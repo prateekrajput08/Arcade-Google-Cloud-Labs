@@ -32,7 +32,6 @@ gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
   --member=user:$USERNAME_2 \
   --role=roles/storage.objectViewer
 
-
 # Completion message
 echo -e "${RED_TEXT}${BOLD_TEXT}Lab Completed Successfully!${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
