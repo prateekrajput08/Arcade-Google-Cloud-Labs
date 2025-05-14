@@ -27,7 +27,7 @@ sudo chmod +x TechCode.sh
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
 <div align="center" style="padding: 5px;">
-  <h3>📱 Join the Arcade Crew Community</h3>
+  <h3>📱 Join the Tech & Code Community</h3>
   
   <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1">
     <img src="https://img.shields.io/badge/Subscribe-Tech%20&%20Code-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Channel">
