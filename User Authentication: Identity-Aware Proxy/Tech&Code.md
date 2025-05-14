@@ -1,4 +1,4 @@
-# 🌐  User Authentication: Identity-Aware Proxy || GSP499 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/focuses/7140?parent=catalog)
+# 🌐  User Authentication: Identity-Aware Proxy || GSP499 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6167/labs/39150)
 
 ## ⚠️ Disclaimer ⚠️
 
