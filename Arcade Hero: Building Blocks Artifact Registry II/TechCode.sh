@@ -20,24 +20,32 @@ echo "${CYAN_TEXT}${BOLD_TEXT}🚀         INITIATING EXECUTION         🚀${RE
 echo "${CYAN_TEXT}${BOLD_TEXT}=========================================${RESET_FORMAT}"
 echo
 
-echo "${BLUE_TEXT}${BOLD_TEXT}🛠️  First, we'll identify the default Google Cloud region associated with your project.${RESET_FORMAT}"
- export REGION=$(gcloud compute project-info describe \
- --format="value(commonInstanceMetadata.items[google-compute-default-region])")
- 
-echo "${GREEN_TEXT}${BOLD_TEXT}⚙️  Next up, we're enabling the Artifact Registry API. This is a necessary step to allow your project to use Artifact Registry for storing and managing packages.${RESET_FORMAT}"
- gcloud services enable artifactregistry.googleapis.com
- 
-echo "${YELLOW_TEXT}${BOLD_TEXT}📦  Now, let's create a new Docker repository named 'container-registry' within the '$REGION' region. This repository will serve as a secure place to store your Docker container images.${RESET_FORMAT}"
- gcloud artifacts repositories create container-registry \
-  --repository-format=docker \
+echo ""
+echo ""
+
+# STEP 1: Set region
+read -p "Export REGION :- " REGION
+
+
+# Step 1.2: Set variables
+REPO_NAME="container-registry"
+FORMAT="DOCKER"
+POLICY_NAME="Grandfather"
+KEEP_COUNT=3
+
+# Step 2: Create the Artifact Registry repository
+gcloud artifacts repositories create $REPO_NAME \
+  --repository-format=$FORMAT \
   --location=$REGION \
-  --description="Docker repository in $REGION"
- 
-echo "${MAGENTA_TEXT}${BOLD_TEXT}🧩  Finally, we'll set up a Go module repository. This repository, named 'go-registry' and located in '$REGION', will be used to host your Go language packages.${RESET_FORMAT}"
- gcloud artifacts repositories create go-registry \
-  --repository-format=go \
-  --location=$REGION \
-  --description="Go module repository"
+  --description="Docker repo for container images"
+
+# Step 3: Create cleanup policy named 'Grandfather' to keep only the latest 3 versions
+# gcloud artifacts policies create $POLICY_NAME \
+#   --repository=$REPO_NAME \
+#   --location=$REGION \
+#   --package-type=$FORMAT \
+#   --keep-count=$KEEP_COUNT \
+#   --action=DELETE
 
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
