@@ -1,5 +1,7 @@
 # 🌐 Arcade Hero: Building Blocks Artifact Registry II || arc1208 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6154/labs/39075)
 
+## 🚀 Watch This Video For The Updated Solution [Complete Solution](https://www.youtube.com/watch?v=aDfUqM9quJ0&ab_channel=Tech%26Code)
+
 ## ⚠️ Disclaimer ⚠️
 
 <blockquote style="background-color: #fffbea; border-left: 6px solid #f7c948; padding: 1em; font-size: 15px; line-height: 1.5;">
