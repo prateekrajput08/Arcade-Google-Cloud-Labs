@@ -1,4 +1,4 @@
-# 🌐 Application Load Balancer with Cloud Armor || GSP215 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]https://www.cloudskillsboost.google/games/6189/labs/39267()
+# 🌐 Application Load Balancer with Cloud Armor || GSP215 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6189/labs/39267)
 
 ## ⚠️ Disclaimer ⚠️
 
