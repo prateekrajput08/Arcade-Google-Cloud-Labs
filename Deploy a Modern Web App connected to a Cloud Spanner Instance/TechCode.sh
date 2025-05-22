@@ -130,3 +130,14 @@ echo
 echo "${BLUE_TEXT}${BOLD_TEXT}Seeding the Cloud Spanner database with initial data...${RESET_FORMAT}"
 node seed-data.js
 echo
+
+
+
+echo
+echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+
+echo
+echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo
