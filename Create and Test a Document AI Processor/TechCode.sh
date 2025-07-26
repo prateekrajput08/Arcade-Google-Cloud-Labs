@@ -118,9 +118,6 @@ curl -X POST \
 https://${LOCATION}-documentai.googleapis.com/v1beta3/projects/${PROJECT_ID}/locations/${LOCATION}/processors/${PROCESSOR_ID}:process > output.json
 
 # Final message
-echo
-echo "${BLUE_TEXT}${BOLD_TEXT}Subscribe to Dr Abhishek Cloud Tutorial:${RESET_FORMAT} ${MAGENTA_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@drabhishek.5460/videos${RESET_FORMAT}"
-echo
 
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
