@@ -1,102 +1,87 @@
 #!/bin/bash
 
-set -euo pipefail
+# Color and text format codes
+BRIGHT_BLACK_TEXT=$'\033[0;90m'
+BRIGHT_RED_TEXT=$'\033[0;91m'
+BRIGHT_GREEN_TEXT=$'\033[0;92m'
+BRIGHT_YELLOW_TEXT=$'\033[0;93m'
+BRIGHT_BLUE_TEXT=$'\033[0;94m'
+BRIGHT_MAGENTA_TEXT=$'\033[0;95m'
+BRIGHT_CYAN_TEXT=$'\033[0;96m'
+BRIGHT_WHITE_TEXT=$'\033[0;97m'
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
 
-trap 'echo "Error on line $LINENO: Command \"$BASH_COMMAND\" failed."; read -p "Press [Enter] to exit..."' ERR
+echo
+echo "${BRIGHT_CYAN_TEXT}${BOLD_TEXT}Starting GSP053: Managing Deployments Using Kubernetes Engine Lab...${RESET_FORMAT}"
+echo
 
-LOG() {
-  echo -e "\n[INFO] $1\n"
-}
+# Prompt for compute zone
+echo "${BRIGHT_YELLOW_TEXT}${BOLD_TEXT}Enter your desired compute zone (e.g., us-central1-a):${RESET_FORMAT}"
+read -p "Zone: " ZONE
+export ZONE
+echo
 
-# Fetch current GCP environment details
-PROJECT_ID=$(gcloud config get-value project 2>/dev/null || true)
-if [ -z "$PROJECT_ID" ]; then
-  echo "No active Google Cloud project set. Please set one using 'gcloud config set project PROJECT_ID'"
-  exit 1
-fi
-
-ZONE=$(gcloud config get-value compute/zone 2>/dev/null || true)
-if [ -z "$ZONE" ]; then
-  echo "No compute zone set. Please set one using 'gcloud config set compute/zone ZONE'"
-  exit 1
-fi
-
-CLUSTER_NAME="bootcamp"
-MACHINE_TYPE="e2-small"
-NUM_NODES=3
-
-LOG "Active project: $PROJECT_ID"
-LOG "Compute zone: $ZONE"
-
-# Explicitly set zone to avoid ambiguity
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Setting compute zone to ${ZONE}...${RESET_FORMAT}"
 gcloud config set compute/zone "$ZONE"
+echo
 
-# Download lab sample code
-LOG "Downloading lab files"
-gsutil -m cp -r gs://spls/gsp053/orchestrate-with-kubernetes .
-cd orchestrate-with-kubernetes/kubernetes || exit
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Creating Kubernetes cluster 'bootcamp'...${RESET_FORMAT}"
+gcloud container clusters create bootcamp --zone "$ZONE" --machine-type e2-small --num-nodes 3 --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
+echo
 
-# Create cluster if it does not exist
-if ! gcloud container clusters describe "$CLUSTER_NAME" --zone "$ZONE" &>/dev/null; then
-  LOG "Creating Kubernetes cluster $CLUSTER_NAME"
-  gcloud container clusters create "$CLUSTER_NAME" \
-    --zone "$ZONE" \
-    --machine-type "$MACHINE_TYPE" \
-    --num-nodes "$NUM_NODES" \
-    --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
-else
-  LOG "Cluster $CLUSTER_NAME already exists. Skipping creation."
-fi
-
-LOG "Waiting for cluster to be ready..."
+echo "${BRIGHT_YELLOW_TEXT}${BOLD_TEXT}Waiting for cluster to be ready (60 seconds)...${RESET_FORMAT}"
 sleep 60
+echo
 
-# Deploy auth service
-LOG "Deploying auth service"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Deploying auth service...${RESET_FORMAT}"
 kubectl apply -f deployments/auth.yaml
 kubectl apply -f services/auth.yaml
+echo
 
-# Deploy hello service
-LOG "Deploying hello service"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Deploying hello service...${RESET_FORMAT}"
 kubectl apply -f deployments/hello.yaml
 kubectl apply -f services/hello.yaml
+echo
 
-# Create secrets and configmaps
-LOG "Creating secrets and configmaps"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Creating secrets and configmaps...${RESET_FORMAT}"
 kubectl create secret generic tls-certs --from-file tls/ --dry-run=client -o yaml | kubectl apply -f -
 kubectl create configmap nginx-frontend-conf --from-file=nginx/frontend.conf --dry-run=client -o yaml | kubectl apply -f -
+echo
 
-# Deploy frontend service
-LOG "Deploying frontend service"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Deploying frontend service...${RESET_FORMAT}"
 kubectl apply -f deployments/frontend.yaml
 kubectl apply -f services/frontend.yaml
+echo
 
-# Scale hello deployment up
-LOG "Scaling hello deployment up to 5 replicas"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Scaling hello deployment to 5 replicas...${RESET_FORMAT}"
 kubectl scale deployment hello --replicas=5
 sleep 15
+echo
 
-# Scale hello deployment down
-LOG "Scaling hello deployment down to 3 replicas"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Scaling hello deployment down to 3 replicas...${RESET_FORMAT}"
 kubectl scale deployment hello --replicas=3
 sleep 15
+echo
 
-# Rolling update with set image command
-LOG "Performing rolling update on hello deployment to version 2.0"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Performing rolling update on hello deployment (version 2.0)...${RESET_FORMAT}"
 kubectl set image deployment/hello hello=gcr.io/google-samples/hello-app:2.0 --record
 sleep 30
+echo
 
-# Rollback to previous revision
-LOG "Rolling back hello deployment to previous revision"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Rolling back hello deployment to previous revision...${RESET_FORMAT}"
 kubectl rollout undo deployment/hello
 sleep 30
+echo
 
-# Show rollout history
-LOG "Displaying rollout history for hello deployment"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Displaying rollout history for hello deployment...${RESET_FORMAT}"
 kubectl rollout history deployment/hello
+echo
 
-# List all pods for verification
-LOG "Listing all pods"
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Listing all pods for verification...${RESET_FORMAT}"
 kubectl get pods
+echo
 
-LOG "Script execution complete. Complete any manual steps or validations as per lab instructions."
+echo "${BRIGHT_GREEN_TEXT}${BOLD_TEXT}Lab completed successfully!${RESET_FORMAT}"
