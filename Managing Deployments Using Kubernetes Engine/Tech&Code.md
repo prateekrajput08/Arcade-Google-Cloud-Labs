@@ -16,7 +16,6 @@
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Managing%20Deployments%20Using%20Kubernetes%20Engine/TechCode.sh
-sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
