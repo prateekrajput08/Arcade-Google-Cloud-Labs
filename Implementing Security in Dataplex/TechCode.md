@@ -1,4 +1,4 @@
-# 🌐 Explore and Create Reports with Looker Studio || GSP409 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6462/labs/40616)
+# 🌐 Implementing Security in Dataplex || GSP1157 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6462/labs/40617)
 
 ## ⚠️ Disclaimer ⚠️
 
