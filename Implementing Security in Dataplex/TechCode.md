@@ -18,7 +18,7 @@ export REGION=
 ```
 
 ```bash
-curl -LO curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Implementing%20Security%20in%20Dataplex/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Implementing%20Security%20in%20Dataplex/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
