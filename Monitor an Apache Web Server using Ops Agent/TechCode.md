@@ -13,9 +13,6 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-```bash
-export REGION=
-```
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Monitor%20an%20Apache%20Web%20Server%20using%20Ops%20Agent/TechCode.sh
