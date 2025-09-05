@@ -99,7 +99,7 @@ done
 echo -e "\r${GREEN_TEXT}${BOLD_TEXT} Propagation time complete. ${RESET_FORMAT}"
 
 echo
-echo "${BLUE}${BOLD_TEXT}🏗️  Initiating creation of GKE clusters (test, staging, prod) asynchronously...${RESET_FORMAT}"
+echo "${BLUE}${BOLD_TEXT} Initiating creation of GKE clusters (test, staging, prod) asynchronously...${RESET_FORMAT}"
 gcloud container clusters create test --node-locations=$ZONE --num-nodes=1  --async
 gcloud container clusters create staging --node-locations=$ZONE --num-nodes=1  --async
 gcloud container clusters create prod --node-locations=$ZONE --num-nodes=1  --async
