@@ -262,7 +262,7 @@ echo "${COLOR_BLUE}${BOLD}Deploying as Cloud Run Service...${COLOR_RESET}"
 function check_progress {
     while true; do
         echo
-        echo "${COLOR_YELLOW}${BOLD} ------ PLEASE COMPLETE MANUAL STEP AND VERIFY YOUR PROGRESS UP TO TASK 6 ${COLOR_RESET}"
+        echo "${COLOR_CYAN}${BOLD} ------ PLEASE COMPLETE MANUAL STEP AND VERIFY YOUR PROGRESS UP TO TASK 6 ${COLOR_RESET}"
         echo
         read -p "${COLOR_BLUE}${BOLD}Have you completed Task 6? (Y/N): ${COLOR_RESET}" user_input
         
@@ -305,7 +305,7 @@ deploy_with_retry slow-concurrent-function \
   --min-instances 1 \
   --max-instances 4
 
-echo "${COLOR_YELLOW}${BOLD} ------ PLEASE COMPLETE MANUAL STEP AND VERIFY YOUR PROGRESS OF TASK 7 ${COLOR_RESET}"
+echo "${COLOR_CYAN}${BOLD} ------ PLEASE COMPLETE MANUAL STEP AND VERIFY YOUR PROGRESS OF TASK 7 ${COLOR_RESET}"
 
 # Final message
 echo
@@ -313,5 +313,5 @@ echo "${GREEN_TEXT}${BOLD_TEXT}=================================================
 echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo
