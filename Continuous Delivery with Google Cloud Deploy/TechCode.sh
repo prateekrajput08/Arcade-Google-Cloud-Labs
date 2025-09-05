@@ -26,11 +26,6 @@ echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-)
-for line in "${pattern[@]}"
-do
-    echo -e "${YELLOW}${line}${NC}"
-done
 ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])" 2>/dev/null)
 
