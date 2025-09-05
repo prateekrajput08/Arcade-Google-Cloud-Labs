@@ -24,7 +24,7 @@ echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-echo "${BLUE}${BOLD_TEXT}🛠️  Determining the default Google Cloud Zone...${RESET_FORMAT}"
+echo "${BLUE}${BOLD_TEXT}Determining the default Google Cloud Zone...${RESET_FORMAT}"
 ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])" 2>/dev/null)
 
