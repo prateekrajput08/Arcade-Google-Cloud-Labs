@@ -1,0 +1,1268 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "id": "ijGzTHJJUCPY",
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Copyright 2024 Google LLC\n",
+    "#\n",
+    "# Licensed under the Apache License, Version 2.0 (the \"License\");\n",
+    "# you may not use this file except in compliance with the License.\n",
+    "# You may obtain a copy of the License at\n",
+    "#\n",
+    "#     https://www.apache.org/licenses/LICENSE-2.0\n",
+    "#\n",
+    "# Unless required by applicable law or agreed to in writing, software\n",
+    "# distributed under the License is distributed on an \"AS IS\" BASIS,\n",
+    "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n",
+    "# See the License for the specific language governing permissions and\n",
+    "# limitations under the License."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "ZPC2X_a9ErW7"
+   },
+   "source": [
+    "# Getting Started with the Gemini API in Vertex AI with cURL / REST API\n",
+    "\n",
+    "<table align=\"left\">\n",
+    "  <td style=\"text-align: center\">\n",
+    "    <a href=\"https://colab.research.google.com/github/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\">\n",
+    "      <img src=\"https://cloud.google.com/ml-engine/images/colab-logo-32px.png\" alt=\"Google Colaboratory logo\"><br> Run in Colab\n",
+    "    </a>\n",
+    "  </td>\n",
+    "  <td style=\"text-align: center\">\n",
+    "    <a href=\"https://console.cloud.google.com/vertex-ai/colab/import/https:%2F%2Fraw.githubusercontent.com%2FGoogleCloudPlatform%2Fgenerative-ai%2Fmain%2Fgemini%2Fgetting-started%2Fintro_gemini_curl.ipynb\">\n",
+    "      <img width=\"32px\" src=\"https://lh3.googleusercontent.com/JmcxdQi-qOpctIvWKgPtrzZdJJK-J3sWE1RsfjZNwshCFgE_9fULcNpuXYTilIR2hjwN\" alt=\"Google Cloud Colab Enterprise logo\"><br> Run in Colab Enterprise\n",
+    "    </a>\n",
+    "  </td>       \n",
+    "  <td style=\"text-align: center\">\n",
+    "    <a href=\"https://github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\">\n",
+    "      <img src=\"https://cloud.google.com/ml-engine/images/github-logo-32px.png\" alt=\"GitHub logo\"><br> View on GitHub\n",
+    "    </a>\n",
+    "  </td>\n",
+    "  <td style=\"text-align: center\">\n",
+    "    <a href=\"https://console.cloud.google.com/vertex-ai/workbench/deploy-notebook?download_url=https://raw.githubusercontent.com/GoogleCloudPlatform/generative-ai/main/gemini/getting-started/intro_gemini_curl.ipynb\">\n",
+    "      <img src=\"https://lh3.googleusercontent.com/UiNooY4LUgW_oTvpsNhPpQzsstV5W8F7rYgxgGBD85cWJoLmrOzhVs_ksK_vgx40SHs7jCqkTkCk=e14-rj-sc0xffffff-h130-w32\" alt=\"Vertex AI logo\"><br> Open in Vertex AI Workbench\n",
+    "    </a>\n",
+    "  </td>\n",
+    "   <td style=\"text-align: center\">\n",
+    "    <a href=\"https://goo.gle/4jeQxSk\">\n",
+    "      <img width=\"32px\" src=\"https://cdn.qwiklabs.com/assets/gcp_cloud-e3a77215f0b8bfa9b3f611c0d2208c7e8708ed31.svg\" alt=\"Google Cloud logo\"><br> Open in  Cloud Skills Boost\n",
+    "    </a>\n",
+    "  </td>\n",
+    "</table>\n",
+    "\n",
+    "<div style=\"clear: both;\"></div>\n",
+    "\n",
+    "<b>Share to:</b>\n",
+    "\n",
+    "<a href=\"https://www.linkedin.com/sharing/share-offsite/?url=https%3A//github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\" target=\"_blank\">\n",
+    "  <img width=\"20px\" src=\"https://upload.wikimedia.org/wikipedia/commons/8/81/LinkedIn_icon.svg\" alt=\"LinkedIn logo\">\n",
+    "</a>\n",
+    "\n",
+    "<a href=\"https://bsky.app/intent/compose?text=https%3A//github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\" target=\"_blank\">\n",
+    "  <img width=\"20px\" src=\"https://upload.wikimedia.org/wikipedia/commons/7/7a/Bluesky_Logo.svg\" alt=\"Bluesky logo\">\n",
+    "</a>\n",
+    "\n",
+    "<a href=\"https://twitter.com/intent/tweet?url=https%3A//github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\" target=\"_blank\">\n",
+    "  <img width=\"20px\" src=\"https://upload.wikimedia.org/wikipedia/commons/5/5a/X_icon_2.svg\" alt=\"X logo\">\n",
+    "</a>\n",
+    "\n",
+    "<a href=\"https://reddit.com/submit?url=https%3A//github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\" target=\"_blank\">\n",
+    "  <img width=\"20px\" src=\"https://redditinc.com/hubfs/Reddit%20Inc/Brand/Reddit_Logo.png\" alt=\"Reddit logo\">\n",
+    "</a>\n",
+    "\n",
+    "<a href=\"https://www.facebook.com/sharer/sharer.php?u=https%3A//github.com/GoogleCloudPlatform/generative-ai/blob/main/gemini/getting-started/intro_gemini_curl.ipynb\" target=\"_blank\">\n",
+    "  <img width=\"20px\" src=\"https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg\" alt=\"Facebook logo\">\n",
+    "</a>            \n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "f0cc0f48513b"
+   },
+   "source": [
+    "| Author(s) |\n",
+    "| --- |\n",
+    "| [Eric Dong](https://github.com/gericdong) |\n",
+    "| [Polong Lin](https://github.com/polong-lin) |"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "axauUzNXEl_R"
+   },
+   "source": [
+    "## Overview\n",
+    "\n",
+    "**YouTube Video: Introduction to Gemini on Vertex AI**\n",
+    "\n",
+    "<a href=\"https://www.youtube.com/watch?v=YfiLUpNejpE&list=PLIivdWyY5sqJio2yeg1dlfILOUO2FoFRx\" target=\"_blank\">\n",
+    "  <img src=\"https://img.youtube.com/vi/YfiLUpNejpE/maxresdefault.jpg\" alt=\"Introduction to Gemini on Vertex AI\" width=\"500\">\n",
+    "</a>\n",
+    "\n",
+    "In this tutorial, you learn how to use the Vertex AI REST API with cURL commands to interact with the Gemini 2.0 Flash model.\n",
+    "\n",
+    "You will complete the following tasks:\n",
+    "\n",
+    "- Text generation\n",
+    "- Streaming text generation\n",
+    "- Chat\n",
+    "- Function Calling\n",
+    "- Multimodal Input\n",
+    "- Controlled generation\n",
+    "- Search as a tool\n",
+    "- Code execution"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "wJf9sLIIEl_S"
+   },
+   "source": [
+    "### Costs\n",
+    "This tutorial uses billable components of Google Cloud:\n",
+    "\n",
+    "- Vertex AI\n",
+    "\n",
+    "Learn about [Vertex AI pricing](https://cloud.google.com/vertex-ai/pricing) and use the [Pricing Calculator](https://cloud.google.com/products/calculator/) to generate a cost estimate based on your projected usage."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "D50ekWXjEl_S"
+   },
+   "source": [
+    "## Getting Started"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "5f7c203ffaa1"
+   },
+   "source": [
+    "### Install required libraries"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "4e66b2f6d36f",
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "%%capture\n",
+    "\n",
+    "!sudo apt install -q jq"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Restart current runtime\n",
+    "\n",
+    "To use the newly installed packages in this Jupyter runtime, you must restart the runtime. You can do this by running the cell below, which will restart the current kernel."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'status': 'ok', 'restart': True}"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Restart kernel after installs so that your environment can access the new packages\n",
+    "import IPython\n",
+    "\n",
+    "app = IPython.Application.instance()\n",
+    "app.kernel.do_shutdown(True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "<div class=\"alert alert-block alert-warning\">\n",
+    "<b>⚠️ The kernel is going to restart. Please wait until it is finished before continuing to the next step. ⚠️</b>\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "dmWOrTJ3gx13"
+   },
+   "source": [
+    "### Authenticate your notebook environment (Colab only)\n",
+    "\n",
+    "If you are running this notebook on Google Colab, run the following cell to authenticate your environment.\n",
+    "\n",
+    "This step is not required if you are using [Vertex AI Workbench](https://cloud.google.com/vertex-ai-workbench)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "id": "NyKGtVQjgx13",
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "\n",
+    "# Additional authentication is required for Google Colab\n",
+    "if \"google.colab\" in sys.modules:\n",
+    "    # Authenticate user to Google Cloud\n",
+    "    from google.colab import auth\n",
+    "\n",
+    "    auth.authenticate_user()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "O6ZGaZlxP9L0"
+   },
+   "source": [
+    "### Set Google Cloud project\n",
+    "\n",
+    "To get started using Vertex AI, you must have an existing Google Cloud project and [enable the Vertex AI API](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com).\n",
+    "\n",
+    "Learn more about [setting up a project and a development environment](https://cloud.google.com/vertex-ai/docs/start/cloud-environment)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "u8IivOG5SqY6",
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "# Define project information\n",
+    "PROJECT_ID = \"qwiklabs-gcp-01-55c5fbbf0142\"  # @param {type:\"string\"}\n",
+    "LOCATION = \"us-west4\"  # @param {type:\"string\"}\n",
+    "\n",
+    "# Import libraries\n",
+    "import os"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "854fbf388e2b"
+   },
+   "source": [
+    "## Use the Gemini 2.0 Flash model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "id": "7eeb063ac6d4",
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "MODEL_ID = \"gemini-2.0-flash\"\n",
+    "API_HOST = f\"{LOCATION}-aiplatform.googleapis.com\"\n",
+    "\n",
+    "os.environ[\"API_ENDPOINT\"] = (\n",
+    "    f\"{API_HOST}/v1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{MODEL_ID}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "0ZZUVBSzc0cR"
+   },
+   "source": [
+    "## Text generation\n",
+    "\n",
+    "The `generateContent` method can handle a wide variety of use cases, including multi-turn chat and multimodal input, depending on what the underlying model supports. In this example, you send a text prompt and request the model response in text."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "id": "1979afec8834",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The sky is blue due to a phenomenon called **Rayleigh scattering**. Here's the breakdown:\n",
+      "\n",
+      "*   **Sunlight:** Sunlight is made up of all the colors of the rainbow.\n",
+      "\n",
+      "*   **Entering the Atmosphere:** When sunlight enters the Earth's atmosphere, it collides with air molecules (mostly nitrogen and oxygen).\n",
+      "\n",
+      "*   **Scattering:** This collision causes the sunlight to be scattered in different directions.\n",
+      "\n",
+      "*   **Rayleigh Scattering:**  Shorter wavelengths of light (blue and violet) are scattered *much more* efficiently than longer wavelengths (red and orange).  This is because the size of the air molecules is comparable to the wavelength of blue light, making the scattering process much more pronounced for blue light.\n",
+      "\n",
+      "*   **Why Blue, Not Violet?:** Violet light is scattered even more than blue light. However, the Sun emits less violet light than blue light, and our eyes are also more sensitive to blue light. Additionally, some violet light is absorbed higher up in the atmosphere. As a result, we perceive the sky as blue.\n",
+      "\n",
+      "**In short:**  Blue light is scattered more effectively than other colors by the air molecules in the Earth's atmosphere, making the sky appear blue to our eyes.\n",
+      "\n",
+      "Think of it like this: imagine you're throwing small balls (blue light) and larger balls (red light) at a bunch of small objects. The small balls are going to bounce off in all directions much more easily than the larger balls.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"USER\",\n",
+    "      \"parts\": { \"text\": \"Why is the sky blue?\" },\n",
+    "    },\n",
+    "    \"generation_config\": {\n",
+    "      \"response_modalities\": \"TEXT\",\n",
+    "     },\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "27701e417da6"
+   },
+   "source": [
+    "### Streaming\n",
+    "\n",
+    "The Gemini API provides a streaming response mechanism. With this approach, you don't need to wait for the complete response; you can start processing fragments as soon as they're accessible."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "id": "rzkCij_iS0we",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The\n",
+      " sky is blue\n",
+      " due to a phenomenon called **Rayleigh scattering**. Here's a breakdown:\n",
+      "\n",
+      "\n",
+      "*   **Sunlight is White (Mostly):** Sunlight appears white, but it\n",
+      "'s actually made up of all the colors of the rainbow (red, orange, yellow, green, blue, indigo, and violet).\n",
+      "\n",
+      "*   **\n",
+      "Light Travels in Waves:** Light travels in waves. Different colors of light have different wavelengths. Red light has the longest wavelength, and violet light has the shortest.\n",
+      "\n",
+      "\n",
+      "*   **Entering the Atmosphere:** When sunlight enters the Earth's atmosphere, it collides with tiny air molecules (mostly nitrogen and oxygen).\n",
+      "\n",
+      "*   **Scattering:** This collision causes the light to scatter in different directions.\n",
+      "\n",
+      "*\n",
+      "   **Rayleigh Scattering:** Rayleigh scattering is the scattering of electromagnetic radiation (including light) by particles of a much smaller wavelength. The amount of scattering is inversely proportional to the fourth power of the wavelength. This means that shorter wavelengths (blue\n",
+      " and violet) are scattered much more strongly than longer wavelengths (red and orange).\n",
+      "\n",
+      "*   **Why Blue, Not Violet?** Although violet light has the shortest wavelength and is scattered even more than blue light, our eyes are more sensitive to blue light. Also, the sun emits slightly less violet light than blue light.\n",
+      "\n",
+      "\n",
+      "*   **The Result:** Since blue light is scattered much more effectively than other colors, it gets scattered all over the sky. When we look up, we see this scattered blue light coming from all directions. That's why the sky appears blue.\n",
+      "\n",
+      "**In summary, the sky is blue because of the following\n",
+      " reasons:**\n",
+      "\n",
+      "1.  **Sunlight contains all colors.**\n",
+      "2.  **Shorter wavelengths (blue and violet) are scattered more.**\n",
+      "3.  **Rayleigh scattering is more effective at scattering blue light than other colors.**\n",
+      "4.  **Our eyes are more sensitive to blue light.**\n",
+      "\n",
+      "\n",
+      "**What about sunsets/sunrises?**\n",
+      "\n",
+      "When the sun is low on the horizon (at sunrise or sunset), the sunlight has to travel through more of the atmosphere to reach our eyes. This means that most of the blue light has been scattered away before it gets to us. The longer wavelengths (red\n",
+      " and orange) are scattered less and can pass through, giving us those beautiful red and orange sunsets and sunrises.\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:streamGenerateContent \\\n",
+    " \\\n",
+    "  -d '{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"USER\",\n",
+    "      \"parts\": { \"text\": \"Why is the sky blue?\" }\n",
+    "    }\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".[] | .candidates[] | .content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "3e56BV7PH9t8"
+   },
+   "source": [
+    "### Model parameters\n",
+    "\n",
+    "Every prompt you send to the model includes parameter values that control how the model generates a response. The model can generate different results for different parameter values. You can experiment with different model parameters to see how the results change. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "id": "Px8hSHhiH9t8",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The lighthouse keeper, Silas, was a man woven from the sea itself. His skin was tanned and weathered like driftwood, his eyes the grey-green of a storm-tossed wave. He'd spent thirty years on the craggy islet, his only companions the gulls, the crashing waves, and the rhythmic pulse of the lamp he tended.\n",
+      "\n",
+      "One day, a storm unlike any he'd ever seen descended. The wind howled like a banshee, tearing at the lighthouse walls. Waves, mountains of frothing water, slammed against the base, threatening to swallow the tower whole. Silas, his face grim, clung to the railing, ensuring the lamp continued its unwavering sweep across the raging sea.\n",
+      "\n",
+      "Suddenly, amidst the chaos, he saw it. A small, battered fishing boat, tossed about like a toy. It was too far out, too vulnerable. He knew, with a sinking heart, that they wouldn't survive the night.\n",
+      "\n",
+      "He grabbed his radio, his fingers fumbling with the controls. Static crackled in his ear, the storm drowning out any chance of a clear signal. Desperation clawed at him. He had to do something.\n",
+      "\n",
+      "Ignoring the howling wind and the treacherous waves, Silas raced down the winding stairs of the lighthouse. He launched the small, inflatable dinghy he kept for emergencies, a task that felt like wrestling a wild beast. The waves threatened to capsize him with every surge.\n",
+      "\n",
+      "He fought his way towards the fishing boat, the lamp of the lighthouse his only guide. The boat was barely afloat, its mast snapped, its hull splintered. He saw two figures huddled in the wreckage, clinging to life.\n",
+      "\n",
+      "With superhuman effort, he pulled them into the dinghy, a young woman and an older man, both shivering and terrified. The journey back to the lighthouse was a nightmare. Waves crashed over them, threatening to drag them back into the churning sea. But Silas, fueled by adrenaline and a lifetime of facing the ocean's fury, held on.\n",
+      "\n",
+      "He finally reached the base of the lighthouse, hauling the survivors onto the narrow platform. He got them inside, wrapped them in blankets, and gave them hot tea. They were safe, for now.\n",
+      "\n",
+      "The storm raged for another twelve hours, but the lighthouse stood firm, its lamp a beacon of hope in the darkness. When the sun finally broke through the clouds, painting the sky in hues of gold and rose, the sea began to calm.\n",
+      "\n",
+      "The young woman, her eyes filled with gratitude, looked at Silas. \"You saved our lives,\" she whispered. \"We owe you everything.\"\n",
+      "\n",
+      "Silas simply shrugged, his gaze fixed on the horizon. \"The sea gives and the sea takes,\" he said, his voice rough with exhaustion. \"Tonight, it gave me the chance to give back.\"\n",
+      "\n",
+      "The woman and her father stayed with Silas for a few days, helping him repair the damage to the lighthouse. They learned about his solitary life, his deep connection to the sea, and his unwavering dedication to his duty.\n",
+      "\n",
+      "When they finally left, they promised to return. And they did, year after year, bringing supplies, sharing stories, and becoming a part of Silas's life. The lighthouse, once a symbol of isolation, became a beacon of connection, a testament to the enduring power of human kindness in the face of the unforgiving sea. Silas, the lonely lighthouse keeper, was no longer alone. He had found a family, forged in the heart of a storm, bound together by the unwavering light of hope.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"USER\",\n",
+    "      \"parts\": [\n",
+    "        {\"text\": \"Tell me a story.\"}\n",
+    "      ]\n",
+    "    },\n",
+    "    \"generation_config\": {\n",
+    "      \"temperature\": 0.2,\n",
+    "      \"top_p\": 0.1,\n",
+    "      \"top_k\": 16,\n",
+    "      \"max_output_tokens\": 2048,\n",
+    "      \"candidate_count\": 1,\n",
+    "      \"stop_sequences\": []\n",
+    "    },\n",
+    "    \"safety_settings\": {\n",
+    "      \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\n",
+    "      \"threshold\": \"BLOCK_LOW_AND_ABOVE\"\n",
+    "    }\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "I4-XhmPn_Pb-"
+   },
+   "source": [
+    "### Chat\n",
+    "\n",
+    "The Gemini API supports natural multi-turn conversations and is ideal for text tasks that require back-and-forth interactions.\n",
+    "\n",
+    "Specify the `role` field only if the content represents a turn in a conversation. You can set `role` to one of the following values: `user`, `model`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "id": "YqSQSK-K-KVU",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Since I don't know the context of our meeting (who we are, what we're working on, etc.), I'll assume we're starting a new project and suggest a typical first order of business:\n",
+      "\n",
+      "**1. Introductions and Roles:**\n",
+      "\n",
+      "*   If we haven't worked together before, we should briefly introduce ourselves and our relevant expertise.\n",
+      "*   Even if we have worked together, clarifying roles for *this specific project* is always a good idea. Who will be responsible for what?\n",
+      "\n",
+      "**Would you like to tell me more about the context of our \"meeting\" so I can give you a more relevant and helpful suggestion?**  For example:\n",
+      "\n",
+      "*   What is our project?\n",
+      "*   What are our roles (or potential roles)?\n",
+      "*   What is the goal of this meeting?\n",
+      "\n",
+      "Knowing those details will allow me to be much more specific.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": [\n",
+    "      {\n",
+    "        \"role\": \"user\",\n",
+    "        \"parts\": [\n",
+    "          { \"text\": \"Hello\" }\n",
+    "        ]\n",
+    "      },\n",
+    "      {\n",
+    "        \"role\": \"model\",\n",
+    "        \"parts\": [\n",
+    "          { \"text\": \"Hello! I am glad you could both make it.\" }\n",
+    "        ]\n",
+    "      },\n",
+    "      {\n",
+    "        \"role\": \"user\",\n",
+    "        \"parts\": [\n",
+    "          { \"text\": \"So what is the first order of business?\" }\n",
+    "        ]\n",
+    "      }\n",
+    "    ]\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "5f0f5fe3b331"
+   },
+   "source": [
+    "### Function calling\n",
+    "\n",
+    "Function calling lets you create a description of a function in their code, then pass that description to a language model in a request. This sample is an example of passing in a description of a function that returns information about where a movie is playing. Several function declarations are included in the request, such as `find_movies` and `find_theaters`.\n",
+    "\n",
+    "Learn more about [function calling](https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/function-calling)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "id": "680b11b0ba4c",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "  \"name\": \"find_theaters\",\n",
+      "  \"args\": {\n",
+      "    \"movie\": \"Barbie\",\n",
+      "    \"location\": \"Mountain View, CA\"\n",
+      "  }\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "  \"contents\": {\n",
+    "    \"role\": \"user\",\n",
+    "    \"parts\": {\n",
+    "      \"text\": \"Which theaters in Mountain View show Barbie movie?\"\n",
+    "    }\n",
+    "  },\n",
+    "  \"tools\": [\n",
+    "    {\n",
+    "      \"function_declarations\": [\n",
+    "        {\n",
+    "          \"name\": \"find_movies\",\n",
+    "          \"description\": \"find movie titles currently playing in theaters based on any description, genre, title words, etc.\",\n",
+    "          \"parameters\": {\n",
+    "            \"type\": \"object\",\n",
+    "            \"properties\": {\n",
+    "              \"location\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"The city and state, e.g. San Francisco, CA or a zip code e.g. 95616\"\n",
+    "              },\n",
+    "              \"description\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"Any kind of description including category or genre, title words, attributes, etc.\"\n",
+    "              }\n",
+    "            },\n",
+    "            \"required\": [\n",
+    "              \"description\"\n",
+    "            ]\n",
+    "          }\n",
+    "        },\n",
+    "        {\n",
+    "          \"name\": \"find_theaters\",\n",
+    "          \"description\": \"find theaters based on location and optionally movie title which are is currently playing in theaters\",\n",
+    "          \"parameters\": {\n",
+    "            \"type\": \"object\",\n",
+    "            \"properties\": {\n",
+    "              \"location\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"The city and state, e.g. San Francisco, CA or a zip code e.g. 95616\"\n",
+    "              },\n",
+    "              \"movie\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"Any movie title\"\n",
+    "              }\n",
+    "            },\n",
+    "            \"required\": [\n",
+    "              \"location\"\n",
+    "            ]\n",
+    "          }\n",
+    "        },\n",
+    "        {\n",
+    "          \"name\": \"get_showtimes\",\n",
+    "          \"description\": \"Find the start times for movies playing in a specific theater\",\n",
+    "          \"parameters\": {\n",
+    "            \"type\": \"object\",\n",
+    "            \"properties\": {\n",
+    "              \"location\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"The city and state, e.g. San Francisco, CA or a zip code e.g. 95616\"\n",
+    "              },\n",
+    "              \"movie\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"Any movie title\"\n",
+    "              },\n",
+    "              \"theater\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"Name of theater\"\n",
+    "              },\n",
+    "              \"date\": {\n",
+    "                \"type\": \"string\",\n",
+    "                \"description\": \"Date for requested showtime\"\n",
+    "              }\n",
+    "            },\n",
+    "            \"required\": [\n",
+    "              \"location\",\n",
+    "              \"movie\",\n",
+    "              \"theater\",\n",
+    "              \"date\"\n",
+    "            ]\n",
+    "          }\n",
+    "        }\n",
+    "      ]\n",
+    "    }\n",
+    "  ]\n",
+    "}' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].functionCall\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "R3g5n23lDtsN"
+   },
+   "source": [
+    "## Multimodal input\n",
+    "\n",
+    "Gemini is a multimodal model that supports adding image and video in text or chat prompts for a text response.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "uTfL2DDch4Lp"
+   },
+   "source": [
+    "### Download an image from Google Cloud Storage"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "id": "KmtWSNLtJ7oD",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Copying gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg...\n",
+      "/ [1 files][ 17.4 KiB/ 17.4 KiB]                                                \n",
+      "Operation completed over 1 objects/17.4 KiB.                                     \n"
+     ]
+    }
+   ],
+   "source": [
+    "! gsutil cp \"gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg\" ./image.jpg"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "BlyyaPgmhpyv"
+   },
+   "source": [
+    "### Generate text from a local image\n",
+    "\n",
+    "Specify the [base64](https://en.wikipedia.org/wiki/Base64) encoding of the image or video to include inline in the prompt and the `mime_type` field. The supported [MIME types](https://en.wikipedia.org/wiki/Media_type) for images include `image/png` and `image/jpeg`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "id": "-uqZ-RWdtdit",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Yes, it is a cat. It's a tabby cat, to be more specific.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "# Encode image data in base64\n",
+    "image_file=\"image.jpg\"\n",
+    "if [[ -f \"$image_file\" ]]; then\n",
+    "  if command -v base64 &> /dev/null; then\n",
+    "    # base64 is available\n",
+    "    if [[ \"$(uname -s)\" == \"Darwin\" ]]; then\n",
+    "      # macOS -b 0 to avoid line wrapping\n",
+    "      data=$(base64 -b 0 -i \"$image_file\")\n",
+    "    else\n",
+    "      # Linux -w 0 to avoid line wrapping\n",
+    "      data=$(base64 -w 0 \"$image_file\")\n",
+    "    fi\n",
+    "  else\n",
+    "    echo \"Error: base64 command not found.\"\n",
+    "    exit 1\n",
+    "  fi\n",
+    "else\n",
+    "  echo \"Error: Image file '$image_file' not found.\"\n",
+    "  exit 1\n",
+    "fi\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d \"{\n",
+    "      'contents': {\n",
+    "        'role': 'USER',\n",
+    "        'parts': [\n",
+    "          {\n",
+    "            'text': 'Is it a cat?'\n",
+    "          },\n",
+    "          {\n",
+    "            'inline_data': {\n",
+    "              'data': '${data}',\n",
+    "              'mime_type':'image/jpeg'\n",
+    "            }\n",
+    "          }\n",
+    "        ]\n",
+    "       }\n",
+    "    }\" 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "fKr-BklmhjgP"
+   },
+   "source": [
+    "### Generate text from an image on Google Cloud Storage\n",
+    "\n",
+    "Specify the Cloud Storage URI of the image to include in the prompt. The bucket that stores the file must be in the same Google Cloud project that's sending the request. You must also specify the `mime_type` field. The supported image MIME types include `image/png` and `image/jpeg`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "id": "43pQE3_z3OjG",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Here's a description of the image:\n",
+      "\n",
+      "**Subject:** The image features a tabby cat standing in the snow.\n",
+      "\n",
+      "**Appearance of the Cat:**\n",
+      "\n",
+      "*   **Coat:** The cat has a classic tabby pattern with brown and black stripes. The fur appears to be dense, likely to provide warmth in the snowy environment.\n",
+      "*   **Eyes:** The cat has striking yellow-green eyes.\n",
+      "*   **Posture:** The cat is standing with one paw slightly raised, giving the impression that it's about to take a step. It's looking directly at the viewer with a curious or alert expression.\n",
+      "*   **Tail:** The tail is striped and slightly curved.\n",
+      "\n",
+      "**Background:**\n",
+      "\n",
+      "*   The background is filled with snow. There are some tire tracks visible in the snow, suggesting a road or path.\n",
+      "*   The background is slightly blurred, which helps to focus attention on the cat.\n",
+      "\n",
+      "**Overall Impression:**\n",
+      "\n",
+      "The image is well-lit and captures the cat in a natural pose. The contrast between the cat's warm coloring and the white snow creates a visually appealing scene. The cat appears to be comfortable and curious in its snowy environment.\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"USER\",\n",
+    "      \"parts\": [\n",
+    "        {\n",
+    "          \"text\": \"Describe this image\"\n",
+    "        },\n",
+    "        {\n",
+    "          \"file_data\": {\n",
+    "            \"mime_type\": \"image/png\",\n",
+    "            \"file_uri\": \"gs://cloud-samples-data/generative-ai/image/320px-Felis_catus-cat_on_snow.jpg\"\n",
+    "          }\n",
+    "        }\n",
+    "      ]\n",
+    "    },\n",
+    "    \"generation_config\": {\n",
+    "      \"temperature\": 0.2,\n",
+    "      \"top_p\": 0.1,\n",
+    "      \"top_k\": 16,\n",
+    "      \"max_output_tokens\": 2048,\n",
+    "      \"candidate_count\": 1,\n",
+    "      \"stop_sequences\": []\n",
+    "    },\n",
+    "    \"safety_settings\": {\n",
+    "      \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\n",
+    "      \"threshold\": \"BLOCK_LOW_AND_ABOVE\"\n",
+    "    }\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "TVF4vHuBOD8N"
+   },
+   "source": [
+    "### Generate text from a video file\n",
+    "\n",
+    "Specify the Cloud Storage URI of the video to include in the prompt. The bucket that stores the file must be in the same Google Cloud project that's sending the request. You must also specify the `mime_type` field. The supported MIME types for video include `video/mp4`.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "id": "F8kS5p0l_uHE",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Okay, here are the answers based on the video:\n",
+      "\n",
+      "*   **Profession of the main person:** Saeka Shimada is a photographer.\n",
+      "*   **Main features of the phone highlighted:** Video Boost in low light, specifically, how it activates \"Night Sight\" to improve the image quality.\n",
+      "*   **City where this was recorded:** Tokyo, specifically the Sancha and Shibuya areas.\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d \\\n",
+    "'{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"USER\",\n",
+    "      \"parts\": [\n",
+    "        {\n",
+    "          \"text\": \"Answer the following questions using the video only. What is the profession of the main person? What are the main features of the phone highlighted? Which city was this recorded in?\"\n",
+    "        },\n",
+    "        {\n",
+    "          \"file_data\": {\n",
+    "            \"mime_type\": \"video/mp4\",\n",
+    "            \"file_uri\": \"gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4\"\n",
+    "          }\n",
+    "        }\n",
+    "      ]\n",
+    "    }\n",
+    "  }' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "133ddb1bc7ff"
+   },
+   "source": [
+    "### Controlled Generation\n",
+    "\n",
+    "Controlled generation allows you to define a response schema to specify the structure of a model's output, the field names, and the expected data type for each field."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "id": "40db1e8d9061",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "  \"recipe_name\": \"Chocolate Chip Cookies\"\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": {\n",
+    "      \"role\": \"user\",\n",
+    "      \"parts\": {\n",
+    "        \"text\": \"List a few popular cookie recipes.\"\n",
+    "      }\n",
+    "    },\n",
+    "    \"generationConfig\": {\n",
+    "        \"response_mime_type\": \"application/json\",\n",
+    "        \"response_schema\": {\"type\": \"object\", \"properties\": {\"recipe_name\": {\"type\": \"string\"}}}\n",
+    "    },\n",
+    "}' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "ebcbb1533401"
+   },
+   "source": [
+    "## Search as a tool\n",
+    "\n",
+    "Using Grounding with Google Search, you can improve the accuracy and recency of responses from the model. Starting with Gemini 2.0, Google Search is available as a tool. This means that the model can decide when to use Google Search."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "id": "a3d8a66bfb3c",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The weather in San Jose, CA today, Wednesday, September 3, 2025, is clear with periodic clouds. The temperature is 62°F (17°C), but it feels like 62°F (16°C). The humidity is around 82% and there is a 0% chance of rain.\n",
+      "\n",
+      "The forecast for the rest of the day is sunny with a 5% chance of rain and partly cloudy at night with a 10% chance of rain. The temperature will be between 55°F (13°C) and 82°F (28°C). The wind will be from the northwest at 10 to 20 mph.\n",
+      "\n",
+      "[\n",
+      "  {\n",
+      "    \"web\": {\n",
+      "      \"uri\": \"https://www.google.com/search?q=weather+in+San Jose, CA,+US\",\n",
+      "      \"title\": \"Weather information for San Jose, CA, US\",\n",
+      "      \"domain\": \"google.com\"\n",
+      "    }\n",
+      "  },\n",
+      "  {\n",
+      "    \"web\": {\n",
+      "      \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE2lY61_Jx5Egh7sISdxbL9xy7H7nv-BHNisZf9amUuQ_8TOiRptVlK3kX83lrnos8oRThURdYStFQFFOEAZV6PaOP6jiyWPbqb_Z6pUpK3DUF1X-kMEt61NSntvIKpecJj4ZcvNRMDQttfy7k=\",\n",
+      "      \"title\": \"wunderground.com\",\n",
+      "      \"domain\": \"wunderground.com\"\n",
+      "    }\n",
+      "  },\n",
+      "  {\n",
+      "    \"web\": {\n",
+      "      \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHBDP8wizR9H1HudTkFN6groE2hzSmLm4S56wlFZwne-L4qi45aoAG4o1LsDOjs8JoKf5OYGexHQ0C9upc9IWU9X3G7Ub0G0ckgs1NdgoDlYyybj-2ZPkYIEMwaY_PJ8QqpfZp2nLGLCN3GEz7rVWqgR9wIkeQG\",\n",
+      "      \"title\": \"foxweather.com\",\n",
+      "      \"domain\": \"foxweather.com\"\n",
+      "    }\n",
+      "  }\n",
+      "]\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "    \"contents\": [\n",
+    "        {\n",
+    "            \"role\": \"user\",\n",
+    "            \"parts\": [\n",
+    "                {\n",
+    "                    \"text\": \"What is the weather today in San Jose CA?\"\n",
+    "                },\n",
+    "            ]\n",
+    "        }\n",
+    "  ],\n",
+    "  \"tools\": {\n",
+    "     \"google_search\": {}\n",
+    "  },\n",
+    "  \"generationConfig\": {\n",
+    "      \"response_modalities\": \"TEXT\"\n",
+    "  }\n",
+    "}' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[].text\" response.json\n",
+    "jq -r \".candidates[].groundingMetadata.groundingChunks\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "37223c8e3133"
+   },
+   "source": [
+    "### Code Execution\n",
+    "\n",
+    "The Gemini API code execution feature enables the model to generate and run Python code and learn iteratively from the results until it arrives at a final output."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "id": "7cebe2cd31c1",
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "  \"text\": \"Okay, I can help you with that. First, I'll calculate the 20th Fibonacci number, and then I'll find the nearest palindrome to it.\\n\\n\"\n",
+      "}\n",
+      "{\n",
+      "  \"executableCode\": {\n",
+      "    \"language\": \"PYTHON\",\n",
+      "    \"code\": \"def fibonacci(n):\\n  if n <= 0:\\n    return 0\\n  elif n == 1:\\n    return 1\\n  else:\\n    a, b = 0, 1\\n    for _ in range(2, n + 1):\\n      a, b = b, a + b\\n    return b\\n\\nfib20 = fibonacci(20)\\nprint(f'{fib20=}')\\n\"\n",
+      "  }\n",
+      "}\n",
+      "{\n",
+      "  \"codeExecutionResult\": {\n",
+      "    \"outcome\": \"OUTCOME_OK\",\n",
+      "    \"output\": \"fib20=6765\\n\"\n",
+      "  }\n",
+      "}\n",
+      "{\n",
+      "  \"text\": \"The 20th Fibonacci number is 6765. Now, I need to find the nearest palindrome to 6765. A palindrome reads the same forwards and backward. Let's consider palindromes around 6765. Possible candidates are 6666, 6776 and 6886.\\n\\n\"\n",
+      "}\n",
+      "{\n",
+      "  \"executableCode\": {\n",
+      "    \"language\": \"PYTHON\",\n",
+      "    \"code\": \"fib20 = 6765\\n\\npalindrome1 = 6666\\npalindrome2 = 6776\\npalindrome3 = 6886\\n\\n\\ndiff1 = abs(fib20 - palindrome1)\\ndiff2 = abs(fib20 - palindrome2)\\ndiff3 = abs(fib20 - palindrome3)\\n\\nprint(f'{diff1=}')\\nprint(f'{diff2=}')\\nprint(f'{diff3=}')\\n\\n\"\n",
+      "  }\n",
+      "}\n",
+      "{\n",
+      "  \"codeExecutionResult\": {\n",
+      "    \"outcome\": \"OUTCOME_OK\",\n",
+      "    \"output\": \"diff1=99\\ndiff2=11\\ndiff3=121\\n\"\n",
+      "  }\n",
+      "}\n",
+      "{\n",
+      "  \"text\": \"Based on the calculations, the differences are:\\n*   |6765 - 6666| = 99\\n*   |6765 - 6776| = 11\\n*   |6765 - 6886| = 121\\n\\nThe smallest difference is 11, which corresponds to the palindrome 6776. Therefore, the nearest palindrome to the 20th Fibonacci number (6765) is 6776.\\n\\nFinal Answer: The final answer is $\\\\boxed{6776}$\\n\"\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%bash\n",
+    "\n",
+    "curl -X POST \\\n",
+    "  -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n",
+    "  -H \"Content-Type: application/json\" \\\n",
+    "  https://${API_ENDPOINT}:generateContent \\\n",
+    "  -d '{\n",
+    "  \"contents\": {\n",
+    "    \"role\": \"user\",\n",
+    "    \"parts\": {\n",
+    "      \"text\": \"Calculate 20th fibonacci number. Then find the nearest palindrome to it.\"\n",
+    "    }\n",
+    "  },\n",
+    "  \"tools\": [\n",
+    "      {\"code_execution\": {},}\n",
+    "  ]\n",
+    "}' 2>/dev/null >response.json\n",
+    "\n",
+    "jq -r \".candidates[].content.parts[]\" response.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "6301d8abe89d"
+   },
+   "source": [
+    "## What's next\n",
+    "\n",
+    "- Explore other notebooks in the [Google Cloud Generative AI GitHub repository](https://github.com/GoogleCloudPlatform/generative-ai).\n",
+    "- Explore AI models in [Model Garden](https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "name": "intro_gemini_curl.ipynb",
+   "toc_visible": true
+  },
+  "environment": {
+   "kernel": "conda-base-py",
+   "name": "workbench-notebooks.m132",
+   "type": "gcloud",
+   "uri": "us-docker.pkg.dev/deeplearning-platform-release/gcr.io/workbench-notebooks:m132"
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel) (Local)",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.18"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
