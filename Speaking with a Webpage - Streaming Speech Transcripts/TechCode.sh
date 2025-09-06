@@ -26,9 +26,6 @@ echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-
-#!/bin/bash
-# Exit on any error
 set -e
 # Constants
 VM_NAME="speaking-with-a-webpage"
