@@ -25,7 +25,6 @@ echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FOR
 echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
-# Exit on any error
 set -e
 
 # Constants
@@ -74,7 +73,7 @@ echo " Waiting for instance to be ready..."
 sleep 15
 
 # SSH install dependencies and clone repo (idempotent)
-echo " Installing packages and cloning repo via SSH..."
+echo "Installing packages and cloning repo via SSH..."
 gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
   sudo apt-get update -y && \
   sudo apt-get install -y git maven openjdk-11-jdk lsof && \
@@ -86,7 +85,7 @@ gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
 "
 
 # Extra wait for VM readiness
-echo "Waiting 30 seconds for VM to initialize..."
+echo " Waiting 30 seconds for VM to initialize..."
 sleep 30
 
 # Get external IP
@@ -105,7 +104,7 @@ gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
 echo " Jetty server for Task 3 started on VM."
 echo ""
 echo " Open your browser and visit: https://$EXTERNAL_IP:8443"
-echo " Your browser will warn about the self-signed SSL certificate — this is expected."
+echo "Your browser will warn about the self-signed SSL certificate — this is expected."
 echo ""
 read -p "After confirming the servlet is working and you've checked your progress in the lab, press Enter to continue to Task 4..."
 
@@ -128,10 +127,10 @@ gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
 "
 
 echo ""
-echo " Jetty server for Task 4 started on VM."
-echo "Open your browser and visit: https://$EXTERNAL_IP:8443"
+echo "Jetty server for Task 4 started on VM."
+echo " Open your browser and visit: https://$EXTERNAL_IP:8443"
 echo ""
-read -p " After confirming the Task 4 servlet is working and you've checked your progress in the lab, press Enter to finish..."
+read -p "After confirming the Task 4 servlet is working and you've checked your progress in the lab, press Enter to finish..."
 
 echo ""
 echo " Lab completed! Remember to stop the server when you're done by running:"
