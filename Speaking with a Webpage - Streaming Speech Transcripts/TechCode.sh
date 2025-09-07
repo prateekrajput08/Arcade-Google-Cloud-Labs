@@ -5,52 +5,6 @@ echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FOR
 echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
-set -e
-
-# Constants
-VM_NAME="speaking-with-a-webpage"
-IMAGE_PROJECT="debian-cloud"
-IMAGE_FAMILY="debian-11"
-MACHINE_TYPE="e2-medium"
-
-# Prompt for user input
-read -p "Enter the zone (e.g. us-central1-b): " ZONE
-
-echo " Starting setup in zone '$ZONE'..."
-
-# Check if firewall rule 'dev-ports' exists, create if not
-if ! gcloud compute firewall-rules describe dev-ports &>/dev/null; then
-  echo " Creating firewall rule 'dev-ports' to allow TCP:8443 from 0.0.0.0/0..."
-  gcloud compute firewall-rules create dev-ports \
-    --allow=tcp:8443 \
-    --source-ranges=0.0.0.0/0 \
-    --target-tags=http-server,https-server
-else
-  echo "Firewall rule 'dev-ports' already exists, skipping creation."
-fi
-
-# Check if VM already exists
-if gcloud compute instances describe "$VM_NAME" --zone="$ZONE" &>/dev/null; then
-  echo " VM '$VM_NAME' already exists in zone '$ZONE'. Skipping VM creation."
-else
-  echo " Creating VM '$VM_NAME' in zone '$ZONE'..."
-  gcloud compute instances create "$VM_NAME" \
-    --zone="$ZONE" \
-    --machine-type="$MACHINE_TYPE" \
-    --image-family="$IMAGE_FAMILY" \
-    --image-project="$IMAGE_PROJECT" \
-    --boot-disk-type=pd-balanced \
-    --boot-disk-size=10GB \
-    --tags=http-server,https-server \
-    --scopes=https://www.googleapis.com/auth/cloud-platform \
-    --metadata=enable-oslogin=TRUE \
-    --no-shielded-secure-boot \
-    --quiet
-fi
-
-# Wait for instance to be ready (skip if VM existed)
-echo " Waiting for instance to be ready..."
-sleep 15
 
 # SSH install dependencies and clone repo (idempotent)
 echo "Installing packages and cloning repo via SSH..."
