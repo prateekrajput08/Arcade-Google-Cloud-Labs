@@ -13,6 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+```bash
+curl -LO hraw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Analyze%20Findings%20with%20Security%20Command%20Center/TechCode.sh
+sudo chmod +x TechCode.sh 
+./TechCode.sh
+```
 
 ```bash
 [   
