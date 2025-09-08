@@ -13,7 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+Network Management API
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Speaking%20with%20a%20Webpage%20-%20Streaming%20Speech%20Transcripts/TechCode.sh
 sudo chmod +x TechCode.sh 
