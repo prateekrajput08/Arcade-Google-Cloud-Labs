@@ -54,7 +54,7 @@ show_spinner() {
 }
 
 # Step 1: Configure environment
-echo "${COLOR_YELLOW}${STYLE_BOLD}🔧 Configuring environment variables${FORMAT_RESET}"
+echo "${COLOR_YELLOW}${STYLE_BOLD}Configuring environment variables${FORMAT_RESET}"
 gcloud auth list
 
 export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
@@ -71,12 +71,12 @@ echo "${STYLE_BOLD}${COLOR_WHITE}┗ Zone: ${ZONE}${FORMAT_RESET}"
 echo
 
 # Step 2: Enable Security Command Center
-echo "${COLOR_CYAN}${STYLE_BOLD}🛡️ Enabling Security Command Center API${FORMAT_RESET}"
+echo "${COLOR_CYAN}${STYLE_BOLD}Enabling Security Command Center API${FORMAT_RESET}"
 gcloud services enable securitycenter.googleapis.com --quiet &
 show_spinner "Enabling API"
 
 # Step 3: Create Pub/Sub resources
-echo "${COLOR_MAGENTA}${STYLE_BOLD}📨 Setting up Pub/Sub for findings export${FORMAT_RESET}"
+echo "${COLOR_MAGENTA}${STYLE_BOLD}Setting up Pub/Sub for findings export${FORMAT_RESET}"
 export BUCKET_NAME="scc-export-bucket-$PROJECT_ID"
 
 gcloud pubsub topics create projects/$PROJECT_ID/topics/export-findings-pubsub-topic &
@@ -87,7 +87,7 @@ gcloud pubsub subscriptions create export-findings-pubsub-topic-sub \
 show_spinner "Creating Pub/Sub subscription"
 
 echo
-echo "${COLOR_WHITE}${STYLE_BOLD}🔗 Please create the export configuration:${FORMAT_RESET}"
+echo "${COLOR_WHITE}${STYLE_BOLD}Please create the export configuration:${FORMAT_RESET}"
 echo "${COLOR_BLUE}https://console.cloud.google.com/security/command-center/config/continuous-exports/pubsub?project=${PROJECT_ID}${FORMAT_RESET}"
 echo
 
@@ -110,14 +110,14 @@ while true; do
 done
 
 # Step 5: Create compute instance
-echo "${COLOR_CYAN}${STYLE_BOLD}🖥️ Creating compute instance${FORMAT_RESET}"
+echo "${COLOR_CYAN}${STYLE_BOLD}Creating compute instance${FORMAT_RESET}"
 gcloud compute instances create instance-1 --zone=$ZONE \
   --machine-type=e2-micro \
   --scopes=https://www.googleapis.com/auth/cloud-platform &
 show_spinner "Creating instance"
 
 # Step 6: BigQuery setup
-echo "${COLOR_BLUE}${STYLE_BOLD}📊 Setting up BigQuery dataset${FORMAT_RESET}"
+echo "${COLOR_BLUE}${STYLE_BOLD}Setting up BigQuery dataset${FORMAT_RESET}"
 bq --location=$REGION mk --dataset $PROJECT_ID:continuous_export_dataset &
 show_spinner "Creating dataset"
 
@@ -128,7 +128,7 @@ gcloud scc bqexports create scc-bq-cont-export \
 show_spinner "Configuring BigQuery export"
 
 # Step 7: Create service accounts
-echo "${COLOR_MAGENTA}${STYLE_BOLD}👥 Creating service accounts${FORMAT_RESET}"
+echo "${COLOR_MAGENTA}${STYLE_BOLD}Creating service accounts${FORMAT_RESET}"
 for i in {0..2}; do
     gcloud iam service-accounts create sccp-test-sa-$i &
     show_spinner "Creating service account sccp-test-sa-$i"
@@ -139,7 +139,7 @@ for i in {0..2}; do
 done
 
 # Step 8: Wait for findings
-echo "${COLOR_YELLOW}${STYLE_BOLD}🔍 Waiting for security findings${FORMAT_RESET}"
+echo "${COLOR_YELLOW}${STYLE_BOLD}Waiting for security findings${FORMAT_RESET}"
 query_findings() {
   bq query --apilog=/dev/null --use_legacy_sql=false --format=pretty \
     "SELECT finding_id, event_time, finding.category FROM continuous_export_dataset.findings"
@@ -163,7 +163,7 @@ while true; do
 done
 
 # Step 9: Storage setup
-echo "${COLOR_CYAN}${STYLE_BOLD}📦 Setting up Cloud Storage${FORMAT_RESET}"
+echo "${COLOR_CYAN}${STYLE_BOLD}Setting up Cloud Storage${FORMAT_RESET}"
 gsutil mb -l $REGION gs://$BUCKET_NAME/ &
 show_spinner "Creating bucket"
 
@@ -173,7 +173,7 @@ show_spinner "Enabling public access prevention"
 sleep 20
 
 # Step 10: Export findings
-echo "${COLOR_MAGENTA}${STYLE_BOLD}📤 Exporting findings to Cloud Storage${FORMAT_RESET}"
+echo "${COLOR_MAGENTA}${STYLE_BOLD}Exporting findings to Cloud Storage${FORMAT_RESET}"
 gcloud scc findings list "projects/$PROJECT_ID" \
   --format=json | jq -c '.[]' > findings.jsonl &
 show_spinner "Exporting findings"
