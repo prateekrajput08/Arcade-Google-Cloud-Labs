@@ -91,7 +91,7 @@ sleep 30
 
 # Get external IP
 EXTERNAL_IP=$(gcloud compute instances describe "$VM_NAME" --zone="$ZONE" --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
-echo "🌍 External IP address: $EXTERNAL_IP"
+echo "External IP address: $EXTERNAL_IP"
 
 echo "Connecting to VM via SSH to start Task 3 Jetty server..."
 
