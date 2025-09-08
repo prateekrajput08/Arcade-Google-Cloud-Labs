@@ -213,9 +213,6 @@ show_spinner "Exporting findings"
 gsutil cp findings.jsonl gs://$BUCKET_NAME/ &
 show_spinner "Uploading findings to bucket"
 
-echo "Next steps:"
-echo "┣ View findings in BigQuery: https://console.cloud.google.com/bigquery?project=${PROJECT_ID}"
-
 # Final message
 
 echo
@@ -226,3 +223,6 @@ echo "${GREEN_TEXT}${BOLD_TEXT}=================================================
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo
+
+echo "Next steps:"
+echo "┣ View findings in BigQuery: https://console.cloud.google.com/bigquery?project=${PROJECT_ID}"
