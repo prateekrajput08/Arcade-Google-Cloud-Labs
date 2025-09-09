@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO /raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Securing%20a%20Cloud%20SQL%20for%20PostgreSQL%20Instance/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Securing%20a%20Cloud%20SQL%20for%20PostgreSQL%20Instance/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
