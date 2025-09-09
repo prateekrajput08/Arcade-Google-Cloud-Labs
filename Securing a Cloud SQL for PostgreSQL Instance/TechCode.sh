@@ -6,7 +6,7 @@ RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
 YELLOW_TEXT=$'\033[0;93m'
 BLUE_TEXT=$'\033[0;94m'
-COLOR_MAGENTA=$'\033[0;95m'
+MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
 WHITE_TEXT=$'\033[0;97m'
 
@@ -39,34 +39,34 @@ KMS_KEYRING_ID="cloud-sql-keyring"
 KMS_KEY_ID="cloud-sql-key"
 SQL_SERVICE="sqladmin.googleapis.com"
 
-echo "${COLOR_MAGENTA}${BOLD}Starting Cloud SQL with CMEK automation...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Starting Cloud SQL with CMEK automation...${COLOR_RESET}"
 
 # Get the current project
 PROJECT_ID=$(gcloud config get-value project)
 echo "Project ID: $PROJECT_ID"
 
 # Enable the Cloud SQL Admin API if not already enabled
-echo "${COLOR_MAGENTA}${BOLD}Enabling Cloud SQL Admin API...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Enabling Cloud SQL Admin API...${COLOR_RESET}"
 gcloud services enable $SQL_SERVICE
 
 # Create the Cloud SQL service account for CMEK
-echo "${COLOR_MAGENTA}${BOLD}Creating Cloud SQL service account identity...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL service account identity...${COLOR_RESET}"
 gcloud beta services identity create \
   --service=$SQL_SERVICE \
   --project=$PROJECT_ID
 
 # Get ZONE and REGION based on bastion-vm
-echo "${COLOR_MAGENTA}${BOLD}Fetching bastion-vm zone and region...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Fetching bastion-vm zone and region...${COLOR_RESET}"
 ZONE=$(gcloud compute instances list --filter="NAME=bastion-vm" --format=json | jq -r '.[0].zone' | awk -F "/zones/" '{print $NF}')
 REGION=${ZONE::-2}
 echo "Zone: $ZONE | Region: $REGION"
 
 # Create KMS keyring
-echo "${COLOR_MAGENTA}${BOLD}Creating KMS keyring...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating KMS keyring...${COLOR_RESET}"
 gcloud kms keyrings create $KMS_KEYRING_ID --location=$REGION || echo "⚠️ Keyring may already exist."
 
 # Create KMS key
-echo "${COLOR_MAGENTA}${BOLD}Creating KMS key...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating KMS key...${COLOR_RESET}"
 gcloud kms keys create $KMS_KEY_ID \
   --location=$REGION \
   --keyring=$KMS_KEYRING_ID \
@@ -74,7 +74,7 @@ gcloud kms keys create $KMS_KEY_ID \
 
 # Bind KMS key to SQL service account
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format 'value(projectNumber)')
-echo "${COLOR_MAGENTA}${BOLD}Binding key to service account...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Binding key to service account...${COLOR_RESET}"
 gcloud kms keys add-iam-policy-binding $KMS_KEY_ID \
   --location=$REGION \
   --keyring=$KMS_KEYRING_ID \
@@ -82,7 +82,7 @@ gcloud kms keys add-iam-policy-binding $KMS_KEY_ID \
   --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
 # Get external IPs
-echo "${COLOR_MAGENTA}${BOLD}Getting external IPs...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Getting external IPs...${COLOR_RESET}"
 AUTHORIZED_IP=$(gcloud compute instances describe bastion-vm --zone=$ZONE --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
 CLOUD_SHELL_IP=$(curl -s ifconfig.me)
 echo "Bastion IP: $AUTHORIZED_IP"
@@ -94,7 +94,7 @@ KEY_NAME=$(gcloud kms keys describe $KMS_KEY_ID \
     --format='value(name)')
 
 # Create Cloud SQL instance with CMEK enabled
-echo "${COLOR_MAGENTA}${BOLD}Creating Cloud SQL instance with CMEK...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL instance with CMEK...${COLOR_RESET}"
 gcloud sql instances create $CLOUDSQL_INSTANCE \
     --project=$PROJECT_ID \
     --authorized-networks=${AUTHORIZED_IP}/32,${CLOUD_SHELL_IP}/32 \
@@ -105,10 +105,10 @@ gcloud sql instances create $CLOUDSQL_INSTANCE \
     --region=$REGION \
     --root-password=$DB_ROOT_PASSWORD
 
-echo "${COLOR_MAGENTA}${BOLD}Cloud SQL instance created."
+echo "${MAGENTA_TEXT}${BOLD}Cloud SQL instance created."
 
 # Task 2: Enable pgAudit
-echo "${COLOR_MAGENTA}${BOLD}Enabling pgAudit on the SQL instance...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Enabling pgAudit on the SQL instance...${COLOR_RESET}"
 gcloud sql instances patch $CLOUDSQL_INSTANCE \
     --database-flags=cloudsql.enable_pgaudit=on,pgaudit.log=all
 
