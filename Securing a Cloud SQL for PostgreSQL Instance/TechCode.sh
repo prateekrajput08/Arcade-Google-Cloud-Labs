@@ -39,42 +39,42 @@ KMS_KEYRING_ID="cloud-sql-keyring"
 KMS_KEY_ID="cloud-sql-key"
 SQL_SERVICE="sqladmin.googleapis.com"
 
-echo "${MAGENTA_TEXT}${BOLD}Starting Cloud SQL with CMEK automation...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Starting Cloud SQL with CMEK automation...${RESET_FORMAT}"
 
 # Get the current project
 PROJECT_ID=$(gcloud config get-value project)
 echo "Project ID: $PROJECT_ID"
 
 # Enable the Cloud SQL Admin API if not already enabled
-echo "${MAGENTA_TEXT}${BOLD}Enabling Cloud SQL Admin API...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Enabling Cloud SQL Admin API...${RESET_FORMAT}"
 gcloud services enable $SQL_SERVICE
 
 # Create the Cloud SQL service account for CMEK
-echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL service account identity...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL service account identity...${RESET_FORMAT}"
 gcloud beta services identity create \
   --service=$SQL_SERVICE \
   --project=$PROJECT_ID
 
 # Get ZONE and REGION based on bastion-vm
-echo "${MAGENTA_TEXT}${BOLD}Fetching bastion-vm zone and region...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Fetching bastion-vm zone and region...${RESET_FORMAT}"
 ZONE=$(gcloud compute instances list --filter="NAME=bastion-vm" --format=json | jq -r '.[0].zone' | awk -F "/zones/" '{print $NF}')
 REGION=${ZONE::-2}
 echo "Zone: $ZONE | Region: $REGION"
 
 # Create KMS keyring
-echo "${MAGENTA_TEXT}${BOLD}Creating KMS keyring...${COLOR_RESET}"
-gcloud kms keyrings create $KMS_KEYRING_ID --location=$REGION || echo "⚠️ Keyring may already exist."
+echo "${MAGENTA_TEXT}${BOLD}Creating KMS keyring...${RESET_FORMAT}"
+gcloud kms keyrings create $KMS_KEYRING_ID --location=$REGION || echo "Keyring may already exist."
 
 # Create KMS key
-echo "${MAGENTA_TEXT}${BOLD}Creating KMS key...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating KMS key...${RESET_FORMAT}"
 gcloud kms keys create $KMS_KEY_ID \
   --location=$REGION \
   --keyring=$KMS_KEYRING_ID \
-  --purpose=encryption || echo "⚠️ Key may already exist."
+  --purpose=encryption || echo "Key may already exist."
 
 # Bind KMS key to SQL service account
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format 'value(projectNumber)')
-echo "${MAGENTA_TEXT}${BOLD}Binding key to service account...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Binding key to service account...${RESET_FORMAT}"
 gcloud kms keys add-iam-policy-binding $KMS_KEY_ID \
   --location=$REGION \
   --keyring=$KMS_KEYRING_ID \
@@ -82,7 +82,7 @@ gcloud kms keys add-iam-policy-binding $KMS_KEY_ID \
   --role="roles/cloudkms.cryptoKeyEncrypterDecrypter"
 
 # Get external IPs
-echo "${MAGENTA_TEXT}${BOLD}Getting external IPs...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Getting external IPs...${RESET_FORMAT}"
 AUTHORIZED_IP=$(gcloud compute instances describe bastion-vm --zone=$ZONE --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
 CLOUD_SHELL_IP=$(curl -s ifconfig.me)
 echo "Bastion IP: $AUTHORIZED_IP"
@@ -94,7 +94,7 @@ KEY_NAME=$(gcloud kms keys describe $KMS_KEY_ID \
     --format='value(name)')
 
 # Create Cloud SQL instance with CMEK enabled
-echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL instance with CMEK...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Creating Cloud SQL instance with CMEK...${RESET_FORMAT}"
 gcloud sql instances create $CLOUDSQL_INSTANCE \
     --project=$PROJECT_ID \
     --authorized-networks=${AUTHORIZED_IP}/32,${CLOUD_SHELL_IP}/32 \
@@ -105,10 +105,10 @@ gcloud sql instances create $CLOUDSQL_INSTANCE \
     --region=$REGION \
     --root-password=$DB_ROOT_PASSWORD
 
-echo "${MAGENTA_TEXT}${BOLD}Cloud SQL instance created."
+echo "${MAGENTA_TEXT}${BOLD}Cloud SQL instance created.${RESET_FORMAT}"
 
 # Task 2: Enable pgAudit
-echo "${MAGENTA_TEXT}${BOLD}Enabling pgAudit on the SQL instance...${COLOR_RESET}"
+echo "${MAGENTA_TEXT}${BOLD}Enabling pgAudit on the SQL instance...${RESET_FORMAT}"
 gcloud sql instances patch $CLOUDSQL_INSTANCE \
     --database-flags=cloudsql.enable_pgaudit=on,pgaudit.log=all
 
