@@ -20,8 +20,8 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
-rm tech-code-lab-v1.0.0.ipynb
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/discover%20and%20protect%20sensitive%20data%20across%20your%20ecosystem%3A%20challenge%20lab/tech-code-lab-v1.0.0.ipynb
+rm deidentify-model-response-challenge-lab-v1.0.0.ipynb
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/discover%20and%20protect%20sensitive%20data%20across%20your%20ecosystem%3A%20challenge%20lab/deidentify-model-response-challenge-lab-v1.0.0.ipynb
 ```
 
 </div>
