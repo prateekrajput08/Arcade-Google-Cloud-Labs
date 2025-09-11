@@ -117,8 +117,7 @@ deploy_with_retry nodejs-http-function \
   --region $REGION \
   --trigger-http \
   --timeout 600s \
-  --max-instances 1 \
-  --allow-unauthenticated
+  --max-instances 1 
 
 # Test HTTP Function
 echo
