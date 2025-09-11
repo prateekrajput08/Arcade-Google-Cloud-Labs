@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # Enhanced Color Definitions
 COLOR_BLACK=$'\033[0;30m'
@@ -75,16 +74,16 @@ mkdir ~/hello-http && cd $_
 cat > index.js <<EOF
 const functions = require('@google-cloud/functions-framework');
 functions.http('helloWorld', (req, res) => {
-  res.status(200).send('HTTP with Node.js in GCF 2nd gen!');
+  res.status(200).send('HTTP with Node.js 22 in GCF 2nd gen!');
 });
 EOF
 cat > package.json <<EOF
 {
-  "name": "nodejs-functions-gen2-codelab",
-  "version": "0.0.1",
+  "name": "nodejs-http-function",
+  "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/functions-framework": "^2.0.0"
+    "@google-cloud/functions-framework": "^3.0.0"
   }
 }
 EOF
@@ -110,16 +109,16 @@ deploy_with_retry() {
   return 1
 }
 
-gcloud functions deploy nodejs-http-function \
+deploy_with_retry nodejs-http-function \
   --gen2 \
   --runtime nodejs22 \
   --entry-point helloWorld \
   --source . \
-  --region us-central1 \
+  --region $REGION \
   --trigger-http \
   --timeout 600s \
-  --max-instances 1
-
+  --max-instances 1 \
+  --allow-unauthenticated
 
 # Test HTTP Function
 echo
