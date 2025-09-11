@@ -82,7 +82,7 @@ run_step() {
 }
 
 # =============== Start ===============
-banner
+
 need gcloud
 need bq
 need jq
