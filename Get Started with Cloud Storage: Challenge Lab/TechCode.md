@@ -30,7 +30,7 @@ gsutil cp sample.txt gs://$Bucket_2
 gsutil acl ch -u allUsers:R gs://$Bucket_2/sample.txt
 
 gcloud storage buckets update gs://$Bucket_3 --update-labels=key=value
-sh
+
 ```
 
 </div>
