@@ -68,7 +68,7 @@ EOF
 
 gcloud functions deploy $FUNCTION_NAME \
   --gen2 \
-  --runtime nodejs16 \
+  --runtime nodejs20 \
   --entry-point $FUNCTION_NAME \
   --source . \
   --region $REGION \
