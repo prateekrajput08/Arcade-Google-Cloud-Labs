@@ -46,8 +46,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-
-${RESET}"
 #gcloud auth list
 #gcloud config list project
 export PROJECT_ID=$(gcloud info --format='value(config.project)')
@@ -63,12 +61,6 @@ export PROJECT_ID=$(gcloud info --format='value(config.project)')
 #----------------------------------------------------code--------------------------------------------------#
 
 bq mk ecommerce
-
-echo "${GREEN}${BOLD}
-
-Task 2 Completed
-
-${RESET}"
 
 bq query --use_legacy_sql=false "
 SELECT
@@ -96,12 +88,6 @@ ORDER BY
   sentimentScore
 LIMIT 5
 "
-
-echo "${GREEN}${BOLD}
-
-Task 5 Completed
-
-${RESET}"
 
 # pull what sold on 08/01/2017
 bq query --use_legacy_sql=false "
@@ -154,13 +140,6 @@ WHERE SAFE_DIVIDE(website.total_ordered,inventory.stockLevel) >= .50
 ORDER BY total_ordered DESC
 "
 
-echo "${GREEN}${BOLD}
-
-Task 6 Completed
-
-${RESET}"
-
-
 bq query --use_legacy_sql=false "
 CREATE OR REPLACE TABLE ecommerce.sales_by_sku_20170802
 (
@@ -190,6 +169,8 @@ SELECT * FROM \`ecommerce.sales_by_sku_2017*\`
 WHERE _TABLE_SUFFIX = '0802'
 "
 
+#-----------------------------------------------------end----------------------------------------------------------#
+read -p "${BOLD}${RED} Completed ${RESET}" CONSENT_REMOVE
 
 while [ "$CONSENT_REMOVE" != 'y' ]; do
   sleep 10
