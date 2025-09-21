@@ -16,17 +16,10 @@
 ```bash
 Network Management API
 ```
-```bash
 
-```
+---
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Speaking%20with%20a%20Webpage%20-%20Streaming%20Speech%20Transcripts/TechCode.sh
-sudo chmod +x TechCode.sh 
-./TechCode.sh
-```
-
-```bash
-raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Speaking%20with%20a%20Webpage%20-%20Streaming%20Speech%20Transcripts/TechCode2.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
