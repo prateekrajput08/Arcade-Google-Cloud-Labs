@@ -77,7 +77,7 @@ sleep 15
 echo "Installing packages and cloning repo via SSH..."
 gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
   sudo apt-get update -y && \
-  sudo apt-get install -y git maven openjdk-11-jdk lsof && \
+  sudo apt-get install -y git maven openjdk-17-jdk lsof && \
   if [ ! -d speaking-with-a-webpage ]; then
     git clone https://github.com/googlecodelabs/speaking-with-a-webpage.git
   else
@@ -97,7 +97,7 @@ echo "Connecting to VM via SSH to start Task 3 Jetty server..."
 
 # Start Task 3 server
 gcloud compute ssh "$VM_NAME" --zone="$ZONE" --command="
-  sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java || true
+  sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java || true
   cd speaking-with-a-webpage/01-hello-https
   nohup mvn clean jetty:run > jetty.log 2>&1 &
 "
