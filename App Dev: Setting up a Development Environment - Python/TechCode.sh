@@ -43,7 +43,7 @@ gcloud compute firewall-rules create allow-http --action=ALLOW --direction=INGRE
 
 sleep 10
 
-cat > TechCode.sh <<'EOF_CP'
+cat > techcode.sh <<'EOF_CP'
 sudo apt-get update
 sudo apt-get install git -y
 sudo apt-get install python3-setuptools python3-dev build-essential -y
@@ -59,9 +59,9 @@ EOF_CP
 
 sleep 10
 
-gcloud compute scp TechCode.sh dev-instance:/tmp --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet
+gcloud compute scp techcode.sh dev-instance:/tmp --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet
 
-gcloud compute ssh dev-instance --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet --command='bash /tmp/TechCode.sh'
+gcloud compute ssh dev-instance --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet --command='bash /tmp/cechcode.sh'
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
