@@ -17,6 +17,32 @@ RESET_FORMAT=$'\033[0m'
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 
+# Spinner function
+spinner() {
+    local pid=$!
+    local delay=0.1
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
+# Function to run command with spinner
+run_with_spinner() {
+    local command="$1"
+    local message="$2"
+    
+    echo -n "${GREEN_TEXT}${BOLD_TEXT}$message... ${RESET_FORMAT}"
+    (eval "$command" > /dev/null 2>&1) &
+    spinner
+    echo "${BLUE_TEXT}✓${RESET_FORMAT}"
+}
+
 clear
 
 # Welcome message
@@ -31,13 +57,13 @@ read ZONE
 export ZONE
 
 # Enable the required API
-
+run_with_spinner \
     "gcloud services enable file.googleapis.com" \
-    "${GRMAGENTA_TEXTEEN_TEXT}${BOLD_TEXT}Enabling the Filestore API"
+    "${MAGENTA_TEXT}${BOLD_TEXT}Enabling the Filestore API"
 
 # Create a Compute Engine instance with Debian 12 (bookworm)
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating a Compute Engine instance named 'nfs-client'...${RESET_FORMAT}"
-
+run_with_spinner \
     "gcloud compute instances create nfs-client \
     --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-medium \
     --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
@@ -49,8 +75,8 @@ echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating a Compute Engine instance named 'nfs-c
     "Creating Compute Engine instance"
 
 # Create a Filestore instance
-echo "${GREMAGENTA_TEXTEN_TEXT}${BOLD_TEXT}Creating a Filestore instance named 'nfs-server'...${RESET_FORMAT}"
-
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating a Filestore instance named 'nfs-server'...${RESET_FORMAT}"
+run_with_spinner \
     "gcloud filestore instances create nfs-server \
     --zone=$ZONE --tier=BASIC_HDD \
     --file-share=name=\"vol1\",capacity=1TB \
