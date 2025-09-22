@@ -61,7 +61,7 @@ sleep 10
 
 gcloud compute scp techcode.sh dev-instance:/tmp --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet
 
-gcloud compute ssh dev-instance --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet --command='bash /tmp/cechcode.sh'
+gcloud compute ssh dev-instance --project="$DEVSHELL_PROJECT_ID" --zone="$ZONE" --quiet --command='bash /tmp/techcode.sh'
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
