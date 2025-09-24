@@ -27,7 +27,7 @@ timeouts {
   delete = "10m"
 }
 ```
-### Create `providers.tf` if not existed
+### Create `providers.tf` in gcp-microservices-demo-quicklabs if not existed
 
 ```bash
 provider "google" {
