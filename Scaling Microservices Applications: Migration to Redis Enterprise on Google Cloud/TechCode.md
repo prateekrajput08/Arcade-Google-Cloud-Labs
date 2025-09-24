@@ -12,6 +12,30 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
+### Open `terminal` in cloud shell
+
+<h3>
+  terraform/ modules/ gke-cluster/ main.tf
+</h3>
+  
+```bash
+timeouts {
+  create = "10m"
+  update = "10m"
+  delete = "10m"
+}
+```
+### Create `providers.tf`
+
+```bash
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+}
+
+```
+
+---
 ## ☁️ Run in Cloud Shell:
 
 ```bash
