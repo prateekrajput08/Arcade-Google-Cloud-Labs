@@ -25,12 +25,15 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
+export REGION=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
-gcloud auth list
+export ZONE=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
-export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+PROJECT_ID=`gcloud config get-value project`
 
-export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
+export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
 
 git clone https://github.com/Redislabs-Solution-Architects/gcp-microservices-demo-qwiklabs.git
 pushd gcp-microservices-demo-qwiklabs
@@ -73,11 +76,12 @@ EOF
 
 kubectl apply -f https://raw.githubusercontent.com/Redislabs-Solution-Architects/gcp-microservices-demo-qwiklabs/main/util/redis-migrator-job.yaml
 
-kubectl get deployment cartservice -o jsonpath='{.spec.template.spec.containers[0].env}' | jq
+kubectl get deployment cartservice -o jsonpath='{.spec.template.spec.containers[0].env}' | jq 
 
 kubectl patch deployment cartservice --patch '{"spec":{"template":{"spec":{"containers":[{"name":"server","env":[{"name":"REDIS_ADDR","value":"'$REDIS_ENDPOINT'"}]}]}}}}'
 
 kubectl get deployment cartservice -o jsonpath='{.spec.template.spec.containers[0].env}' | jq
+
 
 kubectl patch deployment cartservice --patch '{"spec":{"template":{"spec":{"containers":[{"name":"server","env":[{"name":"REDIS_ADDR","value":"redis-cart:6379"}]}]}}}}'
 
@@ -87,9 +91,7 @@ kubectl patch deployment cartservice --patch '{"spec":{"template":{"spec":{"cont
 
 kubectl get deployment cartservice -o jsonpath='{.spec.template.spec.containers[0].env}' | jq
 
-
 kubectl delete deploy redis-cart
-
 
 # Final message
 echo
