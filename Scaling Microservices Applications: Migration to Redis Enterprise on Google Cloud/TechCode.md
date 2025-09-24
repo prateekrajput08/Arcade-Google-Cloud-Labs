@@ -17,7 +17,7 @@
 ### Open `Editor` in cloud shell
 
 <h3>
-  terraform/ modules/ gke-cluster/ main.tf
+  Navigate- terraform/ modules/ gke-cluster/ main.tf
 </h3>
   
 ```bash
