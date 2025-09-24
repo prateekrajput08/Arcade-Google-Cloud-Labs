@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-### Open `terminal` in cloud shell
+### Open `Editor` in cloud shell
 
 <h3>
   terraform/ modules/ gke-cluster/ main.tf
