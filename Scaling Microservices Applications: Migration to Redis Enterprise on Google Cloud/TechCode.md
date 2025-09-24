@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## ℹ️Perforn below 2 tasks only when you get timeout error else simply run the script
+## ℹ️Perforn below 2 tasks only when you get `timeout error` else simply run the script
 
 ### Open `Editor` in cloud shell
 
