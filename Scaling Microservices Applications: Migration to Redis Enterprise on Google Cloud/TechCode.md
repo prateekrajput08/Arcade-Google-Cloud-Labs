@@ -25,7 +25,7 @@ timeouts {
   delete = "10m"
 }
 ```
-### Create `providers.tf`
+### Create `providers.tf` if not existed
 
 ```bash
 provider "google" {
