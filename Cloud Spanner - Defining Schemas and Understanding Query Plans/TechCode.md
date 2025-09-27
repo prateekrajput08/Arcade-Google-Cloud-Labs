@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Cloud Spanner - Defining Schemas and Understanding Query Plans || GSP1050 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6466/labs/40650)
 
 ## ⚠️ Disclaimer ⚠️
 
