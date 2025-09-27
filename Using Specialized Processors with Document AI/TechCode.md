@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Using%20Specialized%20Processors%20with%20Document%20AI%20(Python)/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Using%20Specialized%20Processors%20with%20Document%20AI/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
