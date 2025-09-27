@@ -19,6 +19,9 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
+```bash
+gcloud auth login --quiet
+```
 
 </div>
 
