@@ -38,7 +38,7 @@ gcloud config set compute/zone "$ZONE"
 
 gcloud config set compute/region "$REGION"
 
-gcloud sql instances create myinstance --project=$DEVSHELL_PROJECT_ID --region=$REGION --root-password=techcps --tier=db-n1-standard-4 --database-version=MYSQL_8_0
+gcloud sql instances create myinstance --project=$DEVSHELL_PROJECT_ID --region=$REGION --root-password=techcode --tier=db-n1-standard-4 --database-version=MYSQL_8_0
 
 
 # Final message
