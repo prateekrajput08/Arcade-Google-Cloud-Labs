@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/ecure%20Software%20Delivery%3A%20Challenge%20Lab/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Secure%20Software%20Delivery%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
