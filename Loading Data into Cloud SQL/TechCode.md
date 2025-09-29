@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Loading Data into Cloud SQL || GSP196 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6466/labs/40657)
 
 ## ⚠️ Disclaimer ⚠️
 
