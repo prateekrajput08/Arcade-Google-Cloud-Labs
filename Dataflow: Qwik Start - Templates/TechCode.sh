@@ -25,12 +25,20 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-gcloud services disable dataflow.googleapis.com
+gcloud auth list
 
-gcloud services enable dataflow.googleapis.com
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
+export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
+
+gcloud services disable dataflow.googleapis.com --project=$DEVSHELL_PROJECT_ID
+
+gcloud services enable dataflow.googleapis.com --project=$DEVSHELL_PROJECT_ID
+
+sleep 30
 
 bq mk taxirides
+
 bq mk \
 --time_partitioning_field timestamp \
 --schema ride_id:string,point_idx:integer,latitude:float,longitude:float,\
@@ -39,14 +47,28 @@ passenger_count:integer -t taxirides.realtime
 
 gsutil mb gs://$DEVSHELL_PROJECT_ID/
 
-sleep 45
+sleep 30
 
-gcloud dataflow jobs run iotflow \
---gcs-location gs://dataflow-templates/latest/PubSub_to_BigQuery \
---region $REGION \
---worker-machine-type e2-medium \
---staging-location gs://$DEVSHELL_PROJECT_ID/temp \
---parameters inputTopic=projects/pubsub-public-data/topics/taxirides-realtime,outputTableSpec=$DEVSHELL_PROJECT_ID:taxirides.realtime
+
+#!/bin/bash
+
+while true; do
+    gcloud dataflow jobs run iotflow \
+        --gcs-location gs://dataflow-templates-"$REGION"/latest/PubSub_to_BigQuery \
+        --region "$REGION" \
+        --worker-machine-type e2-medium \
+        --staging-location gs://"$DEVSHELL_PROJECT_ID"/temp \
+        --parameters inputTopic=projects/pubsub-public-data/topics/taxirides-realtime,outputTableSpec="Table Name":taxirides.realtime
+
+    # Check the gcloud dataflow jobs
+    if [ $? -eq 0 ]; then
+        echo "Dataflow job completed and running successfully."
+        break
+    else
+        echo "Dataflow job retrying. Please subscribe to techcps https://www.youtube.com/@MyQwiklab"
+        sleep 30
+    fi
+done
 
 # Final message
 echo
