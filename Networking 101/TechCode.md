@@ -13,7 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+export REGION_1=
+export REGION_2=
+export REGION_3=
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Networking%20101/TechCode.sh
 sudo chmod +x TechCode.sh 
