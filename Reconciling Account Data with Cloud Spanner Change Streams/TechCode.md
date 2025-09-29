@@ -19,7 +19,55 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
+## Paste in spanner studio
+```bash
+INSERT INTO
+ Account (AccountId,
+   CreationTimestamp,
+   AccountStatus,
+   Balance)
+VALUES
+ (FROM_BASE64('ACCOUNTID11123'),
+   PENDING_COMMIT_TIMESTAMP(),
+   1,
+   22);
 
+ UPDATE
+ Account
+SET
+ CreationTimestamp=PENDING_COMMIT_TIMESTAMP(),
+ AccountStatus=4,
+ Balance=255
+WHERE
+ AccountId=FROM_BASE64('ACCOUNTID11123');
+
+ UPDATE
+ Account
+SET
+ CreationTimestamp=PENDING_COMMIT_TIMESTAMP(),
+ AccountStatus=4,
+ Balance=300
+WHERE
+ AccountId=FROM_BASE64('ACCOUNTID11123');
+
+ UPDATE
+ Account
+SET
+ CreationTimestamp=PENDING_COMMIT_TIMESTAMP(),
+ AccountStatus=4,
+ Balance=500
+WHERE
+ AccountId=FROM_BASE64('ACCOUNTID11123');
+
+ UPDATE
+ Account
+SET
+ CreationTimestamp=PENDING_COMMIT_TIMESTAMP(),
+ AccountStatus=4,
+ Balance=600
+WHERE
+ AccountId=FROM_BASE64('ACCOUNTID11123');
+```
 </div>
 
 ---
