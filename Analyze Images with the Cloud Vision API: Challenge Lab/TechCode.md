@@ -13,7 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+gcloud config set project
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Analyze%20Images%20with%20the%20Cloud%20Vision%20API%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
