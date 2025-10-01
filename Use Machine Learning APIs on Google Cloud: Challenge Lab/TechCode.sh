@@ -26,9 +26,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FOR
 echo
 
 echo -e "${BOLD_MAGENTA}Please enter the following configuration details:${RESET_FORMAT}"
+read -p "$(echo -e "${YELLOW_TEXT}ENTER LANGUAGE (e.g., en, fr, es): ${RESET_FORMAT}")" LANGUAGE
 read -p "$(echo -e "${YELLOW_TEXT}ENTER LOCAL (e.g., en_US, fr_FR): ${RESET_FORMAT}")" LOCAL
 read -p "$(echo -e "${YELLOW_TEXT}ENTER BIGQUERY_ROLE (e.g., roles/bigquery.admin): ${RESET_FORMAT}")" BIGQUERY_ROLE
-read -p "$(echo -e "${YELLOW_TEXT}ENTER LANGUAGE (e.g., en, fr, es): ${RESET_FORMAT}")" LANGUAGE
 read -p "$(echo -e "${YELLOW_TEXT}ENTER CLOUD_STORAGE_ROLE (e.g., roles/storage.admin): ${RESET_FORMAT}")" CLOUD_STORAGE_ROLE
 echo ""
 
@@ -57,23 +57,23 @@ echo -e "\n"
 echo -e "${BLUE_TEXT}→ Creating service account key...${RESET_FORMAT}"
 gcloud iam service-accounts keys create sample-sa-key.json --iam-account sample-sa@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/sample-sa-key.json
-echo -e "${GREEN_TEXT}✓ Key created and exported to environment${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Key created and exported to environment${RESET_FORMAT}"
 ech
 
 echo -e "${BLUE_TEXT}→ Downloading image analysis script...${RESET_FORMAT}"
 wget https://raw.githubusercontent.com/guys-in-the-cloud/cloud-skill-boosts/main/Challenge-labs/Integrate%20with%20Machine%20Learning%20APIs%3A%20Challenge%20Lab/analyze-images-v2.py
-echo -e "${GREEN_TEXT}✓ Script downloaded successfully${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Script downloaded successfully${RESET_FORMAT}"
 echo ""
 
 echo -e "${BLUE_TEXT}→ Updating script locale to ${BOLD_WHITE}${LOCAL}${BOLD_BLUE}...${RESET_FORMAT}"
 sed -i "s/'en'/'${LOCAL}'/g" analyze-images-v2.py
-echo -e "${GREEN_TEXT}✓ Locale updated successfully${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Locale updated successfully${RESET_FORMAT}"
 echo ""
 
 echo -e "${BLUE_TEXT}→ Running image analysis...${RESET_FORMAT}"
 python3 analyze-images-v2.py
 python3 analyze-images-v2.py $DEVSHELL_PROJECT_ID $DEVSHELL_PROJECT_ID
-echo -e "${GREEN_TEXT}✓ Image analysis completed${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Image analysis completed${RESET_FORMAT}"
 echo ""
 
 echo -e "${CYAN_TEXT}→ Querying locale distribution from BigQuery...${RESET_FORMAT}"
