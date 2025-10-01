@@ -1,4 +1,4 @@
-# 🌐 Build a Secure Google Cloud Network: Challenge La || GSP322 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/course_templates/654/labs/592556)
+# 🌐 Build a Secure Google Cloud Network: Challenge Lab || GSP322 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/course_templates/654/labs/592556)
 
 ## ⚠️ Disclaimer ⚠️
 
