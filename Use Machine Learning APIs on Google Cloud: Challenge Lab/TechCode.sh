@@ -58,7 +58,7 @@ echo -e "${BLUE_TEXT}→ Creating service account key...${RESET_FORMAT}"
 gcloud iam service-accounts keys create sample-sa-key.json --iam-account sample-sa@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/sample-sa-key.json
 echo -e "${GREEN_TEXT}Key created and exported to environment${RESET_FORMAT}"
-ech
+echo ""
 
 echo -e "${BLUE_TEXT}→ Downloading image analysis script...${RESET_FORMAT}"
 wget https://raw.githubusercontent.com/guys-in-the-cloud/cloud-skill-boosts/main/Challenge-labs/Integrate%20with%20Machine%20Learning%20APIs%3A%20Challenge%20Lab/analyze-images-v2.py
