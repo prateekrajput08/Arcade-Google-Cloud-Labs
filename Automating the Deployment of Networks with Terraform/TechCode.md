@@ -13,7 +13,10 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+export ZONE=
+export ZONE2=
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Automating%20the%20Deployment%20of%20Networks%20with%20Terraform/TechCode.sh
 sudo chmod +x TechCode.sh 
