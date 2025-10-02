@@ -1,0 +1,15 @@
+Timestamp,Department,Desired range  ,Actual amount (ex: 34000),,"Ask the following questions in ""Explore"""
+1/7/2019 13:07:51,Agriculture,"less than $25,000",10500,,department with the highest actual amount
+1/7/2019 13:08:44,Board of equalization,"$25,001 - $50,000",25600,,how many unique departments
+1/7/2019 13:09:02,Childrens services,"$50,001 - $75,000",56000,,
+1/7/2019 13:09:22,Commerce and Insurance,"less than $25,000",11000,,
+1/7/2019 13:09:36,Commission on Aging and Disability,"$75,001 - $100,000",199000,,
+1/7/2019 13:09:57,Commission on Children and Youth,"$100,00 - $250,000",240000,,
+1/7/2019 13:10:15,Economic and Community Development,"$75,001 - $100,000",98000,,
+1/7/2019 13:10:32,Environment and Conservation,"$100,00 - $250,000",129000,,
+1/7/2019 13:10:49,Housing Development Agency,"$250,001 - $500,000",280000,,
+1/7/2019 13:11:04,Human Rights Commission,"$25,001 - $50,000",47000,,
+1/7/2019 13:11:18,Mental Health and Substance Abuse Services,"$100,00 - $250,000",118900,,
+1/7/2019 13:14:20,Economic and Community Development,"less than $25,000",17000,,
+1/7/2019 16:11:01,Environment and Conservation,"less than $25,000",20000,,
+1/9/2019 0:23:30,Environment and Conservation,"$250,001 - $500,000",348998,,
