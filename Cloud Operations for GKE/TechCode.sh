@@ -57,6 +57,8 @@ make create
 
 make validate
 
+make teardown
+
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
