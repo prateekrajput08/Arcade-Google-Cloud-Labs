@@ -28,7 +28,7 @@ sudo chmod +x TechCode.sh
 
 ### 📥 **Download Required Files:**  
 
-- **translate-v1**: [⬇️ Download Here](https://drive.google.com/uc?export=download&id=1IxJMjqAJ-FVKWOdg2HnJ79wY7BBlbjbJ)
+- **translate-v1**: [Download Here](https://drive.google.com/uc?export=download&id=1IxJMjqAJ-FVKWOdg2HnJ79wY7BBlbjbJ)
 
 ### 🛠️ **App Configuration Details:**  
 
