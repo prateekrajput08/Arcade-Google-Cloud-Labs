@@ -19,7 +19,22 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
+##  Proxy Configuration Details:
 
+| **Property**   | **Value**     |  
+| :------------: | :------------: |  
+| Name           | translate-v1   |  
+| Base Path      | /translate/v1  |
+
+### 📥 **Download Required Files:**  
+
+- **translate-v1**: [⬇️ Download Here](https://drive.google.com/uc?export=download&id=1IxJMjqAJ-FVKWOdg2HnJ79wY7BBlbjbJ)
+
+### 🛠️ **App Configuration Details:**  
+
+| **Property**   | **Value**           |  
+| :------------: | :-----------------: |  
+| Name           | translate-app       |
 </div>
 
 ---
