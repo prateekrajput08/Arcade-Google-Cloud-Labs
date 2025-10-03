@@ -1,4 +1,4 @@
-# 🌐 Deploy and Manage Apigee X: Challenge Lab || GSP349 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/course_templates/661/labs/592711)
+# 🌐 Develop and Secure APIs with Apigee X: Challenge Lab || GSP363 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/focuses/32171?parent=catalog)
 
 ## ⚠️ Disclaimer ⚠️
 
