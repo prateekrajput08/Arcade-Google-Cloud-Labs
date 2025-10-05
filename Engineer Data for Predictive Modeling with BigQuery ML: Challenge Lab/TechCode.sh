@@ -96,9 +96,9 @@ WHERE
 " > /dev/null 2>&1) & spinner
 
 if [ $? -eq 0 ]; then
-    echo -e "\r${GREEN_TEXT}Task 1: Data preparation completed successfully${RESET_FORMAT}"
+    echo "${GREEN_TEXT}Task 1: Data preparation completed successfully${RESET_FORMAT}"
 else
-    echo -e "\r${RED_TEXT}Task 1: Data preparation failed${RESET_FORMAT}"
+    echo "${RED_TEXT}Task 1: Data preparation failed${RESET_FORMAT}"
     exit 1
 fi
 
@@ -121,9 +121,9 @@ SELECT * FROM taxirides.$TABLE_NAME
 " > /dev/null 2>&1) & spinner
 
 if [ $? -eq 0 ]; then
-    echo -e "\r${GREEN_TEXT}Task 2: Model training completed successfully${RESET_FORMAT}"
+    echo "${GREEN_TEXT}Task 2: Model training completed successfully${RESET_FORMAT}"
 else
-    echo -e "\r${RED_TEXT}Task 2: Model training failed${RESET_FORMAT}"
+    echo "${RED_TEXT}Task 2: Model training failed${RESET_FORMAT}"
     exit 1
 fi
 
@@ -139,9 +139,9 @@ SELECT * FROM ML.PREDICT(MODEL taxirides.$MODEL_NAME,(
 " > /dev/null 2>&1) & spinner
 
 if [ $? -eq 0 ]; then
-    echo -e "\r${GREEN_TEXT}Task 3: Prediction generation completed successfully${RESET_FORMAT}"
+    echo "${GREEN_TEXT}Task 3: Prediction generation completed successfully${RESET_FORMAT}"
 else
-    echo -e "\r${RED_TEXT}Task 3: Prediction generation failed${RESET_FORMAT}"
+    echo "${RED_TEXT}Task 3: Prediction generation failed${RESET_FORMAT}"
     exit 1
 fi
 
