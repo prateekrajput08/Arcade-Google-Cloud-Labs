@@ -15,6 +15,13 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export BUCKET=
+export TOPIC=
+export FUNCTION=
+export REGION=
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Store%2C%20Process%2C%20and%20Manage%20Data%20on%20Google%20Cloud%20-%20Command%20Line%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
