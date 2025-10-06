@@ -13,6 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+```bash
+export REGION=
+```
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/App%20Engine%3A%20Qwik%20Start%20-%20Go/TechCode.sh
