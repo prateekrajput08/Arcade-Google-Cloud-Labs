@@ -13,6 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+```bash
+export REGION=
+```
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/App%20Dev%3A%20Storing%20Image%20and%20Video%20Files%20in%20Cloud%20Storage%20-%20Python/TechCode.sh
