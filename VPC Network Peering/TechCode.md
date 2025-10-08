@@ -15,6 +15,12 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export ZONE=
+export ZONE_2=
+export PROJECT_ID_2=
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/VPC%20Network%20Peering/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
