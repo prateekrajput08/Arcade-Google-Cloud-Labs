@@ -69,7 +69,6 @@ while true; do
     break
   else
     echo "Waiting for Cloud Function to be deployed..."
-    echo "In the meantime, subscribe to Dr. Abhishek at: https://www.youtube.com/@drabhishek"
     sleep 10
   fi
 done
