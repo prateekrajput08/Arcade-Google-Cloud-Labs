@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 mini lab : Cloud Storage : 1 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6550/labs/41048)
 
 ## ⚠️ Disclaimer ⚠️
 
