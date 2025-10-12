@@ -15,6 +15,10 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export REGION=
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Cloud%20Spanner%3A%20Qwik%20Start/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
