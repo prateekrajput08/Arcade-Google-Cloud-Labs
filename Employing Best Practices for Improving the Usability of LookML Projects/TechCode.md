@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Employing Best Practices for Improving the Usability of LookML Projects || GSP1020 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6550/labs/41053)
 
 ## ⚠️ Disclaimer ⚠️
 
