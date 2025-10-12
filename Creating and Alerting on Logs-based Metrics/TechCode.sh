@@ -37,8 +37,6 @@ BG_MAGENTA=`tput setab 5`
 BG_CYAN=`tput setab 6`
 BG_WHITE=`tput setab 7`
 
-BOLD=`tput bold`
-RESET=`tput sgr0`
 
 # Array of color codes excluding black and white
 TEXT_COLORS=($RED $GREEN $YELLOW $BLUE $MAGENTA $CYAN)
