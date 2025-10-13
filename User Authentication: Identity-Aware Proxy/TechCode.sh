@@ -66,7 +66,7 @@ cd 1-HelloWorld
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}✏️  Updating Python runtime in app.yaml to python39 for '1-HelloWorld'...${RESET_FORMAT}"
-sed -i 's/python37/python39/g' app.yaml
+sed -i 's/python39/python311/g' app.yaml
 echo
 
 echo "${PINK_TEXT}${BOLD_TEXT}🚀  Creating a new App Engine application in region ${REGION}...${RESET_FORMAT}"
