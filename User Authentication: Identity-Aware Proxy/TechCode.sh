@@ -66,7 +66,7 @@ cd 1-HelloWorld
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}✏️  Updating Python runtime in app.yaml to python39 for '1-HelloWorld'...${RESET_FORMAT}"
-sed -i 's/python37/python39/g' app.yaml
+sed -i 's/python37/python313/g' app.yaml
 echo
 
 echo "${PINK_TEXT}${BOLD_TEXT}🚀  Creating a new App Engine application in region ${REGION}...${RESET_FORMAT}"
@@ -100,7 +100,7 @@ cd ~/user-authentication-with-iap/2-HelloUser
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}✏️  Updating Python runtime in app.yaml for '2-HelloUser' to python39...${RESET_FORMAT}"
-sed -i 's/python37/python39/g' app.yaml
+sed -i 's/python37/python313/g' app.yaml
 echo
 
 echo "${GREEN_TEXT}${BOLD_TEXT}🚀  Preparing to deploy the '2-HelloUser' application. This may take a few minutes...${RESET_FORMAT}"
@@ -130,7 +130,7 @@ cd ~/user-authentication-with-iap/3-HelloVerifiedUser
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}✏️  Updating Python runtime in app.yaml for '3-HelloVerifiedUser' to python39...${RESET_FORMAT}"
-sed -i 's/python37/python39/g' app.yaml
+sed -i 's/python37/python313/g' app.yaml
 echo
 
 echo "${GREEN_TEXT}${BOLD_TEXT}🚀  Preparing to deploy the '3-HelloVerifiedUser' application. This may take a few minutes...${RESET_FORMAT}"
