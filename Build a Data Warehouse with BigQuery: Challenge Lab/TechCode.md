@@ -14,6 +14,11 @@
 
 ## ☁️ Run in Cloud Shell:
 
+## ⚠️Make sure to check Task 2 Shows Like this if it doesn't then simply restart the lab
+<img width="505" height="486" alt="image" src="https://github.com/user-attachments/assets/98da5a3f-1ae3-4126-be12-be4fa5214dfe" />
+
+---
+
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Build%20a%20Data%20Warehouse%20with%20BigQuery%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
