@@ -15,6 +15,13 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export IAP_NET_TAG=
+export INT_NET_TAG=
+export HTTP_NET_TAG=
+export ZONE=
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Build%20a%20Secure%20Google%20Cloud%20Network%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
