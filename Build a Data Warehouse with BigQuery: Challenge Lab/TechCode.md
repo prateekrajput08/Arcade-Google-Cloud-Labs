@@ -25,6 +25,14 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
+```bash
+gcloud auth login
+```
+
+```bash
+gcloud config set project
+```
+
 </div>
 
 ---
