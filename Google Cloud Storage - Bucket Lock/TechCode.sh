@@ -42,6 +42,7 @@ gsutil cp gs://spls/gsp297/dummy_loan "gs://$BUCKET/"
 gsutil ls -L "gs://$BUCKET/dummy_loan"
 gsutil retention event release "gs://$BUCKET/dummy_loan"
 gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil rm "gs://$BUCKET/dummy_loan"
 
 # Final message
 echo
