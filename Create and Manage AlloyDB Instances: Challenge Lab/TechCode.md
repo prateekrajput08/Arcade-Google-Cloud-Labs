@@ -24,6 +24,8 @@ sudo chmod +x TechCode.sh
 export ALLOYDB=
 ```
 
+👉 Go to `AlloyDB Clusters` from [here](https://console.cloud.google.com/alloydb/clusters?)
+
 ```bash
 echo $ALLOYDB  > alloydbip.txt
 psql -h $ALLOYDB -U postgres
