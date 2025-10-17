@@ -37,6 +37,12 @@ gsutil retention lock "gs://$BUCKET/"
 gsutil retention temp set "gs://$BUCKET/dummy_transactions"
 gsutil rm "gs://$BUCKET/dummy_transactions"
 gsutil retention temp release "gs://$BUCKET/dummy_transactions"
+gsutil retention event-default set "gs://$BUCKET/"
+gsutil cp gs://spls/gsp297/dummy_loan "gs://$BUCKET/"
+gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil retention event release "gs://$BUCKET/dummy_loan"
+gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil rm "gs://$BUCKET/dummy_loan"
 
 # Final message
 echo
