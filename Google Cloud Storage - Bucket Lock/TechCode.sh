@@ -28,7 +28,9 @@ echo
 
 export BUCKET=$(gcloud config get-value project)
 gsutil mb "gs://$BUCKET"
+
 sleep 10
+
 gsutil retention set 10s "gs://$BUCKET"
 gsutil retention get "gs://$BUCKET"
 gsutil cp gs://spls/gsp297/dummy_transactions "gs://$BUCKET/"
@@ -43,6 +45,14 @@ gsutil cp gs://spls/gsp297/dummy_loan "gs://$BUCKET/"
 gsutil ls -L "gs://$BUCKET/dummy_loan"
 gsutil retention event release "gs://$BUCKET/dummy_loan"
 gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil rm "gs://$BUCKET/dummy_loan"
+echo "Dummy loan content for retention testing" > dummy_loan
+gsutil retention event-default set "gs://$BUCKET/"
+gsutil cp dummy_loan "gs://$BUCKET/"
+gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil retention event release "gs://$BUCKET/dummy_loan"
+gsutil ls -L "gs://$BUCKET/dummy_loan"
+gsutil rm "gs://$BUCKET/dummy_loan"
 
 
 # Final message
