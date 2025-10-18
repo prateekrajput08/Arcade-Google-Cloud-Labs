@@ -20,18 +20,6 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
-## ⚠️Run Below Command If Last Task Not working
-
-```bash
-echo "Dummy loan content for retention testing" > dummy_loan
-gsutil retention event-default set "gs://$BUCKET/"
-gsutil cp dummy_loan "gs://$BUCKET/"
-gsutil ls -L "gs://$BUCKET/dummy_loan"
-gsutil retention event release "gs://$BUCKET/dummy_loan"
-gsutil ls -L "gs://$BUCKET/dummy_loan"
-gsutil rm "gs://$BUCKET/dummy_loan"
-```
-
 </div>
 
 ---
