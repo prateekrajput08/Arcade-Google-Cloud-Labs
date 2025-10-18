@@ -37,11 +37,19 @@ gsutil retention lock "gs://$BUCKET/"
 gsutil retention temp set "gs://$BUCKET/dummy_transactions"
 gsutil rm "gs://$BUCKET/dummy_transactions"
 gsutil retention temp release "gs://$BUCKET/dummy_transactions"
+# Create the file locally
+echo "Dummy loan content for retention testing" > dummy_loan
+# Set default event-based hold on the bucket
 gsutil retention event-default set "gs://$BUCKET/"
-gsutil cp gs://spls/gsp297/dummy_loan "gs://$BUCKET/"
+# Upload the file to the bucket
+gsutil cp dummy_loan "gs://$BUCKET/"
+# Verify the hold is enabled on the uploaded object
 gsutil ls -L "gs://$BUCKET/dummy_loan"
+# Release the event-based hold
 gsutil retention event release "gs://$BUCKET/dummy_loan"
+# Verify the retention expiration date (it should now show a date)
 gsutil ls -L "gs://$BUCKET/dummy_loan"
+# Try to delete the file (it should now be successful)
 gsutil rm "gs://$BUCKET/dummy_loan"
 
 # Final message
