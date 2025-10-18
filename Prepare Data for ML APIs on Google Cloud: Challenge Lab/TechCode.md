@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-gcloud config set project
+gcloud config set project 
 ```
 
 ```bash
