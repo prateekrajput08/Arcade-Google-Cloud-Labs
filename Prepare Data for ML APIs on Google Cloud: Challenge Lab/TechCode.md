@@ -15,6 +15,10 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+gcloud config set project
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Prepare%20Data%20for%20ML%20APIs%20on%20Google%20Cloud%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
