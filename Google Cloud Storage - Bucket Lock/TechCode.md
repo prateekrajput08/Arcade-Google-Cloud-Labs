@@ -20,7 +20,7 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
-## Run Below Command If Last Task Not working
+## ⚠️Run Below Command If Last Task Not working
 
 ```bash
 echo "Dummy loan content for retention testing" > dummy_loan
