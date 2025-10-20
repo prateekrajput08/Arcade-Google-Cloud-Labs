@@ -14,7 +14,7 @@
 
 ## ☁️ Run in Cloud Shell:
 
-### For form 1: Solution [here](https://youtu.be/Raqvt8jvfRw)
+### For form 1:
 ---
 
 * **Task 1. Create a Cloud Storage bucket.**
@@ -34,6 +34,8 @@ sudo chmod +x TechCode1.sh
 ./TechCode1.sh
 ```
 
+### For form 2:
+
 * **Task 1. Create a lake in Dataplex and add a zone to your .**
 * **Task 2. Environment Creation for Dataplex .**
 * **Task 3. Attach an existing Cloud Storage bucket to the zone.**
@@ -51,7 +53,7 @@ sudo chmod +x TechCode2.sh
 ./TechCode2.sh
 ```
 
----
+### For form 3:
 
 * **Task 1. Create a BigQuery dataset.**
 * **Task 2. Add a zone to your lake.**
@@ -70,7 +72,7 @@ sudo chmod +x TechCode3.sh
 ./TechCode3.sh
 ```
 
----
+### For form 4:
 
 * **Task 1. Create a lake in Dataplex and add a zone to your lake.**
 * **Task 2. Attach an existing Cloud Storage bucket to the zone.**
