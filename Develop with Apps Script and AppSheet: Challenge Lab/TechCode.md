@@ -14,8 +14,8 @@
 
 ## ⚙️ **Task 2: Add Automation to an AppSheet App**
 
-1. **My Drive**[here](https://drive.google.com/drive/my-drive).
-2. Download[Here](https://docs.google.com/spreadsheets/d/1nSa6SvRnecUgCOSEYO-0_hgE5r29P6J1/export?format=xlsx)
+1. My Drive [here](https://drive.google.com/drive/my-drive).
+2. Download [Here](https://docs.google.com/spreadsheets/d/1nSa6SvRnecUgCOSEYO-0_hgE5r29P6J1/export?format=xlsx)
 
 ---
 
