@@ -15,6 +15,12 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export ZONE=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+gcloud compute ssh centos-clean --zone=$ZONE --quiet
+```
+
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Configuring%20IAM%20Permissions%20with%20gcloud/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
