@@ -97,7 +97,6 @@ javascript:(function () {
 ```
 
 ---
----
 
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
