@@ -24,7 +24,7 @@ javascript:(function () {
 // @version      1.1
 // @description  Automatically show assessment panel and hide leaderboard.
 // @author       Gourav Sen
-// @match        https://www.cloudskillsboost.google/games/*
+// @match        https://www.skills.google/games/*
 // @grant        none
 // ==/UserScript==
 
