@@ -92,7 +92,7 @@ javascript:(function () {
     });
 
     // Notify user when script is executed
-    showNotification('Script executed successfully!');
+    showNotification('Follow Tech & Code');
 })();
 ```
 
