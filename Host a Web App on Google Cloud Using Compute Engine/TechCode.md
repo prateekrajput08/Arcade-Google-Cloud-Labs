@@ -13,6 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+
+```bash
+export ZONE=
+```
+
 ## Command 1:-
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Host%20a%20Web%20App%20on%20Google%20Cloud%20Using%20Compute%20Engine/TechCode1.sh
