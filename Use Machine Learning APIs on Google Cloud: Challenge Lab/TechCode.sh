@@ -64,13 +64,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-echo -e "${BOLD_MAGENTA}Please enter the following configuration details:${RESET_FORMAT}"
-read -p "$(echo -e "${YELLOW_TEXT}ENTER LOCAL (e.g., en_US, fr_FR): ${RESET_FORMAT}")" LOCAL
-read -p "$(echo -e "${YELLOW_TEXT}ENTER BIGQUERY_ROLE (e.g., roles/bigquery.admin): ${RESET_FORMAT}")" BIGQUERY_ROLE
-read -p "$(echo -e "${YELLOW_TEXT}ENTER LANGUAGE (e.g., en, fr, es): ${RESET_FORMAT}")" LANGUAGE
-read -p "$(echo -e "${YELLOW_TEXT}ENTER CLOUD_STORAGE_ROLE (e.g., roles/storage.admin): ${RESET_FORMAT}")" CLOUD_STORAGE_ROLE
-echo ""
-
 
 echo -e "${BOLD_MAGENTA}Please enter the following configuration details:${RESET}"
 read -p "$(echo -e "${BOLD_YELLOW}ENTER LANGUAGE (e.g., en, fr, es): ${RESET}")" LANGUAGE
