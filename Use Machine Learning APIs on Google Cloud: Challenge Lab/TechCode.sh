@@ -64,7 +64,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
-
 echo -e "${BOLD_MAGENTA}Please enter the following configuration details:${RESET}"
 read -p "$(echo -e "${BOLD_YELLOW}ENTER LANGUAGE (e.g., en, fr, es): ${RESET}")" LANGUAGE
 read -p "$(echo -e "${BOLD_YELLOW}ENTER LOCAL (e.g., en_US, fr_FR): ${RESET}")" LOCAL
@@ -73,6 +72,9 @@ read -p "$(echo -e "${BOLD_YELLOW}ENTER CLOUD_STORAGE_ROLE (e.g., roles/storage.
 echo ""
 
 
+echo -e "${BOLD_BLUE}→ Creating service account 'sample-sa'...${RESET}"
+gcloud iam service-accounts create sample-sa
+echo ""
 
 echo -e "${BOLD_BLUE}→ Assigning IAM roles to service account...${RESET}"
 echo -e "${CYAN}  - BigQuery Role: ${BOLD_WHITE}$BIGQUERY_ROLE${RESET}"
@@ -116,11 +118,9 @@ echo -e "${GREEN}✓ Image analysis completed${RESET}"
 echo ""
 
 
-
 echo -e "${BOLD_CYAN}→ Querying locale distribution from BigQuery...${RESET}"
 bq query --use_legacy_sql=false "SELECT locale,COUNT(locale) as lcount FROM image_classification_dataset.image_text_detail GROUP BY locale ORDER BY lcount DESC"
 echo ""
-
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
