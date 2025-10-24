@@ -27,7 +27,9 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/key.json"
 
 echo "GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT"
 echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
-
+```
+```bash
+gcloud ml language analyze-entities --content="Michelangelo Caravaggio, Italian painter, is known for 'The Calling of Saint Matthew'." > result.json
 ```
 
 </div>
