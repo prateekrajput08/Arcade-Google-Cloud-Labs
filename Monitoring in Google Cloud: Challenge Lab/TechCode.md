@@ -22,7 +22,7 @@ sudo chmod +x TechCode.sh
 
 * Go to `Create log-based metric` from [here](https://console.cloud.google.com/logs/metrics/edit?)
 
-1. For Log-based metric name: enter `drabhi`
+1. For Log-based metric name: enter `techcode`
 
 2. Paste The Following in `Build filter` & Replace PROJECT_ID
 
