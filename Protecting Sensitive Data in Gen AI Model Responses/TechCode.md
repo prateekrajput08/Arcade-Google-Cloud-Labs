@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Protecting Sensitive Data in Gen AI Model Responses || GSP1283 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6669/labs/41715)
 
 ## ⚠️ Disclaimer ⚠️
 
