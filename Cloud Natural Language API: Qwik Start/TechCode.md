@@ -15,9 +15,19 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Cloud%20Natural%20Language%20API%3A%20Qwik%20Start/TechCode.sh
-sudo chmod +x TechCode.sh 
-./TechCode.sh
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value core/project)
+
+gcloud iam service-accounts create my-natlang-sa \
+  --display-name "my natural language service account"
+
+gcloud iam service-accounts keys create ~/key.json \
+  --iam-account my-natlang-sa@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
+
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/key.json"
+
+echo "GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT"
+echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
+
 ```
 
 </div>
