@@ -15,6 +15,9 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export ZONE=
+```
+```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Managing%20a%20GKE%20Multi-tenant%20Cluster%20with%20Namespaces/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
