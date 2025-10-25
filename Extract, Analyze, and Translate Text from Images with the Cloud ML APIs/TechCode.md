@@ -20,23 +20,6 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
-* Go to `Create log-based metric` from [here](https://console.cloud.google.com/logs/metrics/edit?)
-
-1. For Log-based metric name: enter `drabhi`
-
-2. Paste The Following in `Build filter` & Replace PROJECT_ID
-
-```bash
-resource.type="gce_instance"
-logName="projects/PROJECT_ID/logs/apache-access"
-textPayload:"200"
-```
-
-3. Paste The Following in `Regular Expression` field:
-
-```bash
-execution took (\d+)
-
 </div>
 
 ---
