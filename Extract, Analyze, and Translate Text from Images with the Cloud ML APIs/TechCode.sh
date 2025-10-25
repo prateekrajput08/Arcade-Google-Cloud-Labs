@@ -33,7 +33,7 @@ echo "${PURPLE}${BOLD}STEP 1: API KEY SETUP ${DARK_BLUE}${BOLD}${RESET}"
 echo
 echo -n "${TEAL}${BOLD}Creating API Key..."
 (gcloud alpha services api-keys create --display-name="cloud-ml-key" > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}API Key created successfully!${RESET}"
 
 echo -n "${TEAL}${BOLD}Fetching API Key Name..."
@@ -60,12 +60,12 @@ echo "${PURPLE}${BOLD}STEP 3: CLOUD STORAGE SETUP ${DARK_BLUE}${BOLD}${RESET}"
 echo
 echo -n "${TEAL}${BOLD}Creating GCS Bucket..."
 (gcloud storage buckets create gs://$DEVSHELL_PROJECT_ID-bucket --project=$DEVSHELL_PROJECT_ID > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}GCS Bucket created: ${DARK_BLUE}gs://$DEVSHELL_PROJECT_ID-bucket${RESET}"
 
 echo -n "${TEAL}${BOLD}Setting IAM permissions..."
-(gsutil iam ch projectEditor:serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com:objectCreator gs://$DEVSHELL_PROJECT_ID-bucket > /dev/null 2>&1) &
-spinner
+(gsutil iam ch projectEditor:serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com:objectCreator gs://$DEVSHELL_PROJECT_ID-bucket > /dev/null 2>&1) 
+
 echo -e "\r${LIME}${BOLD}IAM permissions configured!${RESET}"
 echo
 
@@ -74,17 +74,17 @@ echo "${PURPLE}${BOLD}STEP 4: IMAGE PROCESSING ${DARK_BLUE}${BOLD}${RESET}"
 echo
 echo -n "${TEAL}${BOLD}Downloading sample image..."
 (curl -LO raw.githubusercontent.com/ArcadeCrew/Google-Cloud-Labs/main/Extract%2C%20Analyze%2C%20and%20Translate%20Text%20from%20Images%20with%20the%20Cloud%20ML%20APIs/sign.jpg > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}Sample image downloaded!${RESET}"
 
 echo -n "${TEAL}${BOLD}Uploading to GCS Bucket..."
 (gsutil cp sign.jpg gs://$DEVSHELL_PROJECT_ID-bucket/sign.jpg > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}Image uploaded to GCS!${RESET}"
 
 echo -n "${TEAL}${BOLD}Setting public access..."
 (gsutil acl ch -u AllUsers:R gs://$DEVSHELL_PROJECT_ID-bucket/sign.jpg > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}Public access configured!${RESET}"
 echo
 
@@ -115,7 +115,7 @@ echo -e "\r${LIME}${BOLD}OCR request file created!          ${RESET}"
 
 echo -n "${TEAL}${BOLD}Sending to Vision API..."
 (curl -s -X POST -H "Content-Type: application/json" --data-binary @ocr-request.json https://vision.googleapis.com/v1/images:annotate?key=${API_KEY} -o ocr-response.json > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}Vision API response received!          ${RESET}"
 echo
 
@@ -134,7 +134,7 @@ echo -e "\r${LIME}${BOLD}Translation request prepared!          ${RESET}"
 
 echo -n "${TEAL}${BOLD}Sending to Translation API..."
 (curl -s -X POST -H "Content-Type: application/json" --data-binary @translation-request.json https://translation.googleapis.com/language/translate/v2?key=${API_KEY} -o translation-response.json > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}Translation received!          ${RESET}"
 echo
 
@@ -156,7 +156,7 @@ echo -e "\r${LIME}${BOLD}NL API request prepared!          ${RESET}"
 
 echo -n "${TEAL}${BOLD}Sending to Natural Language API..."
 (curl -s -X POST -H "Content-Type: application/json" --data-binary @nl-request.json https://language.googleapis.com/v1/documents:analyzeEntities?key=${API_KEY} -o nl-response.json > /dev/null 2>&1) &
-spinner
+
 echo -e "\r${LIME}${BOLD}NL API analysis complete!          ${RESET}"
 echo
 
