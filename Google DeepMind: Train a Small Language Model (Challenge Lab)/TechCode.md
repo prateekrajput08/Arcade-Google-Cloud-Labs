@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Google DeepMind: Train a Small Language Model (Challenge Lab) || GSP531 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/course_templates/1453/labs/595070)
 
 ## ⚠️ Disclaimer ⚠️
 
