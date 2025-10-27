@@ -28,38 +28,33 @@ text = "".join(tokens)
 ## 👉Task 3. Generating text from an n-gram model
 
 ```bash
-if not ngram_model:
-      return tokenizer.join_text(generated_tokens)
+from collections import defaultdict, Counter
 
-    context_size = len(tokenizer.character_tokenize(next(iter(ngram_model))))
+def build_ngram_model(dataset, n, tokenizer):
+    """
+    Build an n-gram model mapping (n-1)-token contexts to distributions over next token.
+    """
+    ngram_counts = defaultdict(Counter)
 
-    for _ in range(n_tokens):
-      if len(generated_tokens) < context_size:
-        break
+    for text in dataset:
+        tokens = tokenizer.character_tokenize(text)
+        if len(tokens) < n:
+            continue
 
-      context_tokens = generated_tokens [-context_size:]
-      context_key = tokenizer.join_text(context_tokens)
-      
-      if context_key not in ngram_model:
-        break
+        for i in range(len(tokens) - n + 1):
+            context = tokens[i:i + n - 1]
+            next_token = tokens[i + n - 1]
+            context_key = tokenizer.join_text(context)
+            ngram_counts[context_key][next_token] += 1
 
-      next_token_distribution = ngram_model [context_key]
-      
-      if not next_token_distribution:
-        break
+    # Convert counts to probabilities
+    ngram_model = {}
+    for context, counter in ngram_counts.items():
+        total = sum(counter.values())
+        ngram_model[context] = {token: count / total for token, count in counter.items()}
 
-      next_token = ""
-      if sampling_mode == "random":
-        tokens = list(next_token_distribution.keys())
-        probabilities = list(next_token_distribution.values())
+    return ngram_model
 
-        next_token = random.choices (tokens, weights=probabilities, k=1) [0]
-      elif sampling_mode == "greddy":
-        next_token = max(next_token_distribution, key=next_token_distribution.get)
-      else:
-        raise ValueError(f"Unsupported sampling_mode: '{sampling_mode}")
-
-      generated_tokens.append(next_token)
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
