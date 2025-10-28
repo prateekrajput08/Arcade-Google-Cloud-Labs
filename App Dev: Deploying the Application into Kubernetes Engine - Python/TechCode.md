@@ -18,6 +18,9 @@
 ```bash
 pip install packaging
 ```
+### * Configure the Quiz application:
+### Rerun the same command `. prepare_environment.sh`
+
 ### Open New Terminal
 ```bash
 export ZONE=
