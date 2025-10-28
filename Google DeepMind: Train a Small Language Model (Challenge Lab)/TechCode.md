@@ -28,55 +28,165 @@ text = "".join(tokens)
 ## 👉Task 3. Generating text from an n-gram model
 
 ```bash
-from collections import defaultdict, Counter
+def generate_text_from_ngram_model(
+        start_prompt: str,
+        n_tokens: int,
+        ngram_model: dict[str, dict[str, float]],
+        tokenizer: SimpleArabicCharacterTokenizer,
+        sampling_mode: Literal["random", "greedy"] = "random"
+) -> str:
+    """Generate text based on a starting prompt using an ngram model.
 
-def build_ngram_model(dataset, n, tokenizer):
+    Args:
+        start_prompt: The initial prompt to start the generation.
+        n_tokens: The number of tokens to generate after the prompt.
+        model: An ngram model mapping contexts of n-1 tokens to distributions
+            over next token.
+        tokenizer: The tokenizer to encode and decode text.
+        sampling_mode: Whether to use random or greedy sampling. Supported
+            options are "random" and "greedy".
+
+    Returns:
+        The generated text from the prompt.
     """
-    Build an n-gram model mapping (n-1)-token contexts to distributions over next token.
-    """
-    ngram_counts = defaultdict(Counter)
+    # Tokenize the starting prompt.
+    start_tokens = tokenizer.character_tokenize(start_prompt)
 
-    for text in dataset:
-        tokens = tokenizer.character_tokenize(text)
-        if len(tokens) < n:
-            continue
+    generated_tokens = start_tokens + []
 
-        for i in range(len(tokens) - n + 1):
-            context = tokens[i:i + n - 1]
-            next_token = tokens[i + n - 1]
-            context_key = tokenizer.join_text(context)
-            ngram_counts[context_key][next_token] += 1
+    # ---------- Added code starts here ----------
+    import random
 
-    # Convert counts to probabilities
-    ngram_model = {}
-    for context, counter in ngram_counts.items():
-        total = sum(counter.values())
-        ngram_model[context] = {token: count / total for token, count in counter.items()}
+    # Infer context length (n-1)
+    if len(ngram_model) > 0:
+        first_key = next(iter(ngram_model))
+        context_length = len(first_key)
+    else:
+        context_length = 1
 
-    return ngram_model
+    # Generate tokens iteratively
+    for _ in range(n_tokens):
+        # Current context = last (n-1) tokens
+        context = "".join(generated_tokens[-context_length:])
 
+        # If unseen context, pick a random one from model
+        if context not in ngram_model:
+            context = random.choice(list(ngram_model.keys()))
+
+        probs = ngram_model[context]
+        tokens = list(probs.keys())
+        probabilities = list(probs.values())
+
+        # Choose next token
+        if sampling_mode == "greedy":
+            next_token = tokens[argmax(probabilities)]
+        else:
+            next_token = random.choices(tokens, weights=probabilities, k=1)[0]
+
+        generated_tokens.append(next_token)
+    # ---------- Added code ends here ----------
+
+    # Generated tokens are converted back to str.
+    generated_text = tokenizer.join_text(generated_tokens)
+    return generated_text
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
 
 ```bash
-start = 0
+def segment_encoded_sequence(
+        sequence: list[int],
+        max_length: int,
+        n_overlap: int
+) -> list[list[int]]:
+    """Segment a long encoded sequence into overlapping subsequences of maximum
+    length.
+
+    Divides the input sequence into chunks of max_length tokens with specified
+    overlap between consecutive segments. The final segment may be shorter than
+    max_length if insufficient tokens remain.
+
+    Args:
+        sequence: List of token indices to segment.
+        max_length: Maximum length for each subsequence.
+        n_overlap: Number of tokens to overlap between consecutive segments.
+
+    Returns:
+        List of subsequences, each with at most max_length token indices. All
+        segments except possibly the last will have exactly max_length tokens.
+    """
+    subsequences = []
+
+    # ---------- Added code starts here ----------
+    step = max_length - n_overlap
+    start = 0
+
     while start < len(sequence):
-      end = start + max_length
-      subsequences.append(sequence[start:end])
-      if end >= len(sequence): 
-        break
+        end = start + max_length
+        subseq = sequence[start:end]
+        subsequences.append(subseq)
+        if end >= len(sequence):
+            break
+        start += step
+    # ---------- Added code ends here ----------
 
-      start = end - n_overlap
+    return subsequences
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
 
 ```bash
-for text in dataset:
-      token_ids = tokenizer.encode(text)
-      segments = segment_encoded_sequence (token_ids, segmentation_length, n_overlap)
-      encoded_tokens.extend(segments)
+def create_training_sequences(
+        dataset: list[str],
+        context_length: int,
+        n_overlap: int,
+        tokenizer: EnhancedTokenizer
+) -> tuple[np.ndarray, np.ndarray]:
+    """Create training input-target sequence pairs from text dataset.
+
+    Encodes text data into token sequences, segments them into fixed-length
+    overlapping windows, and creates input-target pairs for language modeling
+    where targets are inputs shifted by one position.
+
+    Args:
+        dataset: List of text strings to process into training sequences.
+        context_length: Maximum sequence length for model input.
+        n_overlap: Number of tokens to overlap between consecutive segments.
+        tokenizer: Tokenizer object with encode method for text-to-tokens
+            conversion.
+
+    Returns:
+        Tuple of (inputs, targets) where:
+        - inputs: Array of token sequences of length context_length.
+        - targets: Array of target sequences (inputs shifted by one position).
+    """
+
+    segmentation_length = context_length + 1
+    # The segments are one token longer than the model's maximum input length,
+    # because the target (next) tokens to predict are the input tokens shifted
+    # by one position.
+
+    pad_token_id = tokenizer.pad_token_id
+    encoded_tokens = []
+
+    # ---------- Added code starts here ----------
+    for text in dataset:
+        encoded_seq = tokenizer.encode(text)
+        segmented = segment_encoded_sequence(encoded_seq, segmentation_length, n_overlap)
+        encoded_tokens.extend(segmented)
+    # ---------- Added code ends here ----------
+
+    # Create padded sequences one token longer than the maximum input length.
+    padded_sequences = keras.preprocessing.sequence.pad_sequences(
+            encoded_tokens,
+            maxlen=segmentation_length,
+            padding="post",
+            value=pad_token_id)
+
+    # Create inputs and targets from padded sequences.
+    inputs = padded_sequences[:, :-1]
+    targets = padded_sequences[:, 1:]
+    return inputs, targets
 ```
 
 </div>
