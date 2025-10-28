@@ -39,23 +39,6 @@ export PROJECT_ID=$(gcloud config get-value project)
 echo "${BLUE_TEXT}Project ID: $PROJECT_ID${RESET_FORMAT}"
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}Cloning and setting up the Quiz application...${RESET_FORMAT}"
-
-# Clone and setup the application
-git clone https://github.com/GoogleCloudPlatform/training-data-analyst
-ln -s ~/training-data-analyst/courses/developingapps/v1.2/python/kubernetesengine ~/kubernetesengine
-cd ~/kubernetesengine/start
-
-# Update the prepare script for current region and Python version
-echo "${YELLOW_TEXT}${BOLD_TEXT}Updating configuration for region $REGION...${RESET_FORMAT}"
-export APP_REGION=$REGION
-sed -i -e 's/us-central1/'"$REGION"'/g' -e 's/us-central/'"$APP_REGION"'/g' -e 's/python3/'"python3.12"'/g' prepare_environment.sh
-
-# Prepare environment
-echo "${YELLOW_TEXT}${BOLD_TEXT}Preparing application environment...${RESET_FORMAT}"
-. prepare_environment.sh
-
-echo
 echo "${GREEN_TEXT}${BOLD_TEXT}Creating GKE Cluster...${RESET_FORMAT}"
 
 # Create GKE cluster
