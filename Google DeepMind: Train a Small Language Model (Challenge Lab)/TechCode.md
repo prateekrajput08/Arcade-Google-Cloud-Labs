@@ -25,6 +25,8 @@ tokens = list(text)
 text = "".join(tokens)
 ```
 
+---
+
 ## 👉Task 3. Generating text from an n-gram model
 
 ```bash
@@ -90,6 +92,9 @@ def generate_text_from_ngram_model(
     generated_text = tokenizer.join_text(generated_tokens)
     return generated_text
 ```
+
+---
+
 
 ## 👉Task 4. Preparing dataset for training character-based language model
 ### Complete the segment_encoded_sequence function.
