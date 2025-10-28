@@ -53,6 +53,10 @@ echo "✅ IAM roles applied successfully for $STUDENT_EMAIL on project $PROJECT_
 ```bash
 Fix the error in server.py
 ```
+### If you get permission error in `Task 3`
+```bash
+python3 ~/mcp-on-cloudrun/local_mcp_call.py
+```
 
 </div>
 
