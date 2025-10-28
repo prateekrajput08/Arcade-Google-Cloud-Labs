@@ -179,43 +179,99 @@ def generate_text_from_ngram_model(
 ### Complete the segment_encoded_sequence function.
 
 ```bash
-def segment_encoded_sequence(
-        sequence: list[int],
-        max_length: int,
-        n_overlap: int
-) -> list[list[int]]:
-    """Segment a long encoded sequence into overlapping subsequences of maximum
-    length.
+# --- Imports ---
+from collections import defaultdict, Counter
+from typing import Literal
+import random
 
-    Divides the input sequence into chunks of max_length tokens with specified
-    overlap between consecutive segments. The final segment may be shorter than
-    max_length if insufficient tokens remain.
+# --- Simple Arabic Character Tokenizer ---
+class SimpleArabicCharacterTokenizer:
+    """Simple tokenizer that splits Arabic text into characters and joins them back."""
+    def character_tokenize(self, text: str) -> list[str]:
+        return list(text)
+    def join_text(self, tokens: list[str]) -> str:
+        return "".join(tokens)
 
-    Args:
-        sequence: List of token indices to segment.
-        max_length: Maximum length for each subsequence.
-        n_overlap: Number of tokens to overlap between consecutive segments.
+# --- N-gram Helper Functions ---
+def generate_character_ngrams(text: str, n: int, tokenizer: SimpleArabicCharacterTokenizer):
+    tokens = tokenizer.character_tokenize(text)
+    ngrams = []
+    for i in range(0, len(tokens) - n + 1):
+        ngrams.append(tuple(tokens[i:i + n]))
+    return ngrams
 
-    Returns:
-        List of subsequences, each with at most max_length token indices. All
-        segments except possibly the last will have exactly max_length tokens.
-    """
-    subsequences = []
+def get_character_ngram_counts(dataset: list[str], n: int, tokenizer: SimpleArabicCharacterTokenizer):
+    ngram_counts = defaultdict(Counter)
+    for paragraph in dataset:
+        for ngram in generate_character_ngrams(paragraph, n, tokenizer):
+            context = "".join(ngram[:-1])
+            next_token = ngram[-1]
+            ngram_counts[context][next_token] += 1
+    return dict(ngram_counts)
 
-    # ---------- Added code starts here ----------
-    step = max_length - n_overlap
-    start = 0
+def build_ngram_model(dataset: list[str], n: int, tokenizer: SimpleArabicCharacterTokenizer):
+    ngram_model = {}
+    ngram_counts = get_character_ngram_counts(dataset, n, tokenizer)
+    for context, next_tokens in ngram_counts.items():
+        total = sum(next_tokens.values())
+        ngram_model[context] = {token: count / total for token, count in next_tokens.items()}
+    return ngram_model
 
-    while start < len(sequence):
-        end = start + max_length
-        subseq = sequence[start:end]
-        subsequences.append(subseq)
-        if end >= len(sequence):
-            break
-        start += step
-    # ---------- Added code ends here ----------
+def argmax(arr):
+    return max(range(len(arr)), key=arr.__getitem__)
 
-    return subsequences
+# --- Generate text using n-gram model ---
+def generate_text_from_ngram_model(
+        start_prompt: str,
+        n_tokens: int,
+        ngram_model: dict[str, dict[str, float]],
+        tokenizer: SimpleArabicCharacterTokenizer,
+        sampling_mode: Literal["random", "greedy"] = "random"
+) -> str:
+    start_tokens = tokenizer.character_tokenize(start_prompt)
+    generated_tokens = start_tokens.copy()
+
+    # infer context length (n-1)
+    if len(ngram_model) > 0:
+        first_key = next(iter(ngram_model))
+        context_length = len(first_key)
+    else:
+        context_length = 1
+
+    for _ in range(n_tokens):
+        context = "".join(generated_tokens[-context_length:])
+        if context not in ngram_model:
+            context = random.choice(list(ngram_model.keys()))
+        probs = ngram_model[context]
+        tokens = list(probs.keys())
+        probabilities = list(probs.values())
+
+        if sampling_mode == "greedy":
+            next_token = tokens[argmax(probabilities)]
+        else:
+            next_token = random.choices(tokens, weights=probabilities, k=1)[0]
+
+        generated_tokens.append(next_token)
+
+    generated_text = tokenizer.join_text(generated_tokens)
+    return generated_text
+
+# --- Enhanced Tokenizer ---
+class EnhancedTokenizer:
+    """Enhanced tokenizer that builds a vocabulary from dataset and encodes/decodes text."""
+    def __init__(self, dataset: list[str]):
+        unique_chars = sorted(set("".join(dataset)))
+        self.char_to_id = {ch: i for i, ch in enumerate(unique_chars)}
+        self.id_to_char = {i: ch for ch, i in self.char_to_id.items()}
+
+    def encode(self, text: str) -> list[int]:
+        return [self.char_to_id[ch] for ch in text if ch in self.char_to_id]
+
+    def decode(self, ids: list[int]) -> str:
+        return "".join(self.id_to_char[i] for i in ids if i in self.id_to_char)
+
+    def __len__(self):
+        return len(self.char_to_id)
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
