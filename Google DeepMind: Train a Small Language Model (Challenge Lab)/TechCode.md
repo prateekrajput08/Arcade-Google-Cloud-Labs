@@ -29,135 +29,63 @@ text = "".join(tokens)
 
 ## 👉Task 3. Generating text from an n-gram model
 ```bash
-import random
-from typing import Literal
+if not ngram_model:
+      return tokenizer.join_text(generated_tokens)
 
-def argmax(arr: list[float]) -> int:
-    """Get the index of the largest element in list of float elements."""
-    return max(range(len(arr)), key=arr.__getitem__)
+      context_size = len(tokenizer.character_tokenize(next(iter(ngram_model))))
 
-def generate_text_from_ngram_model(
-        start_prompt: str,
-        n_tokens: int,
-        ngram_model: dict[str, dict[str, float]],
-        tokenizer,
-        sampling_mode: Literal["random", "greedy"] = "random"
-) -> str:
-    """Generate text based on a starting prompt using an ngram model."""
-    # Tokenize the starting prompt.
-    start_tokens = tokenizer.character_tokenize(start_prompt)
+      for _ in range(n_tokens):
+        if len(generated_tokens) < context_size:
+          break
 
-    generated_tokens = start_tokens.copy()
+        context_tokens = generated_tokens[-context_size:]
+        context_key = tokenizer.join_text(context_tokens)
 
-    # Determine n-1 from model context length
-    n_minus_1 = len(next(iter(ngram_model.keys()))) if ngram_model else 1
+        if context_key not in ngram_model:
+          break
 
-    # Generate new tokens
-    for _ in range(n_tokens):
-        context = "".join(generated_tokens[-(n_minus_1):])
-        if context in ngram_model:
-            next_token_probs = ngram_model[context]
-        else:
-            # Fallback: use all probabilities combined (flattened)
-            all_tokens = [tok for ctx in ngram_model.values() for tok in ctx.keys()]
-            next_token_probs = {tok: 1/len(all_tokens) for tok in all_tokens}
+        next_token_distribution = ngram_model[context_key]
 
-        tokens = list(next_token_probs.keys())
-        probs = list(next_token_probs.values())
+        if not next_token_distribution:
+          break
 
-        if sampling_mode == "random":
-            next_token = random.choices(tokens, weights=probs, k=1)[0]
-        else:  # greedy
-            next_token = tokens[argmax(probs)]
+      next_token = ""
+      if sampling_mode == "random":
+        tokens = list(next_token_distribution.key())
+        probabilities = list(next_token_distribution.values())
 
-        generated_tokens.append(next_token)
+        next_token = random.choices(token, weights=probabilities, k=10)[0]
+      elif sampling_mode == "greddy":
+        next_token = max(next_token_distribution, key=next_token_distribution.get)
+      else:
+        raise ValueError(f"Unsupported sampling_mode: '{sampling_mode}")
+        
+      generated_tokens.append(next_token)
 
-    generated_text = tokenizer.join_text(generated_tokens)
-    return generated_text
 ```
 
 ---
 
 ## 👉Task 4. Preparing dataset for training character-based language model
-### 1️⃣ Place 1 — EnhancedTokenizer class
+
+### 1️⃣ `segment_encoded_sequence` function.
 ```bash
-class EnhancedTokenizer(SimpleArabicCharacterTokenizer):
-    UNKNOWN_TOKEN = "<UNK>"
-    PAD_TOKEN = "<PAD>"
-
-    def __init__(self, corpus: list[str], vocabulary: list[str] | None = None):
-        super().__init__()
-        if vocabulary is None:
-            if isinstance(corpus, str):
-                corpus = [corpus]
-            tokens = []
-            for text in corpus:
-                tokens.extend(self.character_tokenize(text))
-            vocabulary = sorted(list(set(tokens)))
-            self.vocabulary = [self.PAD_TOKEN] + vocabulary + [self.UNKNOWN_TOKEN]
-        else:
-            self.vocabulary = vocabulary
-
-        self.vocabulary_size = len(self.vocabulary)
-        self.token_to_index = {t: i for i, t in enumerate(self.vocabulary)}
-        self.index_to_token = {i: t for i, t in enumerate(self.vocabulary)}
-        self.pad_token_id = self.token_to_index[self.PAD_TOKEN]
-        self.unknown_token_id = self.token_to_index[self.UNKNOWN_TOKEN]
-
-    def encode(self, text: str) -> list[int]:
-        return [self.token_to_index.get(tok, self.unknown_token_id)
-                for tok in self.character_tokenize(text)]
-
-    def decode(self, indices: list[int]) -> str:
-        return self.join_text([self.index_to_token.get(i, self.UNKNOWN_TOKEN)
-                               for i in indices])
-```
-
-### 2️⃣ Support Function — segment_encoded_sequence
-```bash
-def segment_encoded_sequence(
-        sequence: list[int],
-        max_length: int,
-        n_overlap: int
-) -> list[list[int]]:
-    """Segment a long encoded sequence into overlapping subsequences."""
-    subsequences = []
-    start = 0
+start = 0
     while start < len(sequence):
-        end = start + max_length
-        subsequences.append(sequence[start:end])
-        if end >= len(sequence):
-            break
-        start = end - n_overlap
-    return subsequences
+      end = start + max_length
+      subsequences.append(sequence[start:end])
+      if end >= len(sequence):
+        break
+      start = end - n_overlap
 ```
 
-### 3️⃣ Place 2 — Inside create_training_sequences()
+### 2️⃣ `create_training_sequences` function.
 
 ```bash
-def create_training_sequences(
-        dataset: list[str],
-        context_length: int,
-        n_overlap: int,
-        tokenizer: EnhancedTokenizer
-) -> tuple[np.ndarray, np.ndarray]:
-    """Create training input-target sequence pairs from text dataset."""
-
-    segmentation_length = context_length + 1
-    pad_token_id = tokenizer.pad_token_id
-    encoded_tokens = []
-
-    # Add your code here
-
-    # Padding and formatting provided below
-    padded_sequences = keras.preprocessing.sequence.pad_sequences(
-            encoded_tokens,
-            maxlen=segmentation_length,
-            padding="post",
-            value=pad_token_id)
-    inputs = padded_sequences[:, :-1]
-    targets = padded_sequences[:, 1:]
-    return inputs, targets
+for text in dataset:
+      token_ids = tokenizer.encode(text)
+      segments = segment_encoded_sequence(token_ids, segmentation_length, n_overlap)
+      encoded_tokens.extendx(segments)
 ```
 
 
