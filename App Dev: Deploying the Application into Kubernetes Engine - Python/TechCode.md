@@ -14,11 +14,11 @@
 
 ## ☁️ Run in Cloud Shell:
 
-## Task 1:-
+### Run below command only is error occurs in task 1
 ```bash
 pip install packaging
 ```
-
+### Open New Terminal
 ```bash
 export ZONE=
 ```
