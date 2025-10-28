@@ -113,7 +113,26 @@ class EnhancedTokenizer(SimpleArabicCharacterTokenizer):
                                for i in indices])
 ```
 
-### 2️⃣ Place 2 — Inside create_training_sequences()
+### 2️⃣ Support Function — segment_encoded_sequence
+```bash
+def segment_encoded_sequence(
+        sequence: list[int],
+        max_length: int,
+        n_overlap: int
+) -> list[list[int]]:
+    """Segment a long encoded sequence into overlapping subsequences."""
+    subsequences = []
+    start = 0
+    while start < len(sequence):
+        end = start + max_length
+        subsequences.append(sequence[start:end])
+        if end >= len(sequence):
+            break
+        start = end - n_overlap
+    return subsequences
+```
+
+### 3️⃣ Place 2 — Inside create_training_sequences()
 
 ```bash
 def create_training_sequences(
@@ -140,24 +159,7 @@ def create_training_sequences(
     targets = padded_sequences[:, 1:]
     return inputs, targets
 ```
-### 3️⃣ Support Function — segment_encoded_sequence
-```bash
-def segment_encoded_sequence(
-        sequence: list[int],
-        max_length: int,
-        n_overlap: int
-) -> list[list[int]]:
-    """Segment a long encoded sequence into overlapping subsequences."""
-    subsequences = []
-    start = 0
-    while start < len(sequence):
-        end = start + max_length
-        subsequences.append(sequence[start:end])
-        if end >= len(sequence):
-            break
-        start = end - n_overlap
-    return subsequences
-```
+
 
 </div>
 
