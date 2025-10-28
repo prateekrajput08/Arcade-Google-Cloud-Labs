@@ -50,10 +50,11 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 # Confirm applied roles
 echo "✅ IAM roles applied successfully for $STUDENT_EMAIL on project $PROJECT_ID"
 ```
+### *Ask `Gemini` to fix the error
 ```bash
 Fix the error in server.py
 ```
-### If you get permission error in `Task 3`
+### *If you get permission error in `Task 3`
 ```bash
 python3 ~/mcp-on-cloudrun/local_mcp_call.py
 ```
