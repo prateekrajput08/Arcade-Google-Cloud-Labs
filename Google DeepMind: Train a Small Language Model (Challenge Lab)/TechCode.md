@@ -28,7 +28,86 @@ text = "".join(tokens)
 ---
 
 ## 👉Task 3. Generating text from an n-gram model
+```bash
+# --- Imports ---
+from collections import defaultdict, Counter
+from typing import Literal
+import random
 
+# --- Simple Arabic Character Tokenizer (minimal version) ---
+class SimpleArabicCharacterTokenizer:
+    """Simple tokenizer that splits Arabic text into characters and joins them back."""
+    def character_tokenize(self, text: str) -> list[str]:
+        return list(text)
+    def join_text(self, tokens: list[str]) -> str:
+        return "".join(tokens)
+
+# --- N-gram Model Functions ---
+
+def generate_character_ngrams(text: str, n: int, tokenizer: SimpleArabicCharacterTokenizer) -> list[tuple[str]]:
+    tokens = tokenizer.character_tokenize(text)
+    ngrams = []
+    for i in range(0, len(tokens) - n + 1):
+        ngrams.append(tuple(tokens[i:i + n]))
+    return ngrams
+
+def get_character_ngram_counts(dataset: list[str], n: int, tokenizer: SimpleArabicCharacterTokenizer) -> dict[str, Counter]:
+    ngram_counts = defaultdict(Counter)
+    for paragraph in dataset:
+        for ngram in generate_character_ngrams(paragraph, n, tokenizer):
+            context = "".join(ngram[:-1])
+            next_token = ngram[-1]
+            ngram_counts[context][next_token] += 1
+    return dict(ngram_counts)
+
+def build_ngram_model(dataset: list[str], n: int, tokenizer: SimpleArabicCharacterTokenizer) -> dict[str, dict[str, float]]:
+    ngram_model = {}
+    ngram_counts = get_character_ngram_counts(dataset, n, tokenizer)
+    for context, next_tokens in ngram_counts.items():
+        total = sum(next_tokens.values())
+        ngram_model[context] = {token: count / total for token, count in next_tokens.items()}
+    return ngram_model
+
+# --- Helper Function ---
+def argmax(arr: list[float]) -> int:
+    return max(range(len(arr)), key=arr.__getitem__)
+
+# --- Your Completed Task 3 Function ---
+def generate_text_from_ngram_model(
+        start_prompt: str,
+        n_tokens: int,
+        ngram_model: dict[str, dict[str, float]],
+        tokenizer: SimpleArabicCharacterTokenizer,
+        sampling_mode: Literal["random", "greedy"] = "random"
+) -> str:
+    start_tokens = tokenizer.character_tokenize(start_prompt)
+    generated_tokens = start_tokens + []
+
+    # infer context length (n-1)
+    if len(ngram_model) > 0:
+        first_key = next(iter(ngram_model))
+        context_length = len(first_key)
+    else:
+        context_length = 1
+
+    for _ in range(n_tokens):
+        context = "".join(generated_tokens[-context_length:])
+        if context not in ngram_model:
+            context = random.choice(list(ngram_model.keys()))
+        probs = ngram_model[context]
+        tokens = list(probs.keys())
+        probabilities = list(probs.values())
+
+        if sampling_mode == "greedy":
+            next_token = tokens[argmax(probabilities)]
+        else:
+            next_token = random.choices(tokens, weights=probabilities, k=1)[0]
+
+        generated_tokens.append(next_token)
+
+    generated_text = tokenizer.join_text(generated_tokens)
+    return generated_text
+```
 ```bash
 def generate_text_from_ngram_model(
         start_prompt: str,
