@@ -92,6 +92,7 @@ def generate_text_from_ngram_model(
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
+### Complete the segment_encoded_sequence function.
 
 ```bash
 def segment_encoded_sequence(
@@ -134,6 +135,7 @@ def segment_encoded_sequence(
 ```
 
 ## 👉Task 4. Preparing dataset for training character-based language model
+### Complete the create_training_sequences function.
 
 ```bash
 def create_training_sequences(
