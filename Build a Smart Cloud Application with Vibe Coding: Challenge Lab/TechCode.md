@@ -50,7 +50,9 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 # Confirm applied roles
 echo "✅ IAM roles applied successfully for $STUDENT_EMAIL on project $PROJECT_ID"
 ```
-
+```bash
+Fix the error in server.py
+```
 
 </div>
 
