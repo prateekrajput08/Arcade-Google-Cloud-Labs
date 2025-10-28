@@ -28,7 +28,7 @@ organizations/{YOUR PROJECTID}/instances/eval-instance/natAddresses/apigee-nat-i
 evaluatePreconfiguredExpr('rce-stable')
 ```
 
-###  Run the following command:
+## ☁️Run the following commands in Cloud Shell:
 ```bash
 echo ${GOOGLE_CLOUD_PROJECT}
 ```
