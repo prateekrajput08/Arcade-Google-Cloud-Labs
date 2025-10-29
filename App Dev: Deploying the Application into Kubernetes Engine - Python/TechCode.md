@@ -13,13 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
-### Run below command only is error occurs in task 1
+* Configure the Quiz application:
+### Run below command `. prepare_environment.sh`
 ```bash
 pip install packaging
 ```
-### * Configure the Quiz application:
-### Rerun the same command `. prepare_environment.sh`
 
 ### Open New Terminal
 ```bash
