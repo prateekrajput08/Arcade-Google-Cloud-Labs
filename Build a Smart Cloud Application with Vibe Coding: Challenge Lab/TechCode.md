@@ -24,31 +24,26 @@ run.googleapis.com
 ```
 
 ```bash
-# Ask for student email once
-read -p "Enter your student email address (the one used to start the lab): " STUDENT_EMAIL
+read -p $'\e[1;36mEnter your student email address (the one used to start the lab): \e[0m' STUDENT_EMAIL
 
-# Fetch current project ID from gcloud config
 PROJECT_ID=$(gcloud config get-value project)
 
-echo "🔍 Using Project ID: $PROJECT_ID"
-echo "👤 Using Student Email: $STUDENT_EMAIL"
+echo -e "\n\e[1;34m Using Project ID:\e[0m \e[1;33m$PROJECT_ID\e[0m"
+echo -e "\e[1;34m Using Student Email:\e[0m \e[1;33m$STUDENT_EMAIL\e[0m\n"
 
-# Grant Cloud Run Admin role
-echo "Granting Cloud Run Admin role..."
+echo -e "\e[1;35mGranting Cloud Run Admin role...\e[0m"
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="user:$STUDENT_EMAIL" \
   --role="roles/run.admin" \
   --quiet
 
-# Grant Vertex AI User role
-echo "Granting Vertex AI User role..."
+echo -e "\e[1;35mGranting Vertex AI User role...\e[0m"
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="user:$STUDENT_EMAIL" \
   --role="roles/aiplatform.user" \
   --quiet
 
-# Confirm applied roles
-echo "✅ IAM roles applied successfully for $STUDENT_EMAIL on project $PROJECT_ID"
+echo -e "\n\e[1;32m✅ IAM roles applied successfully for\e[0m \e[1;33m$STUDENT_EMAIL\e[0m \e[1;32mon project\e[0m \e[1;33m$PROJECT_ID\e[0m\n"
 ```
 ### *Ask `Gemini` to fix the error
 ```bash
