@@ -25,29 +25,31 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Ask user for the connection profile ID (unique identifier)
-read -p "Enter the connection profile ID (unique identifier): " CONNECTION_PROFILE_ID
+# Enable required APIs with color output
+echo -e "${CYAN_TEXT}Enabling Database Migration API...${NO_COLOR}"
+gcloud services enable datamigration.googleapis.com --quiet
+echo -e "${CYAN_TEXT}Enabling Service Networking API...${NO_COLOR}"
+gcloud services enable servicenetworking.googleapis.com --quiet
 
-# Ask user for the display name of the connection profile
-read -p "Enter the connection profile display name: " CONNECTION_PROFILE_NAME
+# User prompts with bold formatting
+echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${NO_COLOR}"
 
-# Ask user for the host or IP address
-read -p "Enter the host or IP address: " HOST_OR_IP
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile ID (unique identifier): ${NO_COLOR}")" CONNECTION_PROFILE_ID
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile display name: ${NO_COLOR}")" CONNECTION_PROFILE_NAME
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${NO_COLOR}")" HOST_OR_IP
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${NO_COLOR}")" REGION
 
-# Ask user for the region
-read -p "Enter the region: " REGION
-
-# Fixed values for database engine, username, and password
+# Variables
 DATABASE_ENGINE="MYSQL"
 USERNAME="admin"
 PASSWORD="changeme"
 PORT=3306
 
-# Check if connection profile already exists
+# Check if profile exists with color output
 EXISTS=$(gcloud database-migration connection-profiles describe "$CONNECTION_PROFILE_ID" --location="$REGION" --quiet --format="value(name)" 2>/dev/null)
 
 if [ "$EXISTS" == "" ]; then
-  # Create the connection profile
+  # Create the connection profile with success message
   gcloud database-migration connection-profiles create mysql "$CONNECTION_PROFILE_ID" \
     --display-name="$CONNECTION_PROFILE_NAME" \
     --region="$REGION" \
@@ -56,9 +58,10 @@ if [ "$EXISTS" == "" ]; then
     --username="$USERNAME" \
     --password="$PASSWORD"
 
-  echo "Connection profile '$CONNECTION_PROFILE_NAME' (ID: $CONNECTION_PROFILE_ID) created successfully in region '$REGION' with database engine '$DATABASE_ENGINE'."
+  echo -e "${GREEN_TEXT}${BOLD_TEXT}Connection profile '${CONNECTION_PROFILE_NAME}' (ID: ${CONNECTION_PROFILE_ID}) created successfully in region '${REGION}' with database engine '${DATABASE_ENGINE}'.${NO_COLOR}"
 else
-  echo "Connection profile with ID '$CONNECTION_PROFILE_ID' already exists in region '$REGION'. No new profile was created."
+  # Profile already exists warning
+  echo -e "${YELLOW_TEXT}${BOLD_TEXT}Connection profile with ID '${CONNECTION_PROFILE_ID}' already exists in region '${REGION}'. No new profile was created.${NO_COLOR}"
 fi
 
 
