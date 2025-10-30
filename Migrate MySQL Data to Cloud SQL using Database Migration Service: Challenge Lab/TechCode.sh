@@ -26,18 +26,18 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 # Enable required APIs with color output
-echo -e "${CYAN_TEXT}Enabling Database Migration API...${NO_COLOR}"
+echo -e "${YELLOW_TEXT}Enabling Database Migration API...${RESET_FORMAT}"
 gcloud services enable datamigration.googleapis.com --quiet
-echo -e "${CYAN_TEXT}Enabling Service Networking API...${NO_COLOR}"
+echo -e "${YELLOW_TEXT}Enabling Service Networking API...${RESET_FORMAT}"
 gcloud services enable servicenetworking.googleapis.com --quiet
 
 # User prompts with bold formatting
-echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${NO_COLOR}"
+echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${RESET_FORMAT}"
 
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile ID (unique identifier): ${NO_COLOR}")" CONNECTION_PROFILE_ID
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile display name: ${NO_COLOR}")" CONNECTION_PROFILE_NAME
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${NO_COLOR}")" HOST_OR_IP
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${NO_COLOR}")" REGION
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile ID (unique identifier): ${RESET_FORMAT}")" CONNECTION_PROFILE_ID
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile display name: ${RESET_FORMAT}")" CONNECTION_PROFILE_NAME
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${RESET_FORMAT}")" HOST_OR_IP
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")" REGION
 
 # Variables
 DATABASE_ENGINE="MYSQL"
