@@ -54,9 +54,10 @@ echo "✅ IAM roles applied successfully for $STUDENT_EMAIL on project $PROJECT_
 ```bash
 Fix the error in server.py
 ```
-### *If you get permission error in `Task 3`
+### Task 5. Dockerize and deploy the ADK agent to Cloud Run
+* `TODO` comments, and update the code accordingly to complete the agent setup.
 ```bash
-python3 ~/mcp-on-cloudrun/local_mcp_call.py
+google_search
 ```
 
 </div>
