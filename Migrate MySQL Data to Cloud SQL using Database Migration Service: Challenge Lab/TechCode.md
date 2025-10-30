@@ -13,15 +13,26 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+## Task 1:
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Migrate%20MySQL%20Data%20to%20Cloud%20SQL%20using%20Database%20Migration%20Service%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-## 👉Click [Here](https://console.cloud.google.com/dbmigration/migrations?)
+## ✨For Database Migration: Click [Here](https://console.cloud.google.com/dbmigration/migrations?)
 
+## Task 4: Connect to the MySQL Interactive Console**
 
+* Run the following command in your terminal:
+```bash
+mysql -u admin -p
+```
+
+* When prompted for the password, enter:
+```bash
+changeme
+```
+---
 </div>
 
 ---
