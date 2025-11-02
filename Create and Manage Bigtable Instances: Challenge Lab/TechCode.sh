@@ -27,6 +27,7 @@ echo
 
 
 
+
 gcloud auth list
 
 export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
@@ -146,6 +147,7 @@ gcloud bigtable backups delete PersonalizedProducts_7 \
   --cluster=ecommerce-recommendations-c1 --quiet
 
 # gcloud bigtable instances delete ecommerce-recommendations --quiet
+
 
 
 # Final message
