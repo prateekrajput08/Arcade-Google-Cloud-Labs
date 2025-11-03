@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## adk_challenge_lab/paint_agent/agent.py:
+## 👉Update `adk_challenge_lab/paint_agent/agent.py`:
 
 ```bash
 AgentTool(agent=search_agent, skip_summarization=False),
