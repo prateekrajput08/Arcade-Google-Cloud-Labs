@@ -12,12 +12,12 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
----
-- Create a Cloud Monitoring group **DemoGroup**
+## Follow as per video
+- Create a Cloud Monitoring group `DemoGroup`
 
-- In the third field (Value), type in **instance**
+- In the third field (Value), type in `instance`
 
-- Create uptime check **DemoGroup uptime check**
+- Create uptime check `DemoGroup uptime check`
 ---
 
 ## ☁️ Run in Cloud Shell:
