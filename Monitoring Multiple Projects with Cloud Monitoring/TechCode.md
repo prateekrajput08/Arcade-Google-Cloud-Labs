@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## Follow as per video
+## 👉Follow as per video
 - Create a Cloud Monitoring group `DemoGroup`
 
 - In the third field (Value), type in `instance`
