@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## ☁️ Run in Cloud Shell:
+## ☁️ Task 5:
 
 ```bash
 $PREVIEW_URL/bq/$PROJECT_ID/publicviews/ca_zip_codes
