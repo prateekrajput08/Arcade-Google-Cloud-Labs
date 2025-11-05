@@ -85,7 +85,7 @@ start = 0
 for text in dataset:
       token_ids = tokenizer.encode(text)
       segments = segment_encoded_sequence(token_ids, segmentation_length, n_overlap)
-      encoded_tokens.extendx(segments)
+      encoded_tokens.extend(segments)
 ```
 
 
