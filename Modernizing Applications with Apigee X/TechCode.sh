@@ -53,55 +53,55 @@ echo -e "${YELLOW}${BOLD}Update the configuration file to use the ${REGION} regi
 sed -i "s/us-west1/$REGION/g" config.sh
 
 # Step 6: Display and execute the init-project.sh script
-echo -e "${CYAN}${BOLD}Display and execute the init-project.sh script${RESET}"
+echo -e "${CYAN}${BOLD}Display and execute the init-project.sh script${RESET_FORMAT}"
 cat init-project.sh
 ./init-project.sh
 
 # Step 7: Display and execute the init-service.sh script
-echo -e "${GREEN}${BOLD}Display and execute the init-service.sh script${RESET}"
+echo -e "${GREEN}${BOLD}Display and execute the init-service.sh script${RESET_FORMAT}"
 cat init-service.sh
 ./init-service.sh
 
 # Step 8: Display and execute the deploy.sh script
-echo -e "${YELLOW}${BOLD}Display and execute the deploy.sh script${RESET}"
+echo -e "${YELLOW}${BOLD}Display and execute the deploy.sh script${RESET_FORMAT}"
 cat deploy.sh
 ./deploy.sh
 
 # Step 9: Export the REST backend host URL
-echo -e "${CYAN}${BOLD}Export the REST backend host URL${RESET}"
+echo -e "${CYAN}${BOLD}Export the REST backend host URL${RESET_FORMAT}"
 export RESTHOST=$(gcloud run services describe simplebank-rest --platform managed --region $REGION --format 'value(status.url)')
 echo "export RESTHOST=${RESTHOST}" >> ~/.bashrc
 
 # Step 10: Check the REST service status
-echo -e "${GREEN}${BOLD}Check the REST service status${RESET}"
+echo -e "${GREEN}${BOLD}Check the REST service status${RESET_FORMAT}"
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" -X GET "${RESTHOST}/_status"
 
 echo
 
 # Step 11: Add a customer record to the REST service
-echo -e "${YELLOW}${BOLD}Add a customer record to the REST service${RESET}"
+echo -e "${YELLOW}${BOLD}Add a customer record to the REST service${RESET_FORMAT}"
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" -H "Content-Type: application/json" -X POST "${RESTHOST}/customers" -d '{"lastName": "Diallo", "firstName": "Temeka", "email": "temeka@example.com"}'
 
 echo
 
 # Step 12: Retrieve customer details
-echo -e "${CYAN}${BOLD}Retrieve customer details${RESET}"
+echo -e "${CYAN}${BOLD}Retrieve customer details${RESET_FORMAT}"
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" -X GET "${RESTHOST}/customers/temeka@example.com"
 
 echo
 
 # Step 13: Import sample data into Firestore
-echo -e "${GREEN}${BOLD}Import sample data into Firestore${RESET}"
+echo -e "${GREEN}${BOLD}Import sample data into Firestore${RESET_FORMAT}"
 gcloud firestore import gs://cloud-training/api-dev-quest/firestore/example-data
 
 # Step 14: List all ATMs using the REST service
-echo -e "${YELLOW}${BOLD}List all ATMs using the REST service${RESET}"
+echo -e "${YELLOW}${BOLD}List all ATMs using the REST service${RESET_FORMAT}"
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" -X GET "${RESTHOST}/atms"
 
 echo
 
 # Step 15: Retrieve a specific ATM's details
-echo -e "${CYAN}${BOLD}Retrieve a specific ATM's details${RESET}"
+echo -e "${CYAN}${BOLD}Retrieve a specific ATM's details${RESET_FORMAT}"
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" -X GET "${RESTHOST}/atms/spruce-goose"
 
 echo
@@ -113,44 +113,36 @@ gcloud iam service-accounts create apigee-internal-access \
 --project=${GOOGLE_CLOUD_PROJECT}
 
 # Step 17: Add IAM policy binding to the REST service
-echo -e "${YELLOW}${BOLD}Add IAM policy binding to the REST service${RESET}"
+echo -e "${YELLOW}${BOLD}Add IAM policy binding to the REST service${RESET_FORMAT}"
 gcloud run services add-iam-policy-binding simplebank-rest \
 --member="serviceAccount:apigee-internal-access@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com" \
 --role=roles/run.invoker --region=$REGION \
 --project=${GOOGLE_CLOUD_PROJECT}
 
 # Step 18: Get the REST service URL
-echo -e "${CYAN}${BOLD}Get the REST service URL${RESET}"
+echo -e "${CYAN}${BOLD}Get the REST service URL${RESET_FORMAT}"
 gcloud run services describe simplebank-rest --platform managed --region $REGION --format 'value(status.url)'
 
 # Step 19: Create an API key for the Geocoding API
-echo -e "${GREEN}${BOLD}Create an API key for the Geocoding API${RESET}"
+echo -e "${GREEN}${BOLD}Create an API key for the Geocoding API${RESET_FORMAT}"
 API_KEY=$(gcloud alpha services api-keys create --project=${GOOGLE_CLOUD_PROJECT} --display-name="Geocoding API key for Apigee" --api-target=service=geocoding_backend --format "value(response.keyString)")
 echo "export API_KEY=${API_KEY}" >> ~/.bashrc
 echo "API_KEY=${API_KEY}"
 
 # Step 20: Monitor runtime instance and attach environment
-echo -e "${YELLOW}${BOLD}Monitor runtime instance and attach environment${RESET}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Monitor runtime instance and attach environment${RESET_FORMAT}"
 export INSTANCE_NAME=eval-instance; export ENV_NAME=eval; export PREV_INSTANCE_STATE=; echo "waiting for runtime instance ${INSTANCE_NAME} to be active"; while : ; do export INSTANCE_STATE=$(curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" -X GET "https://apigee.googleapis.com/v1/organizations/${GOOGLE_CLOUD_PROJECT}/instances/${INSTANCE_NAME}" | jq "select(.state != null) | .state" --raw-output); [[ "${INSTANCE_STATE}" == "${PREV_INSTANCE_STATE}" ]] || (echo; echo "INSTANCE_STATE=${INSTANCE_STATE}"); export PREV_INSTANCE_STATE=${INSTANCE_STATE}; [[ "${INSTANCE_STATE}" != "ACTIVE" ]] || break; echo -n "."; sleep 5; done; echo; echo "instance created, waiting for environment ${ENV_NAME} to be attached to instance"; while : ; do export ATTACHMENT_DONE=$(curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" -X GET "https://apigee.googleapis.com/v1/organizations/${GOOGLE_CLOUD_PROJECT}/instances/${INSTANCE_NAME}/attachments" | jq "select(.attachments != null) | .attachments[] | select(.environment == \"${ENV_NAME}\") | .environment" --join-output); [[ "${ATTACHMENT_DONE}" != "${ENV_NAME}" ]] || break; echo -n "."; sleep 5; done; echo "***ORG IS READY TO USE***";
 
 echo
-
 # Provide the Apigee proxy creation URL
-echo -e "${BLUE}${BOLD}Go to this link to create an Apigee proxy: ${RESET}""https://console.cloud.google.com/apigee/proxy-create?project=$DEVSHELL_PROJECT_ID"
-
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Go to this link to create an Apigee proxy: ${RESET_FORMAT}""https://console.cloud.google.com/apigee/proxy-create?project=$DEVSHELL_PROJECT_ID"
 echo
-
 # Display backend URL and service account details
-echo -e "${YELLOW}${BOLD}Backend URL: ${RESET}""$(gcloud run services describe simplebank-rest --platform managed --region $REGION --format='value(status.url)')"
-
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Backend URL: ${RESET_FORMAT}""$(gcloud run services describe simplebank-rest --platform managed --region $REGION --format='value(status.url)')"
 echo
-
-echo -e "${CYAN}${BOLD}Copy this service account: ${RESET}""apigee-internal-access@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com"
-
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Copy this service account: ${RESET_FORMAT}""apigee-internal-access@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com"
 echo
-
-echo -e "${GREEN}${BOLD}Copy this API KEY: ${RESET}""apikey=${API_KEY}"
-
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Copy this API KEY: ${RESET_FORMAT}""apikey=${API_KEY}"
 echo
 
 cd
