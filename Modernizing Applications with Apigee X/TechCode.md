@@ -20,8 +20,8 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
-## Download [Here](https://drive.google.com/uc?export=download&id=1PBoqlq2qnZAYvFwCVRBfBx06hvEWniPs)
-## Download [Here](https://drive.google.com/uc?export=download&id=1fcbG0QSSlV4hBq1yw9iXB7dHk4rLrKP0)
+## Download 👉[Here](https://drive.google.com/uc?export=download&id=1PBoqlq2qnZAYvFwCVRBfBx06hvEWniPs)
+## Download 👉[Here](https://drive.google.com/uc?export=download&id=1fcbG0QSSlV4hBq1yw9iXB7dHk4rLrKP0)
 
 </div>
 
