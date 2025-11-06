@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Deploy a Hugo Website with Cloud Build and Firebase Pipeline || GSP747 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6878/labs/42716)
 
 ## ⚠️ Disclaimer ⚠️
 
