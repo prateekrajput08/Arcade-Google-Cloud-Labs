@@ -13,7 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+export REGION=
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/API%20Gateway%3A%20Qwik%20Start/TechCode.sh
 sudo chmod +x TechCode.sh 
