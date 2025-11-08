@@ -13,7 +13,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## Download [Here](https://www.skills.google/games/6880/labs/42766)
+## Download [Here](https://docs.google.com/spreadsheets/d/16hUQkVeDOCX-V1fLlFKLNHI1KMf05y9i/export?format=xlsx)
 ## Download [Here](https://docs.google.com/presentation/d/1rxrFmqHZS3q8BEJmo3vC2Hu9fT0xQ-Wb/export/pptx)
 </div>
 
