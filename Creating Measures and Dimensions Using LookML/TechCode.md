@@ -122,7 +122,7 @@ view: users {
 }
 ```
 
-## Update View `order_items.view:
+## Update View `order_items.view`:
 ```bash
 view: order_items {
   sql_table_name: `cloud-training-demos.looker_ecomm.order_items`
