@@ -1,22 +1,25 @@
 #!/bin/bash
-# Enhanced Color Definitions
-COLOR_BLACK=$'\033[0;30m'
-COLOR_RED=$'\033[0;31m'
-COLOR_GREEN=$'\033[0;32m'
-COLOR_YELLOW=$'\033[0;33m'
-COLOR_BLUE=$'\033[0;34m'
-COLOR_MAGENTA=$'\033[0;35m'
-COLOR_CYAN=$'\033[0;36m'
-COLOR_WHITE=$'\033[0;37m'
-COLOR_RESET=$'\033[0m'
 
-# Text Formatting
-BOLD=$'\033[1m'
-UNDERLINE=$'\033[4m'
-BLINK=$'\033[5m'
-REVERSE=$'\033[7m'
+# Define color variables
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL=$'\033[38;5;50m'
 
+# Define text formatting variables
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
 clear
+
 # Welcome message
 echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
