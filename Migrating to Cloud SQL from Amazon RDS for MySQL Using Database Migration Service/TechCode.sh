@@ -28,10 +28,10 @@ echo
 # User prompts with bold formatting
 echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the Amazon RDS for MySQL connection profile details:${RESET_FORMAT}"
 
-read -p "$(echo -e "${BOLD_TEXT}${YELLOW_TEXT}Enter the connection profile ID (unique identifier): ${RESET_FORMAT}")" CONNECTION_PROFILE_ID
-read -p "$(echo -e "${BOLD_TEXT}${YELLOW_TEXT}Enter the connection profile display name: ${RESET_FORMAT}")" CONNECTION_PROFILE_NAME
-read -p "$(echo -e "${BOLD_TEXT}${YELLOW_TEXT}Enter the Amazon RDS endpoint (host or IP address): ${RESET_FORMAT}")" HOST_OR_IP
-read -p "$(echo -e "${BOLD_TEXT}${YELLOW_TEXT}Enter the region (e.g., us-central1): ${RESET_FORMAT}")" REGION
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile ID (unique identifier): ${RESET_FORMAT}")" CONNECTION_PROFILE_ID
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the connection profile display name: ${RESET_FORMAT}")" CONNECTION_PROFILE_NAME
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the Amazon RDS endpoint (host or IP address): ${RESET_FORMAT}")" HOST_OR_IP
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region (e.g., us-central1): ${RESET_FORMAT}")" REGION
 
 # Variables
 DATABASE_ENGINE="Amazon RDS for MySQL"
@@ -43,16 +43,14 @@ PORT=3306
 EXISTS=$(gcloud database-migration connection-profiles describe "$CONNECTION_PROFILE_ID" --location="$REGION" --quiet --format="value(name)" 2>/dev/null)
 
 if [ "$EXISTS" == "" ]; then
-  # Create the connection profile with Amazon RDS settings
+  # Create the connection profile for Amazon RDS (standard MySQL connector)
   gcloud database-migration connection-profiles create mysql "$CONNECTION_PROFILE_ID" \
     --display-name="$CONNECTION_PROFILE_NAME" \
     --region="$REGION" \
     --host="$HOST_OR_IP" \
     --port=$PORT \
     --username="$USERNAME" \
-    --password="$PASSWORD" \
-    --type=RDS \
-    --labels=engine="amazon-rds-mysql"
+    --password="$PASSWORD"
 
   echo -e "${GREEN_TEXT}${BOLD_TEXT}Amazon RDS connection profile '${CONNECTION_PROFILE_NAME}' (ID: ${CONNECTION_PROFILE_ID}) created successfully in region '${REGION}' with database engine '${DATABASE_ENGINE}'.${NO_COLOR}"
 else
