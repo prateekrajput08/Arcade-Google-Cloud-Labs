@@ -1,4 +1,4 @@
-# 🌐 Kickstarting Application Development with Gemini Code Assist: Challenge Lab || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Kickstarting Application Development with Gemini Code Assist: Challenge Lab || GSP527 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/focuses/132354?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=59224619)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -29,7 +29,7 @@ npm run test
 ```bash
 npm run test
 ```
-## Open `functions/index.js`:
+## Task-4 `functions/index.js`:
 ```bash
 // This endpoint should return all products that are out of stock.
 ```
@@ -40,7 +40,39 @@ npm run test
 ```bash
 curl http://localhost:PORT/outofstock
 ```
+## Task-5 Create an API Gateway to expose the outofstock Cloud Function
+Step 1: Set Environment Variables
+```bash
+export CONFIG_ID=outofstock-api-config
+export API_ID=outofstock-api
+export GATEWAY_ID=store
+export OPENAPI_SPEC=outofstock.yaml
+```
+Step 2: Create the gateway Directory and OpenAPI Spec
+```bash
+mkdir gateway
+cd gateway
+touch outofstock.yaml
+```
+Step 3: Generate OpenAPI Specification
+```bash
+Generate an OpenAPI 2.0 YAML specification for an API Gateway that calls a Cloud Function at https://REGION-PROJECT_ID.cloudfunctions.net/outofstock. The endpoint should be /outofstock and return JSON.
+```
+Step 4:
+```bash
+gcloud services enable apigateway.googleapis.com
+gcloud api-gateway apis create $API_ID --display-name="Out of Stock API"
+gcloud api-gateway api-configs create $CONFIG_ID --api=$API_ID --openapi-spec=outofstock.yaml --display-name="Out of Stock API Config"
+gcloud api-gateway gateways create $GATEWAY_ID --api=$API_ID --api-config=$CONFIG_ID --location=us-central1
+gcloud api-gateway gateways describe $GATEWAY_ID --location=us-central1
 
+```
+**Replace `REGION-PROJECT_ID` with your actual project ID**
+Test the gateway by visiting:
+```bash
+https://defaultHostname/outofstock
+```
+**Replace `defaultHotname`**
 </div>
 
 ---
