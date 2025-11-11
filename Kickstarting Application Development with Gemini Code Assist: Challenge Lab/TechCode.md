@@ -15,66 +15,7 @@
 ## Task-2 `backend/index.test.ts`:
 
 ```bash
-// @Gemini: Write a Jest test for a new endpoint called '/outofstock'
-// that checks for a 200 response and ensures 2 items are returned.
-describe('GET /outofstock', () => {
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should return a 200 status code and 2 out-of-stock items', async () => {
-    // Mock the Firestore response specifically for the /outofstock endpoint
-    const mockOutOfStockProducts = [
-      {
-        id: 'oos1',
-        data: () => ({
-          name: 'Wasabi Party Mix',
-          price: 5,
-          quantity: 0,
-          imgfile: 'product-images/wasabipartymix.png',
-          timestamp: new Date().toISOString(),
-          actualdateadded: new Date().toISOString(),
-        }),
-      },
-      {
-        id: 'oos2',
-        data: () => ({
-          name: 'Jalapeno Seasoning',
-          price: 3,
-          quantity: 0,
-          imgfile: 'product-images/jalapenoseasoning.png',
-          timestamp: new Date().toISOString(),
-          actualdateadded: new Date().toISOString(),
-        }),
-      },
-    ];
-
-    mockCollection.where.mockImplementation((field, op, value) => {
-      if (field === 'quantity' && op === '<=' && value === 0) {
-        return {
-          get: jest.fn().mockResolvedValue({
-            empty: false,
-            docs: mockOutOfStockProducts,
-            forEach: jest.fn(callback => {
-              mockOutOfStockProducts.forEach(doc => callback(doc));
-            }),
-          }),
-        };
-      }
-      return mockCollection;
-    });
-
-    const response = await request(app).get('/outofstock');
-
-    expect(response.statusCode).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body).toHaveLength(2);
-    expect(response.body[0].name).toBe('Wasabi Party Mix');
-    expect(response.body[0].quantity).toBe(0);
-    expect(response.body[1].name).toBe('Jalapeno Seasoning');
-  });
-});
+// Gemini: Write a test for the /outofstock endpoint to verify it returns a status 200 and a list of 2 items.
 ```
 ```bash
 cd cymbal-superstore/backend
@@ -82,6 +23,23 @@ cd cymbal-superstore/backend
 ```bash
 npm install
 npm run test
+```
+## Task-3 `backend/index.ts`:
+```bash
+// This endpoint should return all out-of-stock products.
+```
+```bash
+npm run test
+```
+## Open `functions/index.js`:
+```bash
+// This endpoint should return all products that are out of stock.
+```
+```bash
+npm run test
+```
+```bash
+curl http://localhost:PORT/outofstock
 ```
 
 </div>
