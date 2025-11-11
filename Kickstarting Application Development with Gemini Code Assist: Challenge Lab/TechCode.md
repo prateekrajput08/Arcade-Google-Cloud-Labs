@@ -77,7 +77,9 @@ describe('GET /outofstock', () => {
 });
 ```
 ```bash
-cd backend
+cd cymbal-superstore/backend
+```
+```bash
 npm install
 npm run test
 ```
