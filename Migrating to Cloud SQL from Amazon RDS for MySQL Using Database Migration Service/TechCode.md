@@ -1,4 +1,3 @@
-
 # 🌐 Migrating to Cloud SQL from Amazon RDS for MySQL Using Database Migration Service || GSP859 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6879/labs/42741)
 
 ## ⚠️ Disclaimer ⚠️
@@ -14,11 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Migrating%20to%20Cloud%20SQL%20from%20Amazon%20RDS%20for%20MySQL%20Using%20Database%20Migration%20Service/TechCode.sh
-sudo chmod +x TechCode.sh 
-./TechCode.sh
+gcloud services enable datamigration.googleapis.com --quiet
+gcloud services enable servicenetworking.googleapis.com --quiet
 ```
 
 </div>
