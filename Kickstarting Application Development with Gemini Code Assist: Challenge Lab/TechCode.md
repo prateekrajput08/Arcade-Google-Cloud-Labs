@@ -224,6 +224,7 @@ gcloud api-gateway apis create $API_ID --display-name="Out of Stock API"
 ```bash
 gcloud api-gateway api-configs create $CONFIG_ID --api=$API_ID --openapi-spec=outofstock.yaml --display-name="Out of Stock API Config"
 ```
+**⚠️ Change Region As per your lab Instruction**
 ```bash
 gcloud api-gateway gateways create $GATEWAY_ID --api=$API_ID --api-config=$CONFIG_ID --location=us-central1
 gcloud api-gateway gateways describe $GATEWAY_ID --location=us-central1
