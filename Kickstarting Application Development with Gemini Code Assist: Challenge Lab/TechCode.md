@@ -34,6 +34,9 @@ npm run test
 // This endpoint should return all products that are out of stock.
 ```
 ```bash
+cd cymbal-superstore/functions
+```
+```bash
 gcloud functions deploy outofstock --runtime=nodejs20 --trigger-http --entry-point=outofstock --region=us-central1 --allow-unauthenticated
 ```
 ```bash
