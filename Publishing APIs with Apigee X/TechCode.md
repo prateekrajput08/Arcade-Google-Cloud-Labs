@@ -19,7 +19,7 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-## Download [Here](https://drive.google.com/uc?export=download&id=1sCvChFK9uFAqiUXz0nywifr9ZtkvJs25)
+## 👉Download [Here](https://drive.google.com/uc?export=download&id=1sCvChFK9uFAqiUXz0nywifr9ZtkvJs25)
 
 </div>
 
