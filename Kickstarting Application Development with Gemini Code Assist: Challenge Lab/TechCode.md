@@ -19,8 +19,6 @@
 ```
 ```bash
 cd cymbal-superstore/backend
-```
-```bash
 npm install
 npm run test
 ```
@@ -36,6 +34,7 @@ npm run test
 // This endpoint should return all products that are out of stock.
 ```
 ```bash
+cd cymbal-superstore/functions
 npm run test
 ```
 ```bash
