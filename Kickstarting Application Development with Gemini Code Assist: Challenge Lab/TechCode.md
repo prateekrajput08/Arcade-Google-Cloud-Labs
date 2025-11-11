@@ -217,11 +217,19 @@ Generate an OpenAPI 2.0 YAML specification for an API Gateway that calls a Cloud
 Step 4:
 ```bash
 gcloud services enable apigateway.googleapis.com
+```
+```bash
 gcloud api-gateway apis create $API_ID --display-name="Out of Stock API"
+```
+```bash
 gcloud api-gateway api-configs create $CONFIG_ID --api=$API_ID --openapi-spec=outofstock.yaml --display-name="Out of Stock API Config"
+```
+```bash
 gcloud api-gateway gateways create $GATEWAY_ID --api=$API_ID --api-config=$CONFIG_ID --location=us-central1
+```
+```bash
 gcloud api-gateway gateways describe $GATEWAY_ID --location=us-central1
-
+```
 ```
 **Replace `REGION-PROJECT_ID` with your actual project ID**
 Test the gateway by visiting:
