@@ -192,6 +192,7 @@ cd cymbal-superstore/functions
 ```bash
 gcloud functions deploy outofstock --runtime=nodejs20 --trigger-http --entry-point=outofstock --region=us-central1 --allow-unauthenticated
 ```
+**⚠️ Change Region As per your lab Instruction**
 ```bash
 curl http://localhost:PORT/outofstock
 ```
