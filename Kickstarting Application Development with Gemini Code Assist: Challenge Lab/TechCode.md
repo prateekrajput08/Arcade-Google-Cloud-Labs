@@ -189,10 +189,10 @@ function addOrUpdateFirestore(product) {
 ```bash
 cd cymbal-superstore/functions
 ```
+**⚠️Change `Region` of below As per your lab Instruction**
 ```bash
 gcloud functions deploy outofstock --runtime=nodejs20 --trigger-http --entry-point=outofstock --region=us-central1 --allow-unauthenticated
 ```
-**⚠️ Change `Region` As per your lab Instruction**
 ## Task-5 Create an `API Gateway` to expose the `outofstock Cloud Function`
 Step 1: Set Environment Variables
 ```bash
@@ -232,7 +232,7 @@ paths:
               type: object
 security: []  # This allows unauthenticated access; or replace with proper API key security
 ```
-**Replace `REGION-PROJECT_ID` with your actual project ID**
+**⚠️Replace `REGION-PROJECT_ID` with your actual project ID**
 Step 4: Enable API Gateway Service
 ```bash
 gcloud services enable apigateway.googleapis.com
@@ -247,7 +247,7 @@ Step 6: Create API Gateway & Verify and Test
 gcloud api-gateway gateways create $GATEWAY_ID --api=$API_ID --api-config=$CONFIG_ID --location=us-central1
 gcloud api-gateway gateways describe $GATEWAY_ID --location=us-central1
 ```
-**⚠️ Change Region As per your lab Instruction**
+**⚠️Change Region As per your lab Instruction**
 
 </div>
 
