@@ -29,12 +29,12 @@ echo
 
 # Check if DEVSHELL_PROJECT_ID is set
 if [[ -z "$DEVSHELL_PROJECT_ID" ]]; then
-    echo "${RED}${BOLD}Error: DEVSHELL_PROJECT_ID is not set${RESET}"
+    echo "${RED}${BOLD_TEXT}Error: DEVSHELL_PROJECT_ID is not set${RESET_FORMAT}"
     echo "Please run this script in Google Cloud Shell or set the DEVSHELL_PROJECT_ID variable"
     exit 1
 fi
 
-echo "${YELLOW}${BOLD}Project ID: $DEVSHELL_PROJECT_ID${RESET}"
+echo "${YELLOW_TEXT}${BOLD}Project ID: $DEVSHELL_PROJECT_ID${RESET}"
 
 # Step 1: Enable required Google Cloud services
 echo "${YELLOW}${BOLD}Enabling Required Google Cloud Services${RESET}"
@@ -96,17 +96,13 @@ done
 echo "***ORG IS READY TO USE***"
 
 # Step 6: Create a Pub/Sub topic
-echo "${CYAN}${BOLD}Creating Pub/Sub Topic: apigee-services-v1-delivery-reviews${RESET}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Creating Pub/Sub Topic: apigee-services-v1-delivery-reviews${RESET_FORMAT}"
 gcloud pubsub topics create apigee-services-v1-delivery-reviews --project="$DEVSHELL_PROJECT_ID"
-
 echo
-
 # Step 7: Display final instructions
-echo "${YELLOW}${BOLD}Final Instructions${RESET}"
-echo
-echo -e "${BLUE}${BOLD}Go to this link to create an Apigee proxy: ${RESET}""https://console.cloud.google.com/apigee/proxy-create?project=$DEVSHELL_PROJECT_ID"
-echo
-echo -e "${CYAN}${BOLD}Copy this service account: ${RESET}""apigee-gc-service-access@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Final Instructions${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Go to this link to create an Apigee proxy: ${RESET_FORMAT}""https://console.cloud.google.com/apigee/proxy-create?project=$DEVSHELL_PROJECT_ID"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Copy this service account: ${RESET_FORMAT}""apigee-gc-service-access@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com"
 echo
 
 # Final message
