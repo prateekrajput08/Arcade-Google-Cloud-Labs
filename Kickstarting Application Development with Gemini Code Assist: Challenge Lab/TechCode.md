@@ -212,7 +212,28 @@ touch outofstock.yaml
 ```
 Step 3: Generate OpenAPI Specification
 ```bash
-Generate an OpenAPI 2.0 YAML specification for an API Gateway that calls a Cloud Function at https://REGION-PROJECT_ID.cloudfunctions.net/outofstock. The endpoint should be /outofstock and return JSON.
+swagger: '2.0'
+info:
+  title: OutOfStock API
+  version: 1.0.0
+host: us-central1-yourproject.cloudfunctions.net
+schemes:
+  - https
+paths:
+  /outofstock:
+    get:
+      summary: Get out of stock products
+      operationId: outofstock
+      x-google-backend:
+        address: https://us-central1-yourproject.cloudfunctions.net/outofstock
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+security: []  # This allows unauthenticated access; or replace with proper API key security
 ```
 **Replace `REGION-PROJECT_ID` with your actual project ID**
 Step 4: Enable API Gateway Service
