@@ -34,7 +34,7 @@ if [[ -z "$DEVSHELL_PROJECT_ID" ]]; then
     exit 1
 fi
 
-echo "${YELLOW_TEXT}${BOLD}Project ID: $DEVSHELL_PROJECT_ID${RESET}"
+echo "${YELLOW_TEXT}${BOLD}Project ID: $DEVSHELL_PROJECT_ID${RESET_FORMAT}"
 
 # Step 1: Enable required Google Cloud services
 echo "${YELLOW}${BOLD}Enabling Required Google Cloud Services${RESET}"
