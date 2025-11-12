@@ -192,8 +192,8 @@ cd cymbal-superstore/functions
 ```bash
 gcloud functions deploy outofstock --runtime=nodejs20 --trigger-http --entry-point=outofstock --region=us-central1 --allow-unauthenticated
 ```
-**⚠️ Change Region As per your lab Instruction**
-## Task-5 Create an API Gateway to expose the outofstock Cloud Function
+**⚠️ Change `Region` As per your lab Instruction**
+## Task-5 Create an `API Gateway` to expose the `outofstock Cloud Function`
 Step 1: Set Environment Variables
 ```bash
 export CONFIG_ID=outofstock-api-config
