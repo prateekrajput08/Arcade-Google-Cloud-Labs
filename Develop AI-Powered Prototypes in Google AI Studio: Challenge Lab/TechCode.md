@@ -39,12 +39,12 @@ Add a glowing border or subtle magical particle effect around the main content.
 ## Task 4:
 
 ```bash
-
+Add a "Generate Backstory" button. When clicked, create a unique, one-to-two-sentence origin story for the current character and display it.
 ```
 ## Task 5:
 
 ```bash
-
+Reformat the UI as a bordered player card. Add random stats: Health, Mana, and Strength. Include a "Save to Deck" button that saves the current character to a 'My Deck' list in the app.
 ```
 
 </div>
