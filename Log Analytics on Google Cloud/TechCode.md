@@ -21,7 +21,6 @@ sudo chmod +x TechCode.sh
 ```
 
 </div>
----
 
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
