@@ -31,8 +31,6 @@ npm run test
 ```
 ## Task-4 `functions/index.js`:
 ```bash
-INDEX.JS
-
 const functions = require('@google-cloud/functions-framework');
 const {Firestore} = require('@google-cloud/firestore');
 
@@ -128,7 +126,7 @@ function initFirestoreCollection() {
       timestamp: new Date(Date.now() - Math.floor(Math.random() * 31536000000) - 7776000000),
       actualdateadded: new Date(Date.now()),
     };
-    console.log("⬆️ Adding (or updating) product in firestore: " + oldProduct.name);
+    console.log("Adding (or updating) product in firestore: " + oldProduct.name);
     addOrUpdateFirestore(oldProduct);
   }
   // Add recent products
@@ -151,7 +149,7 @@ function initFirestoreCollection() {
       timestamp: new Date(Date.now() - Math.floor(Math.random() * 518400000) + 1),
       actualdateadded: new Date(Date.now()),
     };
-    console.log("🆕 Adding (or updating) product in firestore: " + recent.name);
+    console.log("Adding (or updating) product in firestore: " + recent.name);
     addOrUpdateFirestore(recent);
   }
   // Add recent products that are out of stock
@@ -165,7 +163,7 @@ function initFirestoreCollection() {
       timestamp: new Date(Date.now() - Math.floor(Math.random() * 518400000) + 1),
       actualdateadded: new Date(Date.now()),
     };
-    console.log("😱 Adding (or updating) out of stock product in firestore: " + oosProduct.name);
+    console.log("Adding (or updating) out of stock product in firestore: " + oosProduct.name);
     addOrUpdateFirestore(oosProduct);
   }
 }
@@ -186,6 +184,7 @@ function addOrUpdateFirestore(product) {
       }
     });
 }
+//Subscribe to Tech & Code https://www.youtube.com/@TechCode9/videos 
 ```
 ```bash
 cd cymbal-superstore/functions
@@ -214,22 +213,22 @@ Step 3: Generate OpenAPI Specification
 ```bash
 Generate an OpenAPI 2.0 YAML specification for an API Gateway that calls a Cloud Function at https://REGION-PROJECT_ID.cloudfunctions.net/outofstock. The endpoint should be /outofstock and return JSON.
 ```
-Step 4:
+**Replace `REGION-PROJECT_ID` with your actual project ID**
+Step 4: Enable API Gateway Service
 ```bash
 gcloud services enable apigateway.googleapis.com
 ```
+Step 5: Create API and API Configuration
 ```bash
 gcloud api-gateway apis create $API_ID --display-name="Out of Stock API"
-```
-```bash
 gcloud api-gateway api-configs create $CONFIG_ID --api=$API_ID --openapi-spec=outofstock.yaml --display-name="Out of Stock API Config"
 ```
-**⚠️ Change Region As per your lab Instruction**
+Step 6: Create API Gateway & Verify and Test
 ```bash
 gcloud api-gateway gateways create $GATEWAY_ID --api=$API_ID --api-config=$CONFIG_ID --location=us-central1
 gcloud api-gateway gateways describe $GATEWAY_ID --location=us-central1
 ```
-**Replace `REGION-PROJECT_ID` with your actual project ID**
+**⚠️ Change Region As per your lab Instruction**
 Test the gateway by visiting:
 ```bash
 https://defaultHostname/outofstock
