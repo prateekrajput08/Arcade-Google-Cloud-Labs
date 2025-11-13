@@ -12,13 +12,32 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## ☁️ Run in Cloud Shell:
+Step-1: Update `PROJECT ID` and `REGION` <br>
+Set Google Cloud project information and create client:
 
+Task-3.1: Update `MODEL ID` <br>
+Task-3.2: INSERT CORRECT CLASSNAME
 ```bash
-rm gemini-explorer-challenge-v2.0.0.ipynb
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Explore%20Generative%20AI%20with%20the%20Gemini%20API%20in%20Vertex%20AI%3A%20Challenge%20Lab/gemini-explorer-challenge-v2.0.0.ipynb
+FunctionDeclaration
 ```
-
+Task-3.3: 
+```bash
+Tool
+```
+Task-3.4:
+```bash
+tools=[weather_tool]
+```
+Task-4.1 Update `MODEL ID`
+Task-4.2 Update `INPUT CORRECT CLASSNAME`
+```bash
+Part.from_uri
+```
+Task-4.2 Update `INSERT VIDEO URL`
+Task-4.2 Update `INSERT CORRECT METHOD NAME`
+```bash
+models.generate_content_stream
+```
 </div>
 
 ---
