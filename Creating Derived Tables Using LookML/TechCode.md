@@ -1,5 +1,4 @@
-
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Creating Derived Tables Using LookML || GSP858 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6879/labs/42740)
 
 ## ⚠️ Disclaimer ⚠️
 
