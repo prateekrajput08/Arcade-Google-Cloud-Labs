@@ -59,7 +59,7 @@ Title the Look `Percent of Flights Cancelled by Aircraft Origin 2004`
 ```bash
 # Place in `faa` model
 explore: +flights {
-    query: start_from_here{
+    query: TechCode-4{
       dimensions: [carriers.name]
       measures: [total_distance]
     }
@@ -74,7 +74,7 @@ Title the Look `Percent of Total Distance Flown by Carrier`
 ```bash
 # Place in `faa` model
 explore: +flights {
-    query: TechCode-4{
+    query: TechCode-5{
       dimensions: [depart_year, distance_tiered]
       measures: [count]
       filters: [flights.depart_date: "after 2000/01/01"]
