@@ -142,10 +142,10 @@ EOF
 cat > package.json <<EOF
 {
   "name": "nodejs-storage-function",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/functions-framework": "^3.0.0"
+    "@google-cloud/functions-framework": "^2.0.0"
   }
 }
 EOF
@@ -249,6 +249,7 @@ deploy_with_retry slow-function \
   --region $REGION \
   --trigger-http \
   --allow-unauthenticated \
+  ``min-instances 1 \
   --max-instances 4
 
 # Test Slow Function
@@ -305,7 +306,9 @@ deploy_with_retry slow-concurrent-function \
   --trigger-http \
   --allow-unauthenticated \
   --min-instances 1 \
-  --max-instances 4
+  --max-instances 4 \
+  --cpu 1 \
+  --concurrency 100
 
 echo "${COLOR_CYAN}${BOLD} ------ PLEASE COMPLETE MANUAL STEP AND VERIFY YOUR PROGRESS OF TASK 7 ${COLOR_RESET}"
 
