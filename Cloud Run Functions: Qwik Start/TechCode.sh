@@ -209,16 +209,17 @@ color = os.environ.get('COLOR')
 def hello_world(request):
     return f'<body style="background-color:{color}"><h1>Hello World!</h1></body>'
 EOF
-deploy_with_retry hello-world-colored \
+COLOR=orange
+gcloud functions deploy hello-world-colored \
   --gen2 \
-  --runtime python39 \
+  --runtime python311 \
   --entry-point hello_world \
   --source . \
-  --region $REGION \
+  --region Region \
   --trigger-http \
   --allow-unauthenticated \
-  --update-env-vars COLOR=yellow \
-  --max-instances 1
+  --update-env-vars COLOR=$COLOR \
+  --max-instances 11
 
 # Deploy Slow Go Function
 echo
@@ -240,7 +241,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
         fmt.Fprint(w, "Slow HTTP Go in GCF 2nd gen!")
 }
 EOF
-echo "module example.com/mod" > go.mod
+echo "module example.com/mod" > go 1.23
 deploy_with_retry slow-function \
   --gen2 \
   --runtime go123 \
