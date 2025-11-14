@@ -12,7 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
-## Look-1 `order_items`:
+## Look-1 `Pivot dimensions`:
 
 ```bash
 # Place in `faa` model
