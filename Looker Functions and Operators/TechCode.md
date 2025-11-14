@@ -59,6 +59,21 @@ Title the Look `Percent of Flights Cancelled by Aircraft Origin 2004`
 ```bash
 # Place in `faa` model
 explore: +flights {
+    query: start_from_here{
+      dimensions: [carriers.name]
+      measures: [total_distance]
+    }
+}
+```
+```bash
+${flights.total_distance}/${flights.total_distance:total}
+```
+Title the Look `Percent of Total Distance Flown by Carrier`
+
+## Look-5 Use functions in table calculations
+```bash
+# Place in `faa` model
+explore: +flights {
     query: TechCode-4{
       dimensions: [depart_year, distance_tiered]
       measures: [count]
