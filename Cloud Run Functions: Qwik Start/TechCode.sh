@@ -209,17 +209,16 @@ color = os.environ.get('COLOR')
 def hello_world(request):
     return f'<body style="background-color:{color}"><h1>Hello World!</h1></body>'
 EOF
-COLOR=orange
-gcloud functions deploy hello-world-colored \
+deploy_with_retry hello-world-colored \
   --gen2 \
   --runtime python311 \
   --entry-point hello_world \
   --source . \
-  --region Region \
+  --region $REGION \
   --trigger-http \
   --allow-unauthenticated \
-  --update-env-vars COLOR=$COLOR \
-  --max-instances 11
+  --update-env-vars COLOR=yellow \
+  --max-instances 1
 
 # Deploy Slow Go Function
 echo
