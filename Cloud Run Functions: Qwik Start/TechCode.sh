@@ -240,7 +240,7 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
         fmt.Fprint(w, "Slow HTTP Go in GCF 2nd gen!")
 }
 EOF
-echo "module example.com/mod" > go 1.23
+echo "module example.com/mod" > go.mod
 deploy_with_retry slow-function \
   --gen2 \
   --runtime go123 \
