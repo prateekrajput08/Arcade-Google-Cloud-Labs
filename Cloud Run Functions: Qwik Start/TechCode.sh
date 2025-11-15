@@ -94,7 +94,7 @@ EOF
 cat > package.json <<EOF
 {
   "name": "nodejs-http-function",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "dependencies": {
     "@google-cloud/functions-framework": "^2.0.0"
