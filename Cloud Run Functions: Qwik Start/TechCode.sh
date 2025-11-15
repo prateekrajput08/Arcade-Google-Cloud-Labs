@@ -294,7 +294,7 @@ gcloud functions call slow-function --gen2 --region $REGION
 
 # Deploy as Cloud Run Service
 echo
-echo "${COLOR_BLUE}${BOLD}Deploying as Cloud Run Service...${COLOR_RESET}"
+echo "${COLOR_BLUE}${BOLD}Deploying as Cloud Run Service...${RESET_FORMAT}"
 
 export spcl_project=$(echo "$PROJECT_ID" | sed 's/-/--/g; s/$/__/g')
 export my_region=$(echo "$REGION" | sed 's/-/--/g; s/$/__/g')
@@ -313,8 +313,7 @@ gcloud functions call slow-function --gen2 --region $REGION
 SLOW_URL=$(gcloud functions describe slow-function --region $REGION --gen2 --format="value(serviceConfig.uri)")
 
 echo
-echo "${YELLOW_TEXT}${BOLD}Load Testing Slow Function...${COLOR_RESET}"
-hey -n 10 -c 10 $SLOW_URL
+echo "${YELLOW_TEXT}${BOLD}Load Testing Slow Function...${RESET_FORMAT}"
 
 # Progress Check
 function check_progress {
@@ -347,12 +346,12 @@ check_progress
 
 # Cleanup
 echo
-echo "${YELLOW_TEXT}${BOLD}Cleaning Up Previous Deployment...${COLOR_RESET}"
+echo "${YELLOW_TEXT}${BOLD}Cleaning Up Previous Deployment...${RESET_FORMAT}"
 gcloud run services delete slow-function --region $REGION --quiet
 
 # Deploy Concurrent Function
 echo
-echo "${YELLOW_TEXT}${BOLD}Deploying Concurrent Function...${COLOR_RESET}"
+echo "${YELLOW_TEXT}${BOLD}Deploying Concurrent Function...${RESET_FORMAT}"
 
 deploy_with_retry slow-concurrent-function \
   --gen2 \
