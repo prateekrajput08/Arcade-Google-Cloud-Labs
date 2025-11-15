@@ -13,6 +13,10 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+```bash
+gcloud services enable datamigration.googleapis.com --quiet
+gcloud services enable servicenetworking.googleapis.com --quiet
+```
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Migrating%20On-premises%20MySQL%20Using%20a%20Continuous%20Database%20Migration%20Service%20Job/TechCode.sh
@@ -20,6 +24,7 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 
+## ✨For Database Migration: Click [Here](https://console.cloud.google.com/dbmigration/migrations?)
 </div>
 
 ---
