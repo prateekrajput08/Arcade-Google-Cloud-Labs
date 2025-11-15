@@ -225,6 +225,7 @@ echo "${COLOR_BLUE}${BOLD}Deploying Colored Hello World Function...${COLOR_RESET
 echo
 
 mkdir ~/hello-world-colored && cd $_
+touch main.py
 touch requirements.txt
 
 cat > main.py <<EOF
@@ -244,7 +245,7 @@ deploy_with_retry hello-world-colored \
   --region $REGION \
   --trigger-http \
   --allow-unauthenticated \
-  --update-env-vars COLOR=orange \
+  --update-env-vars COLOR=$COLOR \
   --max-instances 1
 
 # Deploy Slow Go Function
@@ -254,6 +255,7 @@ echo
 
 mkdir ~/min-instances && cd $_
 touch main.go
+touch go.mod
 
 cat > main.go <<EOF
 package p
@@ -378,7 +380,6 @@ gcloud run deploy slow-concurrent-function \
 
 # Final Test
 SLOW_CONCURRENT_URL=$(gcloud functions describe slow-concurrent-function --region $REGION --gen2 --format="value(serviceConfig.uri)")
-hey -n 10 -c 10 $SLOW_CONCURRENT_URL
 
 
 # Final message
