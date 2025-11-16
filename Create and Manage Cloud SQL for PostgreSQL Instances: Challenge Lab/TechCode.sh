@@ -40,17 +40,17 @@ read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${RES
 read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")" REGION
 
 # Variables
-DATABASE_ENGINE="MYSQL"
-USERNAME="admin"
+DATABASE_ENGINE="POSTGRESQL"     # UPDATED FOR POSTGRES
+USERNAME="postgres"              # UPDATED FOR POSTGRES
 PASSWORD="changeme"
-PORT=3306
+PORT=5432                        # UPDATED FOR POSTGRES
 
 # Check if profile exists with color output
 EXISTS=$(gcloud database-migration connection-profiles describe "$CONNECTION_PROFILE_ID" --location="$REGION" --quiet --format="value(name)" 2>/dev/null)
 
 if [ "$EXISTS" == "" ]; then
-  # Create the connection profile with success message
-  gcloud database-migration connection-profiles create mysql "$CONNECTION_PROFILE_ID" \
+  # Create the connection profile for PostgreSQL
+  gcloud database-migration connection-profiles create postgresql "$CONNECTION_PROFILE_ID" \   # UPDATED FOR POSTGRES
     --display-name="$CONNECTION_PROFILE_NAME" \
     --region="$REGION" \
     --host="$HOST_OR_IP" \
@@ -58,12 +58,11 @@ if [ "$EXISTS" == "" ]; then
     --username="$USERNAME" \
     --password="$PASSWORD"
 
-  echo -e "${GREEN_TEXT}${BOLD_TEXT}Connection profile '${CONNECTION_PROFILE_NAME}' (ID: ${CONNECTION_PROFILE_ID}) created successfully in region '${REGION}' with database engine '${DATABASE_ENGINE}'.${NO_COLOR}"
+  echo -e "${GREEN_TEXT}${BOLD_TEXT}Connection profile '${CONNECTION_PROFILE_NAME}' (ID: ${CONNECTION_PROFILE_ID}) created successfully in region '${REGION}' with PostgreSQL engine.${NO_COLOR}"
 else
   # Profile already exists warning
   echo -e "${YELLOW_TEXT}${BOLD_TEXT}Connection profile with ID '${CONNECTION_PROFILE_ID}' already exists in region '${REGION}'. No new profile was created.${NO_COLOR}"
 fi
-
 
 # Final message
 echo
