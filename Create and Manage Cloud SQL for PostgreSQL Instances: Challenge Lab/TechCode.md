@@ -48,11 +48,11 @@ Run above command 2 times
 ```
 \c postgres;
 ```
-Run above command 2 times
+
 ```
 CREATE EXTENSION pglogical;
 ```
-
+Run above command 2 times
 ```
 \c orders;
 ```
