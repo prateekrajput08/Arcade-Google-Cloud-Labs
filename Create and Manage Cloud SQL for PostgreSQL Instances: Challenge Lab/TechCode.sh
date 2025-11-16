@@ -41,8 +41,8 @@ read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")
 
 # Variables
 DATABASE_ENGINE="POSTGRESQL"     # UPDATED FOR POSTGRES
-USERNAME="postgres"              # UPDATED FOR POSTGRES
-PASSWORD="changeme"
+USERNAME="migration_user"              # UPDATED FOR POSTGRES
+PASSWORD="DMS_1s_cool!"
 PORT=5432                        # UPDATED FOR POSTGRES
 
 # Check if profile exists with color output
