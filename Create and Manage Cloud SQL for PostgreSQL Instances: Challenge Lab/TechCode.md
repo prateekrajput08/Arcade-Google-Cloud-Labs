@@ -134,6 +134,8 @@ GRANT SELECT ON pglogical.subscription TO migration_admin;
 ```
 
 ## Create Connection Profile:
+
+## For Database Migration: Click [Here](https://console.cloud.google.com/dbmigration/migrations?)
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Create%20and%20Manage%20Cloud%20SQL%20for%20PostgreSQL%20Instances%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
