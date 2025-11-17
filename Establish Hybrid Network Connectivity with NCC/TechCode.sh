@@ -27,26 +27,30 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-if [[ -z "$region" ]]; then
-    echo "${RED_TEXT}Error: region variable is not set.${RESET_FORMAT}"
-    echo "${YELLOW_TEXT}Please run the following and then re-run script:${RESET_FORMAT}"
-    echo 'region="Region"'
-    exit 1
+
+if [[ -z "$zone" ]]; then
+    echo "${CYAN_TEXT}Enter your Zone (example: us-central1-f):${RESET_FORMAT}"
+    read zone
 fi
 
 if [[ -z "$zone" ]]; then
-    echo "${RED_TEXT}Error: zone variable is not set.${RESET_FORMAT}"
-    echo "${YELLOW_TEXT}Please run the following and then re-run script:${RESET_FORMAT}"
-    echo 'zone="Zone"'
+    echo "${RED_TEXT}Zone cannot be empty. Exiting.${RESET_FORMAT}"
     exit 1
 fi
 
-echo "${GREEN_TEXT}Using Region: ${region}${RESET_FORMAT}"
-echo "${GREEN_TEXT}Using Zone: ${zone}${RESET_FORMAT}"
+# Extract region automatically from zone
+region=$(echo "$zone" | awk -F'-' '{print $1"-"$2}')
 
-# Project Detection (This one is safe to keep)
+echo "${GREEN_TEXT}Using Zone: $zone${RESET_FORMAT}"
+echo "${GREEN_TEXT}Detected Region: $region${RESET_FORMAT}"
+
+gcloud config set compute/zone "$zone" >/dev/null
+gcloud config set compute/region "$region" >/dev/null
+
+# Project Detection
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 echo "${GREEN_TEXT}Using Project ID: $PROJECT_ID${RESET_FORMAT}"
+
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}Enabling Required API${RESET_FORMAT}"
@@ -135,7 +139,6 @@ gcloud compute routers add-bgp-peer "$routing_vpc_router_name" \
     --peer-asn="$on_prem_router_asn" \
     --region="$region"
 
-
 gcloud compute routers add-interface "$on_prem_router_name" \
     --interface-name="if-prem-to-hub" \
     --ip-address="$prem_router_ip" \
@@ -196,7 +199,6 @@ echo "To test connectivity:"
 echo "ssh vm3-onprem --zone $zone"
 echo "curl 10.0.1.2 -v"
 echo
-
 
 
 # Final message
