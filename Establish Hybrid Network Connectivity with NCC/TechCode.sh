@@ -47,12 +47,10 @@ echo "${GREEN_TEXT}Detected Region: $region${RESET_FORMAT}"
 gcloud config set compute/zone "$zone" >/dev/null
 gcloud config set compute/region "$region" >/dev/null
 
-# Project Detection
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 echo "${GREEN_TEXT}Using Project ID: $PROJECT_ID${RESET_FORMAT}"
 
-
-echo
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Tech & Code – Subscribe Here: https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}Enabling Required API${RESET_FORMAT}"
 gcloud services enable networkconnectivity.googleapis.com
 
@@ -78,8 +76,8 @@ gcloud compute routers create "$on_prem_router_name" \
     --network="$on_prem_network_name" \
     --asn="$on_prem_router_asn"
 
-
 echo
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Watch more cloud tutorials on Tech & Code: https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}Creating VPN Gateways${RESET_FORMAT}"
 
 routing_vpn_gateway_name="routing-vpc-vpn-gateway"
@@ -173,8 +171,8 @@ gcloud compute routers update-bgp-peer "$on_prem_router_name" \
     --advertised-route-priority="111" \
     --region="$region"
 
-
 echo
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Support the channel: Tech & Code – https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}Creating NCC Hub and Spokes${RESET_FORMAT}"
 
 hub_name="mesh-hub"
@@ -195,7 +193,7 @@ gcloud network-connectivity spokes linked-vpn-tunnels create "$vpn_spoke_name" \
 
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}Setup Complete${RESET_FORMAT}"
-echo "To test connectivity:"
+echo "Test connectivity:"
 echo "ssh vm3-onprem --zone $zone"
 echo "curl 10.0.1.2 -v"
 echo
