@@ -27,41 +27,26 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Color Variables
-
-# ---------- AUTO-FETCH PROJECT ----------
-PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-
-if [[ -z "$PROJECT_ID" || "$PROJECT_ID" == "(unset)" ]]; then
-    echo "${YELLOW_TEXT}Project ID not found.${RESET_FORMAT}"
-    read -p "Enter your Project ID: " PROJECT_ID
-    gcloud config set project "$PROJECT_ID"
+if [[ -z "$region" ]]; then
+    echo "${RED_TEXT}Error: region variable is not set.${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}Please run the following and then re-run script:${RESET_FORMAT}"
+    echo 'region="Region"'
+    exit 1
 fi
 
-echo "${GREEN_TEXT}Using Project ID: ${PROJECT_ID}${RESET_FORMAT}"
-
-# ---------- AUTO-FETCH REGION ----------
-region=$(gcloud config get-value compute/region 2>/dev/null)
-
-if [[ -z "$region" || "$region" == "(unset)" ]]; then
-    echo "${YELLOW_TEXT}Region not found.${RESET_FORMAT}"
-    read -p "Enter Region: " region
-    gcloud config set compute/region "$region"
+if [[ -z "$zone" ]]; then
+    echo "${RED_TEXT}Error: zone variable is not set.${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}Please run the following and then re-run script:${RESET_FORMAT}"
+    echo 'zone="Zone"'
+    exit 1
 fi
 
 echo "${GREEN_TEXT}Using Region: ${region}${RESET_FORMAT}"
-
-# ---------- AUTO-FETCH ZONE ----------
-zone=$(gcloud config get-value compute/zone 2>/dev/null)
-
-if [[ -z "$zone" || "$zone" == "(unset)" ]]; then
-    echo "${YELLOW_TEXT}Zone not found.${RESET_FORMAT}"
-    read -p "Enter Zone: " zone
-    gcloud config set compute/zone "$zone"
-fi
-
 echo "${GREEN_TEXT}Using Zone: ${zone}${RESET_FORMAT}"
 
+# Project Detection (This one is safe to keep)
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+echo "${GREEN_TEXT}Using Project ID: $PROJECT_ID${RESET_FORMAT}"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}Enabling Required API${RESET_FORMAT}"
@@ -150,6 +135,7 @@ gcloud compute routers add-bgp-peer "$routing_vpc_router_name" \
     --peer-asn="$on_prem_router_asn" \
     --region="$region"
 
+
 gcloud compute routers add-interface "$on_prem_router_name" \
     --interface-name="if-prem-to-hub" \
     --ip-address="$prem_router_ip" \
@@ -210,6 +196,7 @@ echo "To test connectivity:"
 echo "ssh vm3-onprem --zone $zone"
 echo "curl 10.0.1.2 -v"
 echo
+
 
 
 # Final message
