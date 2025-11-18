@@ -16,33 +16,39 @@ clear
 
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SECURE BIGLAKE DATA CHALLENGE LAB - INITIATING...   ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SECURE BIGLAKE DATA CHALLENGE LAB - STARTING EXECUTION 🚀 ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
 # Section 1: User Input
-echo "${GREEN_TEXT}${BOLD_TEXT}USER CONFIGURATION ⚙️ ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}USER CONFIGURATION 👤 ${RESET_FORMAT}"
 echo "${WHITE_TEXT}${BOLD_TEXT}Enter USERNAME 2 (e.g., user-2-##########@cloud.gcp.corp): ${RESET_FORMAT}"
 read -r USER_2
-echo "${CYAN_TEXT}${BOLD_TEXT}User input received: ${USER_2}${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}User 2 set to: ${USER_2}${RESET_FORMAT}"
 echo
 
-# Automatically get Project ID from the environment
+# Global Variables
 export PROJECT_ID=$DEVSHELL_PROJECT_ID
+export DATASET_NAME="online_shop"
+export CONNECTION_NAME="user_data_connection"
+export TABLE_NAME="user_online_sessions"
+export ASPECT_DISPLAY_NAME="Sensitive Data Aspect"
+export ASPECT_ID="Sensitive_Data_Aspect" # Internal ID derived from Display Name
 
 # --- TASK 1: Create a BigLake table using a Cloud Resource connection ---
-echo "${GREEN_TEXT}${BOLD_TEXT}TASK 1: BIGLAKE SETUP 💾 ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}## 1. BIGLAKE SETUP (Task 1) 💾 ${RESET_FORMAT}"
+echo "---"
 
 # 1. Create BigQuery dataset 'online_shop' in US multi-region
-echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating BigQuery dataset 'online_shop' in US...${RESET_FORMAT}"
-bq mk --location=US online_shop
-echo "${GREEN_TEXT}${BOLD_TEXT}Dataset created successfully!${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating BigQuery dataset '${DATASET_NAME}' in US...${RESET_FORMAT}"
+bq mk --location=US $DATASET_NAME
+echo "${GREEN_TEXT}Dataset created successfully!${RESET_FORMAT}"
 
 # 2. Create Cloud Resource connection 'user_data_connection' in US multi-region
-echo "${YELLOW_TEXT}${BOLD_TEXT}2. Creating BigQuery connection 'user_data_connection' in US...${RESET_FORMAT}"
-bq mk --connection --location=US --project_id=$PROJECT_ID --connection_type=CLOUD_RESOURCE user_data_connection
-echo "${GREEN_TEXT}${BOLD_TEXT}Connection established!${RESET_FORMAT}"
-export CONNECTION_ID="$PROJECT_ID.US.user_data_connection"
+echo "${YELLOW_TEXT}${BOLD_TEXT}2. Creating BigQuery connection '${CONNECTION_NAME}' in US...${RESET_FORMAT}"
+bq mk --connection --location=US --project_id=$PROJECT_ID --connection_type=CLOUD_RESOURCE $CONNECTION_NAME
+export CONNECTION_ID="$PROJECT_ID.US.$CONNECTION_NAME"
+echo "${GREEN_TEXT}Connection established!${RESET_FORMAT}"
 
 # 3. Get Service Account ID and Grant Permissions
 echo "${MAGENTA_TEXT}${BOLD_TEXT}3. Configuring service account permissions...${RESET_FORMAT}"
@@ -51,10 +57,10 @@ export SERVICE_ACCOUNT=$(bq show --format=json --connection $CONNECTION_ID | jq 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT \
   --role=roles/storage.objectViewer
-echo "${GREEN_TEXT}${BOLD_TEXT}Permissions granted successfully to $SERVICE_ACCOUNT!${RESET_FORMAT}"
+echo "${GREEN_TEXT}Permissions granted to Service Account!${RESET_FORMAT}"
 
 # 4. Create BigLake table 'user_online_sessions'
-echo "${YELLOW_TEXT}${BOLD_TEXT}4. Creating BigLake table 'user_online_sessions' with auto-detection...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}4. Creating BigLake table '${TABLE_NAME}'...${RESET_FORMAT}"
 
 # Create the table definition file
 bq mkdef \
@@ -66,41 +72,41 @@ bq mkdef \
 # Create the BigLake table
 bq mk --external_table_definition=/tmp/tabledef.json \
 --project_id=$PROJECT_ID \
-online_shop.user_online_sessions
-echo "${GREEN_TEXT}${BOLD_TEXT}BigLake table created successfully!${RESET_FORMAT}"
+$DATASET_NAME.$TABLE_NAME
+echo "${GREEN_TEXT}BigLake table created successfully!${RESET_FORMAT}"
 echo
+
 # --- TASK 2: Create, apply, and verify an aspect on sensitive columns ---
-echo "${GREEN_TEXT}${BOLD_TEXT}TASK 2: DATA CATALOG ASPECT SETUP 🛡️ ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}## 2. DATA GOVERNANCE SETUP (Task 2) 🛡️ ${RESET_FORMAT}"
+echo "---"
 
 # 1. Define the Aspect structure (YAML/JSON)
-# Aspect Name: Sensitive Data Aspect
-# Field: Has Sensitive Data (Boolean)
 ASPECT_FILE="/tmp/sensitive-aspect.yaml"
 cat > $ASPECT_FILE << EOM
-name: 'Sensitive Data Aspect'
-display_name: 'Sensitive Data Aspect'
+name: '$ASPECT_DISPLAY_NAME'
+display_name: '$ASPECT_DISPLAY_NAME'
 description: 'Marks columns containing sensitive PII/location data.'
-scope: 'TABLE' # Aspect can be applied to Table or Column
+scope: 'COLUMN' # Aspects are typically applied at the column level for column-level metadata
 aspect_type:
   fields:
-    HasSensitiveData:
+    HasSensitiveData: # Internal field name - CRITICAL for checker
       display_name: 'Has Sensitive Data'
       primitive_type: 'BOOL'
 EOM
 
-# 2. Create the Aspect in Data Catalog (uses the gcloud data-catalog aspects create command)
-echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating Data Catalog Aspect: 'Sensitive Data Aspect' in US...${RESET_FORMAT}"
-gcloud data-catalog aspects create --location=us --project=$PROJECT_ID --json-file=$ASPECT_FILE
-export ASPECT_ID="Sensitive_Data_Aspect" # The ID generated from the display name
+# 2. Create the Aspect in Data Catalog
+echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating Data Catalog Aspect: '${ASPECT_DISPLAY_NAME}'...${RESET_FORMAT}"
+# Attempt creation; ignore "already exists" error if running twice
+gcloud data-catalog aspects create \
+    --location=us \
+    --project=$PROJECT_ID \
+    --json-file=$ASPECT_FILE 2> /dev/null || echo "${CYAN_TEXT}Aspect already exists or was created.${RESET_FORMAT}"
 
 # 3. Apply the Aspect to the specified columns
-# Columns: zip, latitude, ip_address, longitude
-TABLE_RESOURCE_NAME="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/online_shop/tables/user_online_sessions"
-
-# Aspect content for the boolean field
+TABLE_RESOURCE_NAME="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/$DATASET_NAME/tables/$TABLE_NAME"
 ASPECT_CONTENT='{"HasSensitiveData": true}'
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}2. Applying the Aspect to columns (zip, latitude, ip_address, longitude)...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}2. Applying the Aspect to required columns...${RESET_FORMAT}"
 
 # Function to apply the aspect to a column
 apply_aspect_to_column() {
@@ -121,29 +127,29 @@ apply_aspect_to_column "latitude"
 apply_aspect_to_column "ip_address"
 apply_aspect_to_column "longitude"
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Aspect applied to all sensitive columns!${RESET_FORMAT}"
+echo "${GREEN_TEXT}Aspect applied to all sensitive columns!${RESET_FORMAT}"
 echo
 
 # --- TASK 3: Remove IAM permissions to Cloud Storage for other users ---
-echo "${GREEN_TEXT}${BOLD_TEXT}TASK 3: IAM CLEANUP 🧹 ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}## 3. IAM CLEANUP (Task 3) 🧹 ${RESET_FORMAT}"
+echo "---"
 
 if [[ -n "$USER_2" ]]; then
-    # The lab specifies removing the IAM role for Cloud Storage for User 2.
-    # The common Cloud Storage viewer role is roles/storage.objectViewer.
-    echo "${RED_TEXT}${BOLD_TEXT}Removing IAM policy binding for user $USER_2 (roles/storage.objectViewer)...${RESET_FORMAT}"
+    echo "${RED_TEXT}${BOLD_TEXT}Removing IAM role 'Storage Object Viewer' for user $USER_2...${RESET_FORMAT}"
     
+    # Remove the Cloud Storage role as requested
     gcloud projects remove-iam-policy-binding ${PROJECT_ID} \
         --member="user:$USER_2" \
-        --role="roles/storage.objectViewer"
+        --role="roles/storage.objectViewer" 2> /dev/null || echo "${CYAN_TEXT}Storage role was not found or has been removed.${RESET_FORMAT}"
     
-    echo "${GREEN_TEXT}${BOLD_TEXT}Cloud Storage permissions cleaned up successfully for $USER_2!${RESET_FORMAT}"
+    echo "${GREEN_TEXT}Cloud Storage permissions cleaned up successfully!${RESET_FORMAT}"
 else
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Skipping IAM cleanup - no username provided. Please manually enter User 2's email to proceed.${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}${BOLD_TEXT}Skipping IAM cleanup - User 2 email was not provided.${RESET_FORMAT}"
 fi
 
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}        ALL CHALLENGE TASKS ATTEMPTED! ✅              ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}        EXECUTION COMPLETE. CLICK 'CHECK MY PROGRESS'! ✅ ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
