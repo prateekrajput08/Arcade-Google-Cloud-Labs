@@ -97,14 +97,120 @@ echo "${GREEN_TEXT}${BOLD_TEXT}Table created successfully!${RESET_FORMAT}"
 echo
 
 # Section 6: Schema Management
-# The entire original Task 2 implementation, which was located here, is now REMOVED.
-echo "${GREEN_TEXT}${BOLD_TEXT}SCHEMA MANAGEMENT (NOTE: Task 2 implementation steps removed as requested)${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Skipping Aspect creation and application.${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}SCHEMA MANAGEMENT ${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Generating schema with policy tags${RESET_FORMAT}"
+cat > schema.json << EOM
+[
+  {
+    "mode": "NULLABLE",
+    "name": "ad_event_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "user_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "uri",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "traffic_source",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "zip",
+    "policyTags": {
+      "names": [
+        "$POLICY_TAG"
+      ]
+    },
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "event_type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "state",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "country",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "city",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "latitude",
+    "policyTags": {
+      "names": [
+        "$POLICY_TAG"
+      ]
+    },
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_at",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "ip_address",
+    "policyTags": {
+      "names": [
+        "$POLICY_TAG"
+      ]
+    },
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "session_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "longitude",
+    "policyTags": {
+      "names": [
+        "$POLICY_TAG"
+      ]
+    },
+    "type": "FLOAT"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "id",
+    "type": "INTEGER"
+  }
+]
+EOM
+
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Updating table schema${RESET_FORMAT}"
+bq update --schema schema.json $DEVSHELL_PROJECT_ID:online_shop.user_online_sessions
+echo "${GREEN_TEXT}${BOLD_TEXT}Schema updated successfully!${RESET_FORMAT}"
 echo
 
 # Section 7: Data Query
-echo "${GREEN_TEXT}${BOLD_TEXT}DATA QUERY (Skipping query that uses policy-tagged columns)${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}Query execution skipped.${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}DATA QUERY${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Running secure query (excluding sensitive columns)...${RESET_FORMAT}"
+bq query --use_legacy_sql=false --format=csv \
+"SELECT * EXCEPT(zip, latitude, ip_address, longitude) 
+FROM \`${DEVSHELL_PROJECT_ID}.online_shop.user_online_sessions\`"
+echo "${GREEN_TEXT}${BOLD_TEXT}Query executed successfully!${RESET_FORMAT}"
 echo
 
 # Section 8: Cleanup
@@ -122,7 +228,7 @@ fi
 # Final message
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}              LAB EXECUTION COMPLETE (Task 2 excluded) ${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
 echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
