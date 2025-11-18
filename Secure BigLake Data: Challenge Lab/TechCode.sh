@@ -1,236 +1,149 @@
 #!/bin/bash
 
+# --- Color Definitions ---
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
 YELLOW_TEXT=$'\033[0;93m'
-BLUE_TEXT=$'\033[0;94m'
-MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
-WHITE_TEXT=$'\033[0;97m'
-TEAL=$'\033[38;5;50m'
-
+MAGENTA_TEXT=$'\033[0;95m'
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
-BLINK_TEXT=$'\033[5m'
 NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
-REVERSE_TEXT=$'\033[7m'
 
 clear
 
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SECURE BIGLAKE DATA CHALLENGE LAB - INITIATING...   ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
 # Section 1: User Input
-echo "${GREEN_TEXT}${BOLD_TEXT}USER CONFIGURATION {RESET_FORMAT}"
-echo "${WHITE_TEXT}${BOLD_TEXT}Enter USERNAME 2 (for IAM cleanup): ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}USER CONFIGURATION ⚙️ ${RESET_FORMAT}"
+echo "${WHITE_TEXT}${BOLD_TEXT}Enter USERNAME 2 (e.g., user-2-##########@cloud.gcp.corp): ${RESET_FORMAT}"
 read -r USER_2
-echo "${CYAN_TEXT}${BOLD_TEXT}User input received${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}User input received: ${USER_2}${RESET_FORMAT}"
 echo
 
-# Section 2: Taxonomy Setup
-echo "${GREEN_TEXT}${BOLD_TEXT}TAXONOMY SETUP ${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Fetching taxonomy details...${RESET_FORMAT}"
-export TAXONOMY_NAME=$(gcloud data-catalog taxonomies list \
-  --location=us \
-  --project=$DEVSHELL_PROJECT_ID \
-  --format="value(displayName)" \
-  --limit=1)
+# Automatically get Project ID from the environment
+export PROJECT_ID=$DEVSHELL_PROJECT_ID
 
-export TAXONOMY_ID=$(gcloud data-catalog taxonomies list \
-  --location=us \
-  --format="value(name)" \
-  --filter="displayName=$TAXONOMY_NAME" | awk -F'/' '{print $6}')
+# --- TASK 1: Create a BigLake table using a Cloud Resource connection ---
+echo "${GREEN_TEXT}${BOLD_TEXT}TASK 1: BIGLAKE SETUP 💾 ${RESET_FORMAT}"
 
-export POLICY_TAG=$(gcloud data-catalog taxonomies policy-tags list \
-  --location=us \
-  --taxonomy=$TAXONOMY_ID \
-  --format="value(name)" \
-  --limit=1)
-
-echo "${CYAN_TEXT}${BOLD_TEXT}Taxonomy Name: ${WHITE_TEXT}$TAXONOMY_NAME${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}Policy Tag: ${WHITE_TEXT}$POLICY_TAG${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Taxonomy details retrieved successfully!${RESET_FORMAT}"
-echo
-
-# Section 3: BigQuery Setup
-echo "${GREEN_TEXT}${BOLD_TEXT} BIGQUERY SETUP ${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigQuery dataset 'online_shop'${RESET_FORMAT}"
-bq mk online_shop
+# 1. Create BigQuery dataset 'online_shop' in US multi-region
+echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating BigQuery dataset 'online_shop' in US...${RESET_FORMAT}"
+bq mk --location=US online_shop
 echo "${GREEN_TEXT}${BOLD_TEXT}Dataset created successfully!${RESET_FORMAT}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigQuery connection${RESET_FORMAT}"
-bq mk --connection --location=US --project_id=$DEVSHELL_PROJECT_ID --connection_type=CLOUD_RESOURCE user_data_connection
+# 2. Create Cloud Resource connection 'user_data_connection' in US multi-region
+echo "${YELLOW_TEXT}${BOLD_TEXT}2. Creating BigQuery connection 'user_data_connection' in US...${RESET_FORMAT}"
+bq mk --connection --location=US --project_id=$PROJECT_ID --connection_type=CLOUD_RESOURCE user_data_connection
 echo "${GREEN_TEXT}${BOLD_TEXT}Connection established!${RESET_FORMAT}"
-echo
+export CONNECTION_ID="$PROJECT_ID.US.user_data_connection"
 
-# Section 4: Permissions
-echo "${GREEN_TEXT}${BOLD_TEXT}PERMISSIONS SETUP ${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Configuring service account permissions${RESET_FORMAT}"
-export SERVICE_ACCOUNT=$(bq show --format=json --connection $DEVSHELL_PROJECT_ID.US.user_data_connection | jq -r '.cloudResource.serviceAccountId')
+# 3. Get Service Account ID and Grant Permissions
+echo "${MAGENTA_TEXT}${BOLD_TEXT}3. Configuring service account permissions...${RESET_FORMAT}"
+export SERVICE_ACCOUNT=$(bq show --format=json --connection $CONNECTION_ID | jq -r '.cloudResource.serviceAccountId')
 
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT \
   --role=roles/storage.objectViewer
-echo "${GREEN_TEXT}${BOLD_TEXT}Permissions granted successfully!${RESET_FORMAT}"
-echo
+echo "${GREEN_TEXT}${BOLD_TEXT}Permissions granted successfully to $SERVICE_ACCOUNT!${RESET_FORMAT}"
 
-# Section 5: Table Configuration
-echo "${GREEN_TEXT}${BOLD_TEXT}TABLE CONFIGURATION${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating table definition from Cloud Storage${RESET_FORMAT}"
+# 4. Create BigLake table 'user_online_sessions'
+echo "${YELLOW_TEXT}${BOLD_TEXT}4. Creating BigLake table 'user_online_sessions' with auto-detection...${RESET_FORMAT}"
+
+# Create the table definition file
 bq mkdef \
 --autodetect \
---connection_id=$DEVSHELL_PROJECT_ID.US.user_data_connection \
+--connection_id=$CONNECTION_ID \
 --source_format=CSV \
-"gs://$DEVSHELL_PROJECT_ID-bucket/user-online-sessions.csv" > /tmp/tabledef.json
-echo "${CYAN_TEXT}${BOLD_TEXT}Definition saved to /tmp/tabledef.json${RESET_FORMAT}"
+"gs://$PROJECT_ID-bucket/user-online-sessions.csv" > /tmp/tabledef.json
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigLake table 'user_online_sessions'${RESET_FORMAT}"
+# Create the BigLake table
 bq mk --external_table_definition=/tmp/tabledef.json \
---project_id=$DEVSHELL_PROJECT_ID \
+--project_id=$PROJECT_ID \
 online_shop.user_online_sessions
-echo "${GREEN_TEXT}${BOLD_TEXT}Table created successfully!${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}BigLake table created successfully!${RESET_FORMAT}"
 echo
+# --- TASK 2: Create, apply, and verify an aspect on sensitive columns ---
+echo "${GREEN_TEXT}${BOLD_TEXT}TASK 2: DATA CATALOG ASPECT SETUP 🛡️ ${RESET_FORMAT}"
 
-# Section 6: Schema Management
-echo "${GREEN_TEXT}${BOLD_TEXT}SCHEMA MANAGEMENT ${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Generating schema with policy tags${RESET_FORMAT}"
-cat > schema.json << EOM
-[
-  {
-    "mode": "NULLABLE",
-    "name": "ad_event_id",
-    "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "user_id",
-    "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "uri",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "traffic_source",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "zip",
-    "policyTags": {
-      "names": [
-        "$POLICY_TAG"
-      ]
-    },
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "event_type",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "state",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "country",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "city",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "latitude",
-    "policyTags": {
-      "names": [
-        "$POLICY_TAG"
-      ]
-    },
-    "type": "FLOAT"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "created_at",
-    "type": "TIMESTAMP"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "ip_address",
-    "policyTags": {
-      "names": [
-        "$POLICY_TAG"
-      ]
-    },
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "session_id",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "longitude",
-    "policyTags": {
-      "names": [
-        "$POLICY_TAG"
-      ]
-    },
-    "type": "FLOAT"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "id",
-    "type": "INTEGER"
-  }
-]
+# 1. Define the Aspect structure (YAML/JSON)
+# Aspect Name: Sensitive Data Aspect
+# Field: Has Sensitive Data (Boolean)
+ASPECT_FILE="/tmp/sensitive-aspect.yaml"
+cat > $ASPECT_FILE << EOM
+name: 'Sensitive Data Aspect'
+display_name: 'Sensitive Data Aspect'
+description: 'Marks columns containing sensitive PII/location data.'
+scope: 'TABLE' # Aspect can be applied to Table or Column
+aspect_type:
+  fields:
+    HasSensitiveData:
+      display_name: 'Has Sensitive Data'
+      primitive_type: 'BOOL'
 EOM
 
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Updating table schema${RESET_FORMAT}"
-bq update --schema schema.json $DEVSHELL_PROJECT_ID:online_shop.user_online_sessions
-echo "${GREEN_TEXT}${BOLD_TEXT}Schema updated successfully!${RESET_FORMAT}"
+# 2. Create the Aspect in Data Catalog (uses the gcloud data-catalog aspects create command)
+echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating Data Catalog Aspect: 'Sensitive Data Aspect' in US...${RESET_FORMAT}"
+gcloud data-catalog aspects create --location=us --project=$PROJECT_ID --json-file=$ASPECT_FILE
+export ASPECT_ID="Sensitive_Data_Aspect" # The ID generated from the display name
+
+# 3. Apply the Aspect to the specified columns
+# Columns: zip, latitude, ip_address, longitude
+TABLE_RESOURCE_NAME="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/online_shop/tables/user_online_sessions"
+
+# Aspect content for the boolean field
+ASPECT_CONTENT='{"HasSensitiveData": true}'
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}2. Applying the Aspect to columns (zip, latitude, ip_address, longitude)...${RESET_FORMAT}"
+
+# Function to apply the aspect to a column
+apply_aspect_to_column() {
+  local COLUMN=$1
+  echo "${MAGENTA_TEXT}   - Applying to column: $COLUMN...${RESET_FORMAT}"
+  gcloud data-catalog entries aspect apply \
+    --location=us \
+    --project=$PROJECT_ID \
+    --resource=$TABLE_RESOURCE_NAME \
+    --column=$COLUMN \
+    --aspect=$ASPECT_ID \
+    --content="$ASPECT_CONTENT"
+}
+
+# Apply to each sensitive column
+apply_aspect_to_column "zip"
+apply_aspect_to_column "latitude"
+apply_aspect_to_column "ip_address"
+apply_aspect_to_column "longitude"
+
+echo "${GREEN_TEXT}${BOLD_TEXT}Aspect applied to all sensitive columns!${RESET_FORMAT}"
 echo
 
-# Section 7: Data Query
-echo "${GREEN_TEXT}${BOLD_TEXT}DATA QUERY${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}Running secure query (excluding sensitive columns)...${RESET_FORMAT}"
-bq query --use_legacy_sql=false --format=csv \
-"SELECT * EXCEPT(zip, latitude, ip_address, longitude) 
-FROM \`${DEVSHELL_PROJECT_ID}.online_shop.user_online_sessions\`"
-echo "${GREEN_TEXT}${BOLD_TEXT}Query executed successfully!${RESET_FORMAT}"
-echo
+# --- TASK 3: Remove IAM permissions to Cloud Storage for other users ---
+echo "${GREEN_TEXT}${BOLD_TEXT}TASK 3: IAM CLEANUP 🧹 ${RESET_FORMAT}"
 
-# Section 8: Cleanup
-echo "${GREEN_TEXT}${BOLD_TEXT}CLEANUP${RESET_FORMAT}"
 if [[ -n "$USER_2" ]]; then
-    echo "${RED_TEXT}${BOLD_TEXT}Removing IAM policy binding for user $USER_2${RESET_FORMAT}"
-    gcloud projects remove-iam-policy-binding ${DEVSHELL_PROJECT_ID} \
+    # The lab specifies removing the IAM role for Cloud Storage for User 2.
+    # The common Cloud Storage viewer role is roles/storage.objectViewer.
+    echo "${RED_TEXT}${BOLD_TEXT}Removing IAM policy binding for user $USER_2 (roles/storage.objectViewer)...${RESET_FORMAT}"
+    
+    gcloud projects remove-iam-policy-binding ${PROJECT_ID} \
         --member="user:$USER_2" \
         --role="roles/storage.objectViewer"
-    echo "${GREEN_TEXT}${BOLD_TEXT}Permissions cleaned up successfully!${RESET_FORMAT}"
+    
+    echo "${GREEN_TEXT}${BOLD_TEXT}Cloud Storage permissions cleaned up successfully for $USER_2!${RESET_FORMAT}"
 else
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Skipping IAM cleanup - no username provided${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}${BOLD_TEXT}Skipping IAM cleanup - no username provided. Please manually enter User 2's email to proceed.${RESET_FORMAT}"
 fi
 
 # Final message
 echo
-echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo
-echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}        ALL CHALLENGE TASKS ATTEMPTED! ✅              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
