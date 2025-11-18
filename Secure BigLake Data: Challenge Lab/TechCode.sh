@@ -1,119 +1,130 @@
 #!/bin/bash
 
-# --- Color Definitions ---
+BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
 YELLOW_TEXT=$'\033[0;93m'
-CYAN_TEXT=$'\033[0;96m'
+BLUE_TEXT=$'\033[0;94m'
 MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL=$'\033[38;5;50m'
+
 BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
+NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
 
 clear
 
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SECURE BIGLAKE DATA CHALLENGE LAB - FINAL EXECUTION 🛠️     ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Global Variables (Updated for compatibility)
-export PROJECT_ID=$DEVSHELL_PROJECT_ID
-export USER_2="student-04-7ff6976ec042@qwiklabs.net" # User input already provided
-export DATASET_NAME="online_shop"
-export TABLE_NAME="user_online_sessions"
-export TAG_TEMPLATE_DISPLAY_NAME="Sensitive Data Aspect"
-# The Tag Template ID must be lower-case snake_case without spaces
-export TAG_TEMPLATE_ID="sensitive_data_aspect"
-
-# --- TASK 1: BigLake Setup (Skipping setup commands as they already exist) ---
-echo "${GREEN_TEXT}${BOLD_TEXT}## 1. BIGLAKE PREREQUISITES CONFIRMED (Task 1) ✅ ${RESET_FORMAT}"
-echo "${CYAN_TEXT}Dataset, Connection, and Table already exist. Proceeding to Task 2.${RESET_FORMAT}"
+# Section 1: User Input
+echo "${GREEN_TEXT}${BOLD_TEXT}USER CONFIGURATION {RESET_FORMAT}"
+echo "${WHITE_TEXT}${BOLD_TEXT}Enter USERNAME 2 (for IAM cleanup): ${RESET_FORMAT}"
+read -r USER_2
+echo "${CYAN_TEXT}${BOLD_TEXT}User input received${RESET_FORMAT}"
 echo
 
-# --- TASK 2: Create, apply, and verify an aspect/Tag Template on sensitive columns ---
-echo "${GREEN_TEXT}${BOLD_TEXT}## 2. DATA GOVERNANCE SETUP (Task 2) - Using Tag Templates 🛡️ ${RESET_FORMAT}"
-echo "---"
+# Section 2: Taxonomy Setup
+echo "${GREEN_TEXT}${BOLD_TEXT}TAXONOMY SETUP ${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Fetching taxonomy details...${RESET_FORMAT}"
+export TAXONOMY_NAME=$(gcloud data-catalog taxonomies list \
+  --location=us \
+  --project=$DEVSHELL_PROJECT_ID \
+  --format="value(displayName)" \
+  --limit=1)
 
-# 1. Define the Tag Template (equivalent to the Aspect definition)
-TAG_TEMPLATE_FILE="/tmp/tag_template.yaml"
-cat > $TAG_TEMPLATE_FILE << EOM
-display_name: "$TAG_TEMPLATE_DISPLAY_NAME"
-fields:
-  has_sensitive_data:
-    display_name: "Has Sensitive Data"
-    type:
-      primitive_type: BOOL
-EOM
+export TAXONOMY_ID=$(gcloud data-catalog taxonomies list \
+  --location=us \
+  --format="value(name)" \
+  --filter="displayName=$TAXONOMY_NAME" | awk -F'/' '{print $6}')
 
-# 2. Create the Tag Template in Data Catalog
-echo "${YELLOW_TEXT}${BOLD_TEXT}1. Creating Data Catalog Tag Template: '${TAG_TEMPLATE_DISPLAY_NAME}'...${RESET_FORMAT}"
-gcloud data-catalog tag-templates create $TAG_TEMPLATE_ID \
-    --location=us \
-    --project=$PROJECT_ID \
-    --file=$TAG_TEMPLATE_FILE 2> /dev/null || echo "${CYAN_TEXT}Tag Template already exists or was created.${RESET_FORMAT}"
+export POLICY_TAG=$(gcloud data-catalog taxonomies policy-tags list \
+  --location=us \
+  --taxonomy=$TAXONOMY_ID \
+  --format="value(name)" \
+  --limit=1)
 
-# Full Resource Path for the Tag Template
-export TAG_TEMPLATE_PATH="projects/$PROJECT_ID/locations/us/tagTemplates/$TAG_TEMPLATE_ID"
-
-# 3. Apply the Tag (equivalent to applying the Aspect) to the specified columns
-TABLE_RESOURCE_NAME="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/$DATASET_NAME/tables/$TABLE_NAME"
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}2. Applying the Tag (Aspect) to required columns...${RESET_FORMAT}"
-
-# Function to apply the Tag to a column
-apply_tag_to_column() {
-  local COLUMN=$1
-  echo "${MAGENTA_TEXT}   - Applying Tag to column: $COLUMN...${RESET_FORMAT}"
-  
-  # Create a JSON file for the Tag content
-  TAG_JSON="/tmp/tag_${COLUMN}.json"
-  cat > $TAG_JSON << EOM
-  {
-    "template": "$TAG_TEMPLATE_PATH",
-    "column": "$COLUMN",
-    "fields": {
-      "has_sensitive_data": {
-        "boolValue": true
-      }
-    }
-  }
-EOM
-  
-  # Apply the Tag
-  gcloud data-catalog tags create \
-    --location=us \
-    --project=$PROJECT_ID \
-    --entry=$TABLE_RESOURCE_NAME \
-    --file=$TAG_JSON
-}
-
-# Apply to each sensitive column
-apply_tag_to_column "zip"
-apply_tag_to_column "latitude"
-apply_tag_to_column "ip_address"
-apply_tag_to_column "longitude" 2> /dev/null || echo "${CYAN_TEXT}Tags already applied to one or more columns.${RESET_FORMAT}"
-
-
-echo "${GREEN_TEXT}Tag Template (Aspect) applied to all sensitive columns!${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}Taxonomy Name: ${WHITE_TEXT}$TAXONOMY_NAME${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}Policy Tag: ${WHITE_TEXT}$POLICY_TAG${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Taxonomy details retrieved successfully!${RESET_FORMAT}"
 echo
 
-# --- TASK 3: Remove IAM permissions to Cloud Storage for other users ---
-echo "${GREEN_TEXT}${BOLD_TEXT}## 3. IAM CLEANUP (Task 3) 🧹 ${RESET_FORMAT}"
-echo "---"
+# Section 3: BigQuery Setup
+echo "${GREEN_TEXT}${BOLD_TEXT} BIGQUERY SETUP ${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigQuery dataset 'online_shop'${RESET_FORMAT}"
+bq mk online_shop
+echo "${GREEN_TEXT}${BOLD_TEXT}Dataset created successfully!${RESET_FORMAT}"
 
-echo "${RED_TEXT}${BOLD_TEXT}Removing IAM role 'Storage Object Viewer' for user ${USER_2}...${RESET_FORMAT}"
-    
-# Remove the Cloud Storage role as requested
-gcloud projects remove-iam-policy-binding ${PROJECT_ID} \
-    --member="user:$USER_2" \
-    --role="roles/storage.objectViewer" 2> /dev/null || echo "${CYAN_TEXT}Policy binding not found (which means the role is removed/clean).${RESET_FORMAT}"
-    
-echo "${GREEN_TEXT}Cloud Storage permissions cleanup attempt complete!${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigQuery connection${RESET_FORMAT}"
+bq mk --connection --location=US --project_id=$DEVSHELL_PROJECT_ID --connection_type=CLOUD_RESOURCE user_data_connection
+echo "${GREEN_TEXT}${BOLD_TEXT}Connection established!${RESET_FORMAT}"
+echo
+
+# Section 4: Permissions
+echo "${GREEN_TEXT}${BOLD_TEXT}PERMISSIONS SETUP ${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Configuring service account permissions${RESET_FORMAT}"
+export SERVICE_ACCOUNT=$(bq show --format=json --connection $DEVSHELL_PROJECT_ID.US.user_data_connection | jq -r '.cloudResource.serviceAccountId')
+
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT \
+  --role=roles/storage.objectViewer
+echo "${GREEN_TEXT}${BOLD_TEXT}Permissions granted successfully!${RESET_FORMAT}"
+echo
+
+# Section 5: Table Configuration
+echo "${GREEN_TEXT}${BOLD_TEXT}TABLE CONFIGURATION${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating table definition from Cloud Storage${RESET_FORMAT}"
+bq mkdef \
+--autodetect \
+--connection_id=$DEVSHELL_PROJECT_ID.US.user_data_connection \
+--source_format=CSV \
+"gs://$DEVSHELL_PROJECT_ID-bucket/user-online-sessions.csv" > /tmp/tabledef.json
+echo "${CYAN_TEXT}${BOLD_TEXT}Definition saved to /tmp/tabledef.json${RESET_FORMAT}"
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating BigLake table 'user_online_sessions'${RESET_FORMAT}"
+bq mk --external_table_definition=/tmp/tabledef.json \
+--project_id=$DEVSHELL_PROJECT_ID \
+online_shop.user_online_sessions
+echo "${GREEN_TEXT}${BOLD_TEXT}Table created successfully!${RESET_FORMAT}"
+echo
+
+# Section 6: Schema Management
+# The entire original Task 2 implementation, which was located here, is now REMOVED.
+echo "${GREEN_TEXT}${BOLD_TEXT}SCHEMA MANAGEMENT (NOTE: Task 2 implementation steps removed as requested)${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Skipping Aspect creation and application.${RESET_FORMAT}"
+echo
+
+# Section 7: Data Query
+echo "${GREEN_TEXT}${BOLD_TEXT}DATA QUERY (Skipping query that uses policy-tagged columns)${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Query execution skipped.${RESET_FORMAT}"
+echo
+
+# Section 8: Cleanup
+echo "${GREEN_TEXT}${BOLD_TEXT}CLEANUP${RESET_FORMAT}"
+if [[ -n "$USER_2" ]]; then
+    echo "${RED_TEXT}${BOLD_TEXT}Removing IAM policy binding for user $USER_2${RESET_FORMAT}"
+    gcloud projects remove-iam-policy-binding ${DEVSHELL_PROJECT_ID} \
+        --member="user:$USER_2" \
+        --role="roles/storage.objectViewer"
+    echo "${GREEN_TEXT}${BOLD_TEXT}Permissions cleaned up successfully!${RESET_FORMAT}"
+else
+    echo "${YELLOW_TEXT}${BOLD_TEXT}Skipping IAM cleanup - no username provided${RESET_FORMAT}"
+fi
 
 # Final message
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}        EXECUTION COMPLETE. CLICK 'CHECK MY PROGRESS'! ✅ ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}              LAB EXECUTION COMPLETE (Task 2 excluded) ${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
