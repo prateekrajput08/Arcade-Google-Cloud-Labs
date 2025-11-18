@@ -6,7 +6,7 @@ GREEN=$'\033[0;92m'
 YELLOW=$'\033[0;93m'
 BLUE=$'\033[0;94m'
 MAGENTA=$'\033[0;95m'
-CYAN=$'\033[0;96m'
+CYAN_TEXT=$'\033[0;96m'
 WHITE=$'\033[0;97m'
 TEAL=$'\033[38;5;50m'
 
@@ -20,9 +20,9 @@ REVERSE=$'\033[7m'
 clear
 
 # Welcome message
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD}==================================================================${RESET}"
+echo "${CYAN_TEXT}${BOLD}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET}"
+echo "${CYAN_TEXT}${BOLD}==================================================================${RESET}"
 echo
 
 # ---------- defaults for the lab ----------
@@ -182,10 +182,10 @@ fi
 
 # Final message
 echo
-echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${YELLOW}${BOLD}=======================================================${RESET}"
+echo "${YELLOW}${BOLD}              LAB COMPLETED SUCCESSFULLY!              ${RESET}"
+echo "${YELLOW}${BOLD}=======================================================${RESET}"
 echo
-echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo "${RED}${BOLD}${UNDERLINE}https://www.youtube.com/@TechCode9${RESET}"
+echo "${GREEN}${BOLD}Don't forget to Like, Share and Subscribe for more Videos${RESET}"
 echo
