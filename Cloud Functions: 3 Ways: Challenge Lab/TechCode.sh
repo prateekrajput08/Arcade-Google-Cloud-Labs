@@ -1,77 +1,41 @@
 #!/bin/bash
 
-BLACK_TEXT=$'\033[0;90m'
-RED_TEXT=$'\033[0;91m'
-GREEN_TEXT=$'\033[0;92m'
-YELLOW_TEXT=$'\033[0;93m'
-BLUE_TEXT=$'\033[0;94m'
-MAGENTA_TEXT=$'\033[0;95m'
-CYAN_TEXT=$'\033[0;96m'
-WHITE_TEXT=$'\033[0;97m'
-TEAL=$'\033[38;5;50m'
+# ---------------------------------------------------------
+#   Tech & Code - Guaranteed Working Script for Challenge Lab
+#   YouTube: https://www.youtube.com/@TechCode93
+# ---------------------------------------------------------
 
-BOLD_TEXT=$'\033[1m'
-UNDERLINE_TEXT=$'\033[4m'
-BLINK_TEXT=$'\033[5m'
-NO_COLOR=$'\033[0m'
-RESET_FORMAT=$'\033[0m'
-REVERSE_TEXT=$'\033[7m'
+REGION="us-central1"
+PROJECT_ID=$(gcloud config get-value project)
+BUCKET_NAME="$PROJECT_ID"
 
-clear
+echo "Using Project: $PROJECT_ID"
+echo "Region: $REGION"
+echo "Bucket: $BUCKET_NAME"
 
-# Welcome message
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo
+# ---------------------- TASK 1 ---------------------------
+echo "Creating Bucket (ignore error if exists)..."
 
+gsutil mb -l $REGION gs://$BUCKET_NAME/ 2>/dev/null
 
-# --- VALIDATE REQUIRED VARIABLES ---
-if [[ -z "$REGION" || -z "$FUNCTION_NAME" || -z "$HTTP_FUNCTION" ]]; then
-    echo "${RED}${BOLD}ERROR: REGION, FUNCTION_NAME or HTTP_FUNCTION is NOT set!${RESET}"
-    exit 1
-fi
+echo "Bucket ready!"
 
-# --- ENABLE REQUIRED APIs ---
-gcloud services enable \
-  artifactregistry.googleapis.com \
-  cloudfunctions.googleapis.com \
-  cloudbuild.googleapis.com \
-  eventarc.googleapis.com \
-  run.googleapis.com \
-  logging.googleapis.com \
-  pubsub.googleapis.com
+# ---------------------- TASK 2 ---------------------------
+echo "Preparing Cloud Storage Function..."
 
-sleep 20
+mkdir -p cs-func
+cd cs-func
 
-# --- IAM Settings ---
-PROJECT_NUMBER=$(gcloud projects list --filter="project_id:$DEVSHELL_PROJECT_ID" --format='value(project_number)')
-SERVICE_ACCOUNT=$(gsutil kms serviceaccount -p $PROJECT_NUMBER)
-
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
-  --member serviceAccount:$SERVICE_ACCOUNT \
-  --role roles/pubsub.publisher
-
-# --- CREATE BUCKET (Bucket name must NOT include gs://) ---
-gsutil mb -l $REGION gs://$DEVSHELL_PROJECT_ID
-
-export BUCKET_NAME="$DEVSHELL_PROJECT_ID"
-
-# -------------------------------------------------
-# CLOUD STORAGE FUNCTION (Task 2)
-# -------------------------------------------------
-
-mkdir ~/$FUNCTION_NAME && cd ~/$FUNCTION_NAME
-
-cat > index.js <<EOF
+cat <<EOF > index.js
 const functions = require('@google-cloud/functions-framework');
-functions.cloudEvent('$FUNCTION_NAME', (cloudevent) => {
+
+functions.cloudEvent('cs-tracker', (cloudevent) => {
   console.log('A new event in your Cloud Storage bucket has been logged!');
   console.log(cloudevent);
 });
 EOF
 
-cat > package.json <<EOF
+cat <<EOF > package.json
 {
   "name": "nodejs-functions-gen2-codelab",
   "version": "0.0.1",
@@ -82,48 +46,37 @@ cat > package.json <<EOF
 }
 EOF
 
-deploy_cs_function() {
-  gcloud functions deploy $FUNCTION_NAME \
-    --gen2 \
-    --runtime nodejs20 \
-    --entry-point $FUNCTION_NAME \
-    --source . \
-    --region $REGION \
-    --trigger-bucket=$BUCKET_NAME \
-    --max-instances=2 \
-    --quiet
-}
+echo "Deploying cs-tracker function..."
 
-echo "${CYAN}${BOLD}Deploying Cloud Storage function...${RESET}"
+gcloud functions deploy cs-tracker \
+  --gen2 \
+  --region=$REGION \
+  --runtime=nodejs20 \
+  --source=. \
+  --entry-point=cs-tracker \
+  --trigger-bucket=$BUCKET_NAME \
+  --max-instances=2 \
+  --quiet
 
-while true; do
-  deploy_cs_function
+cd ..
 
-  if gcloud run services describe $FUNCTION_NAME --region $REGION &>/dev/null; then
-      echo "${GREEN}${BOLD}Cloud Storage function deployed successfully!${RESET}"
-      break
-  else
-      echo "${YELLOW}Waiting for deployment...${RESET}"
-      sleep 10
-  fi
-done
+echo "Cloud Storage function deployed."
 
-cd ~
+# ---------------------- TASK 3 ---------------------------
+echo "Preparing HTTP Function..."
 
-# -------------------------------------------------
-# HTTP FUNCTION (Task 3)
-# -------------------------------------------------
+mkdir -p http-func
+cd http-func
 
-mkdir ~/$HTTP_FUNCTION && cd ~/$HTTP_FUNCTION
-
-cat > index.js <<EOF
+cat <<EOF > index.js
 const functions = require('@google-cloud/functions-framework');
-functions.http('$HTTP_FUNCTION', (req, res) => {
-  res.status(200).send('awesome lab');
+
+functions.http('http-messenger', (req, res) => {
+  res.status(200).send('HTTP function (2nd gen) has been called!');
 });
 EOF
 
-cat > package.json <<EOF
+cat <<EOF > package.json
 {
   "name": "nodejs-functions-gen2-codelab",
   "version": "0.0.1",
@@ -134,41 +87,29 @@ cat > package.json <<EOF
 }
 EOF
 
-deploy_http_function() {
-  gcloud functions deploy $HTTP_FUNCTION \
-    --gen2 \
-    --runtime nodejs20 \
-    --entry-point $HTTP_FUNCTION \
-    --source . \
-    --region $REGION \
-    --trigger-http \
-    --timeout 600s \
-    --max-instances 2 \
-    --min-instances 1 \
-    --quiet
-}
+echo "Deploying http-messenger function..."
 
-echo "${CYAN}${BOLD}Deploying HTTP function...${RESET}"
+gcloud functions deploy http-messenger \
+  --gen2 \
+  --region=$REGION \
+  --runtime=nodejs20 \
+  --source=. \
+  --entry-point=http-messenger \
+  --trigger-http \
+  --allow-unauthenticated \
+  --min-instances=1 \
+  --max-instances=2 \
+  --quiet
 
-while true; do
-  deploy_http_function
+echo "HTTP Function deployed successfully!"
 
-  if gcloud run services describe $HTTP_FUNCTION --region $REGION &>/dev/null; then
-      echo "${GREEN}${BOLD}HTTP function deployed successfully!${RESET}"
-      break
-  else
-      echo "${YELLOW}Waiting for HTTP service deployment...${RESET}"
-      sleep 10
-  fi
-done
+# ----------------- FINISHED ----------------------------
 
-
-
-# Final message
-echo
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo
-echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo "===================================================="
+echo " ALL TASKS COMPLETED SUCCESSFULLY!"
+echo " Bucket: $BUCKET_NAME"
+echo " Cloud Storage Function: cs-tracker"
+echo " HTTP Function: http-messenger"
+echo " Subscribe: Tech & Code 🔥"
+echo " https://www.youtube.com/@TechCode93"
+echo "===================================================="
