@@ -12,8 +12,6 @@
 
 <div style="padding: 15px; margin: 10px 0;">
   
-## 👉 Download [Here](https://drive.google.com/uc?export=download&id=15Gb8EbOCRY1Xsyorg1JRCLn25baz5A8j)
-
 ---
 ## ☁️ Run in Cloud Shell:
 
@@ -22,6 +20,7 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
+## 👉 Download [Here](https://drive.google.com/uc?export=download&id=15Gb8EbOCRY1Xsyorg1JRCLn25baz5A8j)
 
 </div>
 
