@@ -85,39 +85,12 @@ gcloud workbench instances create cnn-challenge \
 # Step 4: Provide a link to the Workbench instances page
 echo
 echo "${BLUE}${BOLD}Click here to view your Workbench instance: ${RESET}""https://console.cloud.google.com/vertex-ai/workbench/instances?project=$DEVSHELL_PROJECT_ID"
-
 echo
-
-
-# Display a random congratulatory message
-random_congrats
-
-echo -e "\n"  # Adding one blank line
-
-cd
-
-remove_files() {
-    # Loop through all files in the current directory
-    for file in *; do
-        # Check if the file name starts with "gsp", "arc", or "shell"
-        if [[ "$file" == gsp* || "$file" == arc* || "$file" == shell* ]]; then
-            # Check if it's a regular file (not a directory)
-            if [[ -f "$file" ]]; then
-                # Remove the file and echo the file name
-                rm "$file"
-                echo "File removed: $file"
-            fi
-        fi
-    done
-}
-
-remove_files
-
 
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}        LAB COMPLETED SUCCESSFULLY! FOLLOW VIDEO       ${RESET_FORMAT_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT_FORMAT}"
