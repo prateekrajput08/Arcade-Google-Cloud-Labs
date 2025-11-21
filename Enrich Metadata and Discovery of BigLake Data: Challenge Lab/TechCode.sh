@@ -63,6 +63,23 @@ bq mk \
   --external_table_definition=gs://$DEVSHELL_PROJECT_ID-bucket/customer-online-sessions.csv \
   ecommerce.customer_online_sessions
 
+gcloud data-catalog tag-templates create sensitive_data_template \
+    --location=$REGION \
+    --display-name="Sensitive Data Template" \
+    --field=id=has_sensitive_data,display-name="Has Sensitive Data",type=bool \
+    --field=id=sensitive_data_type,display-name="Sensitive Data Type",type='enum(Location Info|Contact Info|None)'
+
+cat > tag_file.json << EOF
+  {
+    "has_sensitive_data": TRUE,
+    "sensitive_data_type": "Location Info"
+  }
+EOF
+
+ENTRY_NAME=$(gcloud data-catalog entries lookup '//bigquery.googleapis.com/projects/'$DEVSHELL_PROJECT_ID'/datasets/ecommerce/tables/customer_online_sessions' --format="value(name)")
+
+gcloud data-catalog tags create --entry=${ENTRY_NAME} \
+    --tag-template=sensitive_data_template --tag-template-location=$REGION --tag-file=tag_file.json
 
 # Final message
 echo
