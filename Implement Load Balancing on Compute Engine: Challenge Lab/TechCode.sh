@@ -32,7 +32,7 @@ ZONE=$(gcloud compute project-info describe \
 REGION=$(gcloud compute project-info describe \
   --format="value(commonInstanceMetadata.items[google-compute-default-region])" 2>/dev/null)
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-spinner
+
 
 if [ -z "$ZONE" ]; then
     echo "${YELLOW_TEXT}${BOLD_TEXT}Could not detect default zone.${RESET_FORMAT}"
@@ -60,7 +60,7 @@ for i in {1..3}; do
         apt-get install apache2 -y
         service apache2 restart
         echo "<h3>Web Server: web'$i'</h3>" | tee /var/www/html/index.html' > /dev/null 2>&1 &
-    spinner
+     
     echo "Done"
 done
 echo ""
@@ -70,7 +70,7 @@ echo -n "Creating firewall rule for network load balancer... "
 gcloud compute firewall-rules create www-firewall-network-lb \
     --allow tcp:80 \
     --target-tags network-lb-tag > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 echo ""
 
@@ -79,26 +79,26 @@ echo "Setting up Network Load Balancer..."
 echo -n "Creating static IP address... "
 gcloud compute addresses create network-lb-ip-1 \
     --region=$REGION > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating health check... "
 gcloud compute http-health-checks create basic-check > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating target pool... "
 gcloud compute target-pools create www-pool \
     --region=$REGION \
     --http-health-check basic-check > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Adding instances to target pool... "
 gcloud compute target-pools add-instances www-pool \
     --instances web1,web2,web3 \
     --zone=$ZONE > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating forwarding rule... "
@@ -107,7 +107,7 @@ gcloud compute forwarding-rules create www-rule \
     --ports 80 \
     --address network-lb-ip-1 \
     --target-pool www-pool > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 IPADDRESS=$(gcloud compute forwarding-rules describe www-rule \
@@ -137,7 +137,7 @@ gcloud compute instance-templates create lb-backend-template \
      echo "Page served from: $vm_hostname" | \
      tee /var/www/html/index.html
      systemctl restart apache2' > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating managed instance group... "
@@ -145,7 +145,7 @@ gcloud compute instance-groups managed create lb-backend-group \
    --template=lb-backend-template \
    --size=2 \
    --zone=$ZONE > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating health check firewall rule... "
@@ -156,14 +156,14 @@ gcloud compute firewall-rules create fw-allow-health-check \
   --source-ranges=130.211.0.0/22,35.191.0.0/16 \
   --target-tags=allow-health-check \
   --rules=tcp:80 > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating global IPv4 address... "
 gcloud compute addresses create lb-ipv4-1 \
   --ip-version=IPV4 \
   --global > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 LB_IP=$(gcloud compute addresses describe lb-ipv4-1 \
@@ -174,7 +174,7 @@ echo "HTTP Load Balancer IP: $LB_IP"
 echo -n "Creating HTTP health check... "
 gcloud compute health-checks create http http-basic-check \
   --port 80 > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating backend service... "
@@ -183,7 +183,7 @@ gcloud compute backend-services create web-backend-service \
   --port-name=http \
   --health-checks=http-basic-check \
   --global > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Adding backend to service... "
@@ -191,19 +191,19 @@ gcloud compute backend-services add-backend web-backend-service \
   --instance-group=lb-backend-group \
   --instance-group-zone=$ZONE \
   --global > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating URL map... "
 gcloud compute url-maps create web-map-http \
     --default-service web-backend-service > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating target HTTP proxy... "
 gcloud compute target-http-proxies create http-lb-proxy \
     --url-map web-map-http > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 
 echo -n "Creating forwarding rule... "
@@ -212,7 +212,7 @@ gcloud compute forwarding-rules create http-content-rule \
     --global \
     --target-http-proxy=http-lb-proxy \
     --ports=80 > /dev/null 2>&1 &
-spinner
+ 
 echo "Done"
 echo ""
 
