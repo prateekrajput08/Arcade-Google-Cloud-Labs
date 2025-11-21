@@ -19,209 +19,173 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 
-# Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE  -  EXECUTION STARTED...              ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
+echo "${RED_TEXT}${BOLD_TEXT}      https://www.youtube.com/@TechCode9 ${RESET_FORMAT}"
+echo
 
-# Fetch zone and region with fallback to prompt
-echo -n "${YELLOW_TEXT}${BOLD_TEXT}Detecting default zone and region... ${RESET_FORMAT}"
+# ----------- Detect Project, Zone, Region -------------
+echo "${YELLOW_TEXT}${BOLD_TEXT}Detecting Zone & Region...${RESET_FORMAT}"
+
 ZONE=$(gcloud compute project-info describe \
-  --format="value(commonInstanceMetadata.items[google-compute-default-zone])" 2>/dev/null)
-REGION=$(gcloud compute project-info describe \
-  --format="value(commonInstanceMetadata.items[google-compute-default-region])" 2>/dev/null)
-PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-
+  --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
 if [ -z "$ZONE" ]; then
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Could not detect default zone.${RESET_FORMAT}"
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter your preferred zone (e.g., us-central1-a):${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}${BOLD_TEXT}Default zone not found. Enter zone (us-east1-d):${RESET_FORMAT}"
     read -p "Zone: " ZONE
-    REGION=${ZONE%-*}
-else
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Detected Zone: $ZONE${RESET_FORMAT}"
-    echo "${YELLOW_TEXT}${BOLD_TEXT}Detected Region: $REGION${RESET_FORMAT}"
 fi
-echo ""
 
-# Create web instances
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating web instances (web1, web2, web3)...${RESET_FORMAT}"
-for i in {1..3}; do
-    echo -n "Creating web$i... "
+REGION="${ZONE%-*}"
+PROJECT_ID=$(gcloud config get-value project)
+
+echo "${GREEN_TEXT}${BOLD_TEXT}Using Zone: $ZONE${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Using Region: $REGION${RESET_FORMAT}"
+echo
+echo "${RED_TEXT}${BOLD_TEXT}Tech & Code - https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo
+
+# ---------------- Task 1: Create Web Servers -------------------
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating web1, web2, web3...${RESET_FORMAT}"
+
+for i in 1 2 3; do
+    echo "${BLUE_TEXT}Creating web$i ...${RESET_FORMAT}"
     gcloud compute instances create web$i \
         --zone=$ZONE \
         --machine-type=e2-small \
         --tags=network-lb-tag \
+        --network=default \
         --image-family=debian-12 \
         --image-project=debian-cloud \
-        --metadata=startup-script='#!/bin/bash
-        apt-get update
-        apt-get install apache2 -y
-        service apache2 restart
-        echo "<h3>Web Server: web'$i'</h3>" | tee /var/www/html/index.html' > /dev/null 2>&1 &
-     
-    echo "Done"
+        --metadata=startup-script="#!/bin/bash
+            apt-get update
+            apt-get install apache2 -y
+            service apache2 restart
+            echo \"<h3>Web Server: web$i</h3>\" > /var/www/html/index.html"
 done
-echo ""
 
-# Create firewall rule
-echo -n "Creating firewall rule for network load balancer... "
+echo
+echo "${GREEN_TEXT}${BOLD_TEXT}Web servers created successfully.${RESET_FORMAT}"
+echo
+
+# Firewall for Network LB
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating firewall rule www-firewall-network-lb...${RESET_FORMAT}"
+
 gcloud compute firewall-rules create www-firewall-network-lb \
     --allow tcp:80 \
-    --target-tags network-lb-tag > /dev/null 2>&1 &
- 
-echo "Done"
-echo ""
+    --network=default \
+    --target-tags=network-lb-tag
 
-# Network Load Balancer Setup
-echo "Setting up Network Load Balancer..."
-echo -n "Creating static IP address... "
+echo "${GREEN_TEXT}${BOLD_TEXT}Firewall rule created.${RESET_FORMAT}"
+echo
+
+# ---------------- Task 2: Network Load Balancer -------------------
+echo "${YELLOW_TEXT}${BOLD_TEXT}Configuring Network Load Balancer...${RESET_FORMAT}"
+
 gcloud compute addresses create network-lb-ip-1 \
-    --region=$REGION > /dev/null 2>&1 &
- 
-echo "Done"
+    --region=$REGION
 
-echo -n "Creating health check... "
-gcloud compute http-health-checks create basic-check > /dev/null 2>&1 &
- 
-echo "Done"
+gcloud compute http-health-checks create basic-check
 
-echo -n "Creating target pool... "
 gcloud compute target-pools create www-pool \
     --region=$REGION \
-    --http-health-check basic-check > /dev/null 2>&1 &
- 
-echo "Done"
+    --http-health-check basic-check
 
-echo -n "Adding instances to target pool... "
 gcloud compute target-pools add-instances www-pool \
-    --instances web1,web2,web3 \
-    --zone=$ZONE > /dev/null 2>&1 &
- 
-echo "Done"
+    --instances=web1,web2,web3 \
+    --zone=$ZONE
 
-echo -n "Creating forwarding rule... "
 gcloud compute forwarding-rules create www-rule \
     --region=$REGION \
-    --ports 80 \
-    --address network-lb-ip-1 \
-    --target-pool www-pool > /dev/null 2>&1 &
- 
-echo "Done"
+    --ports=80 \
+    --address=network-lb-ip-1 \
+    --target-pool=www-pool
 
-IPADDRESS=$(gcloud compute forwarding-rules describe www-rule \
-    --region=$REGION \
-    --format="json" | jq -r .IPAddress)
-echo "Network Load Balancer IP: $IPADDRESS"
-echo ""
+NLB_IP=$(gcloud compute forwarding-rules describe www-rule \
+    --region=$REGION --format="get(IPAddress)")
 
-# HTTP Load Balancer Setup
-echo "Setting up HTTP Load Balancer..."
-echo -n "Creating instance template... "
+echo "${GREEN_TEXT}${BOLD_TEXT}Network Load Balancer created. IP: $NLB_IP ${RESET_FORMAT}"
+echo
+echo "${RED_TEXT}${BOLD_TEXT}Tech & Code - https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo
+
+# ---------------- Task 3: HTTP Load Balancer -------------------
+echo "${YELLOW_TEXT}${BOLD_TEXT}Setting up HTTP Load Balancer...${RESET_FORMAT}"
+
+# Instance Template
 gcloud compute instance-templates create lb-backend-template \
-   --region=$REGION \
-   --network=default \
-   --subnet=default \
-   --tags=allow-health-check \
-   --machine-type=e2-medium \
-   --image-family=debian-12 \
-   --image-project=debian-cloud \
-   --metadata=startup-script='#!/bin/bash
-     apt-get update
-     apt-get install apache2 -y
-     a2ensite default-ssl
-     a2enmod ssl
-     vm_hostname="$(curl -H "Metadata-Flavor:Google" \
-     http://169.254.169.254/computeMetadata/v1/instance/name)"
-     echo "Page served from: $vm_hostname" | \
-     tee /var/www/html/index.html
-     systemctl restart apache2' > /dev/null 2>&1 &
- 
-echo "Done"
+  --machine-type=e2-medium \
+  --tags=allow-health-check \
+  --image-family=debian-12 \
+  --image-project=debian-cloud \
+  --metadata=startup-script="#!/bin/bash
+       apt-get update
+       apt-get install apache2 -y
+       vm=\$(hostname)
+       echo \"Page served from: \$vm\" > /var/www/html/index.html
+       systemctl restart apache2"
 
-echo -n "Creating managed instance group... "
+# Managed Instance Group
 gcloud compute instance-groups managed create lb-backend-group \
-   --template=lb-backend-template \
-   --size=2 \
-   --zone=$ZONE > /dev/null 2>&1 &
- 
-echo "Done"
+  --template=lb-backend-template \
+  --size=2 \
+  --zone=$ZONE
 
-echo -n "Creating health check firewall rule... "
+# Firewall for HC
 gcloud compute firewall-rules create fw-allow-health-check \
   --network=default \
   --action=allow \
   --direction=ingress \
   --source-ranges=130.211.0.0/22,35.191.0.0/16 \
   --target-tags=allow-health-check \
-  --rules=tcp:80 > /dev/null 2>&1 &
- 
-echo "Done"
+  --rules=tcp:80
 
-echo -n "Creating global IPv4 address... "
+# Global IP
 gcloud compute addresses create lb-ipv4-1 \
   --ip-version=IPV4 \
-  --global > /dev/null 2>&1 &
- 
-echo "Done"
+  --global
 
 LB_IP=$(gcloud compute addresses describe lb-ipv4-1 \
-  --format="get(address)" \
-  --global)
-echo "HTTP Load Balancer IP: $LB_IP"
+  --global --format="get(address)")
 
-echo -n "Creating HTTP health check... "
-gcloud compute health-checks create http http-basic-check \
-  --port 80 > /dev/null 2>&1 &
- 
-echo "Done"
+# Health check
+gcloud compute health-checks create http http-basic-check --port=80
 
-echo -n "Creating backend service... "
+# Backend service
 gcloud compute backend-services create web-backend-service \
   --protocol=HTTP \
   --port-name=http \
   --health-checks=http-basic-check \
-  --global > /dev/null 2>&1 &
- 
-echo "Done"
+  --global
 
-echo -n "Adding backend to service... "
 gcloud compute backend-services add-backend web-backend-service \
   --instance-group=lb-backend-group \
   --instance-group-zone=$ZONE \
-  --global > /dev/null 2>&1 &
- 
-echo "Done"
+  --global
 
-echo -n "Creating URL map... "
+# URL Map & Proxy
 gcloud compute url-maps create web-map-http \
-    --default-service web-backend-service > /dev/null 2>&1 &
- 
-echo "Done"
+  --default-service web-backend-service
 
-echo -n "Creating target HTTP proxy... "
 gcloud compute target-http-proxies create http-lb-proxy \
-    --url-map web-map-http > /dev/null 2>&1 &
- 
-echo "Done"
+  --url-map=web-map-http
 
-echo -n "Creating forwarding rule... "
+# Forwarding rule
 gcloud compute forwarding-rules create http-content-rule \
-    --address=lb-ipv4-1 \
-    --global \
-    --target-http-proxy=http-lb-proxy \
-    --ports=80 > /dev/null 2>&1 &
- 
-echo "Done"
-echo ""
+  --address=lb-ipv4-1 \
+  --global \
+  --target-http-proxy=http-lb-proxy \
+  --ports=80
 
-
-# Final message
 echo
+echo "${GREEN_TEXT}${BOLD_TEXT}HTTP Load Balancer created successfully.${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}HTTP LB IP: $LB_IP${RESET_FORMAT}"
+echo
+
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe!${RESET_FORMAT}"
