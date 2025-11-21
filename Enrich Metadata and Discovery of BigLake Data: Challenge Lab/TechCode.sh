@@ -25,43 +25,84 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# =============================
-# Task 1: Create BigQuery Dataset (US Multi-Region)
-# =============================
+###############################################
+# TASK 1 — Create BigQuery dataset (US)
+###############################################
+
 bq --location=US mk ecommerce
 
 
-# =============================
-# Task 2: Create Cloud Resource Connection (US Multi-Region)
-# =============================
+
+###############################################
+# TASK 2 — Create Cloud Resource connection
+#          and BigLake table
+###############################################
 
 # Enable required APIs
 gcloud services enable bigqueryconnection.googleapis.com
 gcloud services enable datacatalog.googleapis.com
 
-# Create Cloud Resource Connection
+# Create the connection (multi-region US)
 bq mk --connection \
   --connection_type=CLOUD_RESOURCE \
   --location=US \
   --project_id=$DEVSHELL_PROJECT_ID \
   customer_data_connection
 
-# Fetch the connection service account
+# Fetch connection service account
 CONN_SA=$(bq show --connection $DEVSHELL_PROJECT_ID.US.customer_data_connection \
   | grep serviceAccountId \
   | awk -F'"' '{print $4}')
 
 echo "Connection Service Account: $CONN_SA"
 
-# Grant Storage Viewer so BigLake can read the CSV
+# Grant Storage Viewer so BigLake can read files
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
   --member="serviceAccount:$CONN_SA" \
   --role="roles/storage.objectViewer"
 
-# Create BigLake table with autodetected schema
+# Create BigLake table from CSV (schema auto-detected)
 bq mk \
   --external_table_definition=gs://$DEVSHELL_PROJECT_ID-bucket/customer-online-sessions.csv \
   ecommerce.customer_online_sessions
+
+
+
+###############################################
+# TASK 3 — Create Aspect + Apply to table
+###############################################
+
+# Create the Aspect Template
+gcloud data-catalog aspects templates create sensitive_data_aspect \
+  --location=US \
+  --display-name="Sensitive Data Aspect" \
+  --field=id=Has_Sensitive_Data,display-name="Has Sensitive Data",type=bool \
+  --field=id=Sensitive_Data_Type,display-name="Sensitive Data Type",type='enum(Location Info|Contact Info|None)'
+
+
+# Create aspect data file
+cat > aspect.json << EOF
+{
+  "Has_Sensitive_Data": true,
+  "Sensitive_Data_Type": "Location Info"
+}
+EOF
+
+
+# Lookup the BigLake table entry
+ENTRY=$(gcloud data-catalog entries lookup \
+  //bigquery.googleapis.com/projects/$DEVSHELL_PROJECT_ID/datasets/ecommerce/tables/customer_online_sessions \
+  --format="value(name)")
+
+echo "Entry name: $ENTRY"
+
+
+# Apply the aspect
+gcloud data-catalog aspects create \
+  --entry=$ENTRY \
+  --aspect-template=sensitive_data_aspect \
+  --aspect-template-location=US \
+  --aspect-data-file=aspect.json
 
 
 # Final message
