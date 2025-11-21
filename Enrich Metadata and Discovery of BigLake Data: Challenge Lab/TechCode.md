@@ -20,7 +20,7 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ### Field Name `sensitive_data_type`
-### Dataplex Universal Catalog `customer_online_service`
+### Dataplex Universal Catalog `customer_online_session`
 
 </div>
 
