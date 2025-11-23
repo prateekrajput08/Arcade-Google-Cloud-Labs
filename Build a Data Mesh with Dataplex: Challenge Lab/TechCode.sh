@@ -1,29 +1,29 @@
-    #!/bin/bash
+#!/bin/bash
 
-    # Define color variables
-    BLACK_TEXT=$'\033[0;90m'
-    RED_TEXT=$'\033[0;91m'
-    GREEN_TEXT=$'\033[0;92m'
-    YELLOW_TEXT=$'\033[0;93m'
-    BLUE_TEXT=$'\033[0;94m'
-    MAGENTA_TEXT=$'\033[0;95m'
-    CYAN_TEXT=$'\033[0;96m'
-    WHITE_TEXT=$'\033[0;97m'
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL=$'\033[38;5;50m'
 
-    NO_COLOR=$'\033[0m'
-    RESET_FORMAT=$'\033[0m'
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
 
-    # Define text formatting variables
-    BOLD_TEXT=$'\033[1m'
-    UNDERLINE_TEXT=$'\033[4m'
+clear
 
-    clear
-
-    # Welcome message
-    echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-    echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
-    echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-    echo
+# Welcome message
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo
 
 # Enable necessary Google Cloud services for Dataplex, Data Catalog, and Dataproc
 gcloud services enable \
@@ -82,12 +82,20 @@ gcloud dataplex assets create customer-orders \
   --resource-name=projects/$DEVSHELL_PROJECT_ID/datasets/customer_orders \
   --discovery-enabled
 
-# Create a Data Catalog tag template for protected customer data
-gcloud data-catalog tag-templates create protected_customer_data_template \
-    --location=$REGION \
-    --display-name="Protected Customer Data Template" \
-    --field=id=raw_data_flag,display-name="Raw Data Flag",type='enum(Yes|No)',required=TRUE \
-    --field=id=protected_contact_information_flag,display-name="Protected Contact Information Flag",type='enum(Yes|No)',required=TRUE
+###############################################################################
+# REPLACED TAG TEMPLATE WITH ASPECT TYPE
+###############################################################################
+
+# Create Dataplex Aspect Type instead of Data Catalog Tag Template
+gcloud dataplex aspect-types create protected_customer_data_aspect \
+  --location=$REGION \
+  --display-name="Protected Customer Data Aspect" \
+  --description="Aspect defining customer protected data fields" \
+  --fields=raw_data_flag=ENUM,protected_contact_information_flag=ENUM \
+  --enum-values=raw_data_flag:Yes,No \
+  --enum-values=protected_contact_information_flag:Yes,No
+
+###############################################################################
 
 # Grant "dataWriter" role to user $USER_2 on the "customer-engagements" asset
 gcloud dataplex assets add-iam-policy-binding customer-engagements \
@@ -133,18 +141,15 @@ EOF_CP
 # Copy the YAML file to a Cloud Storage bucket
 gsutil cp dq-customer-orders.yaml gs://$DEVSHELL_PROJECT_ID-dq-config
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Click here: "${RESET_FORMAT}""${BLUE_TEXT}${BOLD_TEXT}"https://console.cloud.google.com/dataplex/search?project=$DEVSHELL_PROJECT_ID&qSystems=DATAPLEX""${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Click here: "${RESET}""${BLUE_TEXT}${BOLD_TEXT}"https://console.cloud.google.com/dataplex/search?project=$DEVSHELL_PROJECT_ID&qSystems=DATAPLEX""${RESET_FORMAT}"
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Click here: "${RESET_FORMAT}""${BLUE_TEXT}${_TEXT}""https://console.cloud.google.com/dataplex/process/create-task/data-quality?project=$DEVSHELL_PROJECT_ID"""${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Click here: "${RESET}""${BLUE_TEXT}${BOLD_TEXT}""https://console.cloud.google.com/dataplex/process/create-task/data-quality?project=$DEVSHELL_PROJECT_ID"""${RESET_FORMAT}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}NOW${RESET_FORMAT}" "${WHITE_TEXT}${BOLD_TEXT}FOLLOW${RESET_FORMAT}" "${GREEN_TEXT}${BOLD_TEXT}VIDEO'S INSTRUCTIONS${RESET_FORMAT}"
-
-    # Final message
-    echo
-    echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-    echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-    echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-    echo
-    echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-    echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
-    echo
+# Final message
+echo
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
