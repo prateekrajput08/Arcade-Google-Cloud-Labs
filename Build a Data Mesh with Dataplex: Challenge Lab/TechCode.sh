@@ -27,7 +27,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}        SUBSCRIBE TECH & CODE - INITIATING EXECUTI
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-
 gcloud services enable dataplex.googleapis.com datacatalog.googleapis.com dataproc.googleapis.com
 
 export PROJECT_ID=$(gcloud config get-value project)
@@ -36,8 +35,7 @@ export REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
 
 gcloud dataplex lakes create sales-lake \
   --location=$REGION \
-  --display-name="Sales Lake" \
-  --async
+  --display-name="Sales Lake"
 
 gcloud dataplex zones create raw-customer-zone \
   --lake=sales-lake \
@@ -46,8 +44,7 @@ gcloud dataplex zones create raw-customer-zone \
   --type=RAW \
   --resource-location-type=SINGLE_REGION \
   --discovery-enabled \
-  --discovery-schedule="0 * * * *" \
-  --async
+  --discovery-schedule="0 * * * *"
 
 gcloud dataplex zones create curated-customer-zone \
   --lake=sales-lake \
@@ -56,8 +53,7 @@ gcloud dataplex zones create curated-customer-zone \
   --type=CURATED \
   --resource-location-type=SINGLE_REGION \
   --discovery-enabled \
-  --discovery-schedule="0 * * * *" \
-  --async
+  --discovery-schedule="0 * * * *"
 
 gcloud dataplex assets create customer-engagements \
   --lake=sales-lake \
@@ -66,8 +62,7 @@ gcloud dataplex assets create customer-engagements \
   --display-name="Customer Engagements" \
   --resource-type=STORAGE_BUCKET \
   --resource-name=projects/$PROJECT_ID/buckets/$PROJECT_ID-customer-online-sessions \
-  --discovery-enabled \
-  --async
+  --discovery-enabled
 
 gcloud dataplex assets create customer-orders \
   --lake=sales-lake \
@@ -76,8 +71,7 @@ gcloud dataplex assets create customer-orders \
   --display-name="Customer Orders" \
   --resource-type=BIGQUERY_DATASET \
   --resource-name=projects/$PROJECT_ID/datasets/customer_orders \
-  --discovery-enabled \
-  --async
+  --discovery-enabled
 
 read -p "Complete Task 2 manually, then press Enter: "
 
@@ -113,8 +107,7 @@ gcloud dataplex datascans create data-quality customer-orders-data-quality-job \
     --project=$PROJECT_ID \
     --location=$REGION \
     --data-source-resource="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items" \
-    --data-quality-spec-file="gs://$PROJECT_ID-dq-config/dq-customer-orders.yaml" \
-    --async
+    --data-quality-spec-file="gs://$PROJECT_ID-dq-config/dq-customer-orders.yaml"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
