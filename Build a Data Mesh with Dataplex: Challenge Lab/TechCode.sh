@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================
-# Color Variables (Kept as Provided)
+# Color Variables (Unchanged)
 # ===============================
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
@@ -43,6 +43,7 @@ export ZONE=$(gcloud compute project-info describe --format="value(commonInstanc
 export REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
 
 echo "${GREEN_TEXT}${BOLD_TEXT}Project: $PROJECT_ID | Region: $REGION | Zone: $ZONE ${RESET_FORMAT}"
+sleep 1
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Tech & Code - https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 sleep 1
@@ -74,7 +75,6 @@ gcloud dataplex zones create curated-customer-zone \
   --discovery-enabled \
   --discovery-schedule="0 * * * *"
 
-# RAW zone asset
 gcloud dataplex assets create customer-engagements \
   --lake=sales-lake \
   --zone=raw-customer-zone \
@@ -84,7 +84,6 @@ gcloud dataplex assets create customer-engagements \
   --resource-name=projects/$PROJECT_ID/buckets/$PROJECT_ID-customer-online-sessions \
   --discovery-enabled
 
-# CURATED zone asset
 gcloud dataplex assets create customer-orders \
   --lake=sales-lake \
   --zone=curated-customer-zone \
@@ -96,22 +95,17 @@ gcloud dataplex assets create customer-orders \
 
 echo "${GREEN_TEXT}${BOLD_TEXT}Task 1 Completed Successfully!${RESET_FORMAT}"
 echo
-echo "${YELLOW_TEXT}${BOLD_TEXT}Tech & Code - https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo
 
 # ===============================
-# PAUSE BEFORE TASK 2
+# TASK 2 — Manual Step
 # ===============================
-echo "${MAGENTA_TEXT}${BOLD_TEXT}⚠️  NOW DO TASK 2 MANUALLY IN THE LAB UI:${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Create Aspect Type → Apply Aspect to Raw Zone${RESET_FORMAT}"
-echo
+echo "${MAGENTA_TEXT}${BOLD_TEXT}⚠️  DO TASK 2 MANUALLY NOW (Aspect Type + Apply Aspect)${RESET_FORMAT}"
 read -p "Press Y and hit ENTER once you finish Task 2 manually: " CONFIRM
 
 # ===============================
-# TASK 3 — Assign IAM to User 2
+# TASK 3 — IAM Role Assignment
 # ===============================
-echo
-read -p "Enter User 2 email (User 2 ID from lab): " USER_2
+read -p "Enter User 2 email (User 2 ID): " USER_2
 echo "${BLUE_TEXT}${BOLD_TEXT}Assigning roles/dataplex.dataWriter to $USER_2...${RESET_FORMAT}"
 
 gcloud dataplex assets add-iam-policy-binding customer-engagements \
@@ -125,66 +119,53 @@ echo "${GREEN_TEXT}${BOLD_TEXT}Task 3 Completed Successfully!${RESET_FORMAT}"
 echo
 
 # ===============================
-# TASK 4 — Create Data Quality Spec
+# TASK 4 — Create YAML for Data Quality
 # ===============================
 echo "${BLUE_TEXT}${BOLD_TEXT}Creating Data Quality YAML...${RESET_FORMAT}"
 
 cat > dq-customer-orders.yaml <<EOF
-metadata_registry_defaults:
-  dataplex:
-    projects: $PROJECT_ID
-    locations: $REGION
-    lakes: sales-lake
-    zones: curated-customer-zone
-
-rule_dimensions:
-  - completeness
-
-row_filters:
-  NONE:
-    filter_sql_expr: True
-
 rules:
-  NOT_NULL:
-    rule_type: NOT_NULL
-    dimension: completeness
+- nonNullExpectation: {}
+  column: user_id
+  dimension: COMPLETENESS
+  threshold: 1
 
-rule_bindings:
-  VALID_USER:
-    entity_uri: bigquery://projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items
-    column_id: user_id
-    row_filter_id: NONE
-    rule_ids: [NOT_NULL]
+- nonNullExpectation: {}
+  column: order_id
+  dimension: COMPLETENESS
+  threshold: 1
 
-  VALID_ORDER:
-    entity_uri: bigquery://projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items
-    column_id: order_id
-    row_filter_id: NONE
-    rule_ids: [NOT_NULL]
-
+postScanActions:
+  bigqueryExport:
+    resultsTable: projects/$PROJECT_ID/datasets/orders_dq_dataset/tables/results
 EOF
 
 echo "${GREEN_TEXT}${BOLD_TEXT}Uploading YAML to Cloud Storage...${RESET_FORMAT}"
 gsutil cp dq-customer-orders.yaml gs://$PROJECT_ID-dq-config/
 
 echo "${GREEN_TEXT}${BOLD_TEXT}Task 4 Completed Successfully!${RESET_FORMAT}"
-echo "${YELLOW_TEXT}${BOLD_TEXT}Tech & Code - https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 
 # ===============================
-# TASK 5 — Data Quality Job Setup
+# TASK 5 — AUTOMATED DATA QUALITY SCAN (UPDATED!)
 # ===============================
-echo "${BLUE_TEXT}${BOLD_TEXT}Go to Dataplex → Data Quality → Create Job${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}Use dq-customer-orders.yaml from GCS bucket${RESET_FORMAT}"
-echo
+echo "${BLUE_TEXT}${BOLD_TEXT}Running Dataplex Data Quality Scan (Task 5)...${RESET_FORMAT}"
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Link:${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}https://console.cloud.google.com/dataplex/process/create-task/data-quality?project=$PROJECT_ID${RESET_FORMAT}"
+gcloud dataplex datascans create data-quality customer-orders-data-quality-job \
+    --project=$PROJECT_ID \
+    --location=$REGION \
+    --data-source-resource="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items" \
+    --data-quality-spec-file="gs://$PROJECT_ID-dq-config/dq-customer-orders.yaml"
 
+echo "${GREEN_TEXT}${BOLD_TEXT}Task 5 Completed Successfully!${RESET_FORMAT}"
+
+# ===============================
+# FINAL MESSAGE
+# ===============================
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}        ALL TASKS COMPLETED — LAB READY TO SUBMIT       ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe!${RESET_FORMAT}"
 
