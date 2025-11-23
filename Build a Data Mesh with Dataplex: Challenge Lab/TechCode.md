@@ -19,10 +19,6 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-  
-* For the display name enter, `Customer Orders Data Quality Job`
-
-* For BigQuery table type `results`
 
 </div>
 
