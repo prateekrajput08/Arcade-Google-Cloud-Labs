@@ -25,41 +25,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Define color variables
-
-BLACK=`tput setaf 0`
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-BLUE=`tput setaf 4`
-MAGENTA=`tput setaf 5`
-CYAN=`tput setaf 6`
-WHITE=`tput setaf 7`
-
-BG_BLACK=`tput setab 0`
-BG_RED=`tput setab 1`
-BG_GREEN=`tput setab 2`
-BG_YELLOW=`tput setab 3`
-BG_BLUE=`tput setab 4`
-BG_MAGENTA=`tput setab 5`
-BG_CYAN=`tput setab 6`
-BG_WHITE=`tput setab 7`
-
-BOLD=`tput bold`
-RESET=`tput sgr0`
-
-# Array of color codes excluding black and white
-TEXT_COLORS=($RED $GREEN $YELLOW $BLUE $MAGENTA $CYAN)
-BG_COLORS=($BG_RED $BG_GREEN $BG_YELLOW $BG_BLUE $BG_MAGENTA $BG_CYAN)
-
-# Pick random colors
-RANDOM_TEXT_COLOR=${TEXT_COLORS[$RANDOM % ${#TEXT_COLORS[@]}]}
-RANDOM_BG_COLOR=${BG_COLORS[$RANDOM % ${#BG_COLORS[@]}]}
-
-
 
 # Step 1: Enable required APIs
-echo "${BLUE}${BOLD}Enabling required Google Cloud APIs...${RESET}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Enabling required Google Cloud APIs...${RESET_FORMAT}"
 gcloud services enable \
   compute.googleapis.com \
   monitoring.googleapis.com \
@@ -73,26 +41,26 @@ gcloud services enable \
 sleep 30
 
 # Step 2: Set up the default zone
-echo "${GREEN}${BOLD}Retrieving default compute zone...${RESET}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Retrieving default compute zone...${RESET_FORMAT}"
 export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
 # Step 3: Create a Vertex AI Workbench instance
-echo "${CYAN}${BOLD}Creating a Vertex AI Workbench instance named 'cnn-challenge' in zone $ZONE...${RESET}"
+echo "${CYAN_TEXT}${BOLD_TEXT}Creating a Vertex AI Workbench instance named 'cnn-challenge' in zone $ZONE...${RESET_FORMAT}"
 gcloud workbench instances create cnn-challenge \
   --location=$ZONE
 
 # Step 4: Provide a link to the Workbench instances page
 echo
-echo "${BLUE}${BOLD}Click here to view your Workbench instance: ${RESET}""https://console.cloud.google.com/vertex-ai/workbench/instances?project=$DEVSHELL_PROJECT_ID"
+echo "${BLUE_TEXT}${BOLD_TEXT}Click here to view your Workbench instance: ${RESET}""https://console.cloud.google.com/vertex-ai/workbench/instances?project=$DEVSHELL_PROJECT_ID"
 echo
 
 # Final message
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}        LAB COMPLETED SUCCESSFULLY! FOLLOW VIDEO       ${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}        LAB COMPLETED SUCCESSFULLY! FOLLOW VIDEO       ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
