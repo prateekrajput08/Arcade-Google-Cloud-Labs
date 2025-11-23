@@ -19,7 +19,6 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-### Field Name `sensitive_data_type`
 ### Dataplex Universal Catalog `customer_online_session`
 
 </div>
