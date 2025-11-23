@@ -13,7 +13,7 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## Task 1. Create LookML objects
-### Update `o  rder_items`:
+### Update `order_items`:
 ```bash
 view: order_items {
   sql_table_name: `cloud-training-demos.looker_ecomm.order_items`
