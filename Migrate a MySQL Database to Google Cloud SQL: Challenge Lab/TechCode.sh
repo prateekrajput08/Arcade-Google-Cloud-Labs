@@ -25,9 +25,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# ===========================================
-# AUTO-DETECT ZONE & REGION
-# ===========================================
+gcloud auth login --no-launch-browser
+
 echo "${BLUE_TEXT}${BOLD_TEXT}Detecting zone from VM 'blog'...${RESET_FORMAT}"
 
 export ZONE=$(gcloud compute instances list --filter="name=blog" --format="value(zone)")
@@ -37,7 +36,7 @@ echo "${GREEN_TEXT}ZONE detected: ${YELLOW_TEXT}$ZONE${RESET_FORMAT}"
 echo "${GREEN_TEXT}REGION derived: ${YELLOW_TEXT}$REGION${RESET_FORMAT}"
 
 # ===========================================
-# TASK 1 — Create Cloud SQL Instance
+# TASK 1 — CREATE CLOUD SQL INSTANCE
 # ===========================================
 echo "${BLUE_TEXT}${BOLD_TEXT}Creating Cloud SQL instance 'wordpress'...${RESET_FORMAT}"
 
@@ -46,87 +45,72 @@ gcloud sql instances create wordpress \
   --activation-policy=ALWAYS \
   --region=$REGION
 
-echo "${GREEN_TEXT}Cloud SQL instance created successfully.${RESET_FORMAT}"
+echo "${GREEN_TEXT}Cloud SQL instance created.${RESET_FORMAT}"
 
 echo "${BLUE_TEXT}Setting root password...${RESET_FORMAT}"
+
 gcloud sql users set-password root \
   --host=% \
   --instance=wordpress \
   --password="Password1*"
 
-# Get VM external IP for authorized networks
-echo "${BLUE_TEXT}Authorizing blog VM IP...${RESET_FORMAT}"
-
-ADDRESS=$(gcloud compute instances describe blog \
-  --zone=$ZONE \
-  --format="get(networkInterfaces[0].accessConfigs[0].natIP)")/32
+# ===========================================
+# AUTHORIZE VM IP
+# ===========================================
+BLOG_IP=$(gcloud compute instances describe blog \
+  --zone $ZONE \
+  --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
 
 gcloud sql instances patch wordpress \
-  --authorized-networks=$ADDRESS \
+  --authorized-networks=${BLOG_IP}/32 \
   --quiet
 
-echo "${GREEN_TEXT}Authorized networks updated.${RESET_FORMAT}"
+echo "${GREEN_TEXT}Authorized blog VM IP: $BLOG_IP${RESET_FORMAT}"
+
+SQL_IP=$(gcloud sql instances describe wordpress --format="value(ipAddresses.ipAddress)")
+
+echo "${GREEN_TEXT}Cloud SQL IP: $SQL_IP${RESET_FORMAT}"
 
 # ===========================================
-# CREATE MIGRATION SCRIPT FOR VM
+# CREATE VM SCRIPT
 # ===========================================
-echo "${BLUE_TEXT}${BOLD_TEXT}Preparing migration script for VM...${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Preparing script for VM...${RESET_FORMAT}"
 
-cat > prepare_disk.sh <<'EOF'
+cat > prepare_disk.sh <<EOF
 #!/bin/bash
 
 sudo apt-get update
-sudo apt-get install -y mysql-client
+sudo apt-get install -y mariadb-client
 
-# Fetch Cloud SQL public IP
-MYSQLIP=$(gcloud sql instances describe wordpress --format="value(ipAddresses.ipAddress)")
+SQL_IP="$SQL_IP"
 
-# Create DB + user inside Cloud SQL
-mysql --host=$MYSQLIP --user=root -pPassword1* <<SQL_EOF
+# Create DB + user in Cloud SQL
+mariadb -h \$SQL_IP -u root -pPassword1* <<SQL_EOF
 CREATE DATABASE wordpress;
 CREATE USER 'blogadmin'@'%' IDENTIFIED BY 'Password1*';
 GRANT ALL PRIVILEGES ON wordpress.* TO 'blogadmin'@'%';
 FLUSH PRIVILEGES;
 SQL_EOF
 
-# Dump local MySQL DB (source)
-sudo mysqldump -u blogadmin -pPassword1* wordpress > /tmp/wordpress_backup.sql
+# Dump local DB
+sudo mysqldump -u blogadmin -pPassword1* wordpress > /tmp/wp.sql
 
 # Import into Cloud SQL
-mysql --host=$MYSQLIP --user=root -pPassword1* wordpress < /tmp/wordpress_backup.sql
+mariadb -h \$SQL_IP -u root -pPassword1* wordpress < /tmp/wp.sql
 
 # Update wp-config.php
 cd /var/www/html/wordpress
 
-sudo sed -i "s/define('DB_USER', .*)/define('DB_USER', 'blogadmin')/" wp-config.php
-sudo sed -i "s/define('DB_PASSWORD', .*)/define('DB_PASSWORD', 'Password1*')/" wp-config.php
-sudo sed -i "s/define('DB_HOST', .*)/define('DB_HOST', '$MYSQLIP')/" wp-config.php
+sudo sed -i "s/'DB_USER',.*/'DB_USER', 'blogadmin')/" wp-config.php
+sudo sed -i "s/'DB_PASSWORD',.*/'DB_PASSWORD', 'Password1*')/" wp-config.php
+sudo sed -i "s/'DB_HOST',.*/'DB_HOST', '\$SQL_IP')/" wp-config.php
 
 sudo service apache2 restart
 EOF
 
-echo "${GREEN_TEXT}VM migration script created.${RESET_FORMAT}"
-
-# ===========================================
-# COPY SCRIPT TO VM & EXECUTE
-# ===========================================
-echo "${BLUE_TEXT}${BOLD_TEXT}Copying script to VM...${RESET_FORMAT}"
-
-gcloud compute scp prepare_disk.sh blog:/tmp \
-  --project=$DEVSHELL_PROJECT_ID \
-  --zone=$ZONE --quiet
-
-echo "${BLUE_TEXT}${BOLD_TEXT}Running migration script on VM...${RESET_FORMAT}"
-
-gcloud compute ssh blog \
-  --project=$DEVSHELL_PROJECT_ID \
-  --zone=$ZONE --quiet \
-  --command="bash /tmp/prepare_disk.sh"
-
-echo "${GREEN_TEXT}${BOLD_TEXT}==============================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}   Migration Completed Successfully!          ${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}   WordPress now uses Cloud SQL.              ${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}==============================================${RESET_FORMAT}"
+echo "${GREEN_TEXT}VM script created.${RESET_FORMAT}"
+gcloud compute scp prepare_disk.sh blog:/tmp --zone $ZONE --quiet
+gcloud compute ssh blog --zone $ZONE --quiet --command="bash /tmp/prepare_disk.sh"
 
 
 # Final message
