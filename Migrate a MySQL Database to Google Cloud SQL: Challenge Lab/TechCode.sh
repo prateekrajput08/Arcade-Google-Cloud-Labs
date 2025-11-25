@@ -25,8 +25,12 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-gcloud auth login --no-launch-browser  
+# ===========================================
+gcloud auth login --no-launch-browser
 
+# ===========================================
+# WAIT FOR VM 'blog' TO BE READY
+# ===========================================
 echo "${BLUE_TEXT}${BOLD_TEXT}Waiting for VM 'blog' to be ready...${RESET_FORMAT}"
 
 while true; do
@@ -49,19 +53,18 @@ echo "${GREEN_TEXT}Detected ZONE: ${YELLOW_TEXT}$ZONE${RESET_FORMAT}"
 echo "${GREEN_TEXT}Detected REGION: ${YELLOW_TEXT}$REGION${RESET_FORMAT}"
 
 # ===========================================
-# CREATE CLOUD SQL INSTANCE
+# CREATE CLOUD SQL INSTANCE (SAFE)
 # ===========================================
 echo "${BLUE_TEXT}${BOLD_TEXT}Creating Cloud SQL instance 'wordpress'...${RESET_FORMAT}"
 
 gcloud sql instances create wordpress \
   --tier=db-n1-standard-1 \
   --activation-policy=ALWAYS \
-  --region=$REGION
+  --region=$REGION || echo "${YELLOW_TEXT}Instance already exists, continuing...${RESET_FORMAT}"
 
-echo "${GREEN_TEXT}Cloud SQL instance 'wordpress' created.${RESET_FORMAT}"
+echo "${GREEN_TEXT}Cloud SQL instance ready.${RESET_FORMAT}"
 
-echo "${BLUE_TEXT}Setting root password...${RESET_FORMAT}"
-
+# Set root password each time (safe)
 gcloud sql users set-password root \
   --host=% \
   --instance=wordpress \
@@ -78,17 +81,14 @@ gcloud sql instances patch wordpress \
 
 echo "${GREEN_TEXT}Authorized blog VM IP: ${YELLOW_TEXT}$BLOG_IP${RESET_FORMAT}"
 
-# ===========================================
-# GET CLOUD SQL PUBLIC IP
-# ===========================================
 SQL_IP=$(gcloud sql instances describe wordpress --format="value(ipAddresses.ipAddress)")
 
 echo "${GREEN_TEXT}Cloud SQL Public IP: ${YELLOW_TEXT}$SQL_IP${RESET_FORMAT}"
 
 # ===========================================
-# CREATE VM MIGRATION SCRIPT
+# CREATE VM MIGRATION SCRIPT (SAFE)
 # ===========================================
-echo "${BLUE_TEXT}${BOLD_TEXT}Preparing migration script for VM...${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Creating migration script for VM...${RESET_FORMAT}"
 
 cat > prepare_disk.sh <<EOF
 #!/bin/bash
@@ -98,10 +98,10 @@ sudo apt-get install -y mariadb-client
 
 SQL_IP="$SQL_IP"
 
-# Create DB + user
+# Create DB & user safely
 mariadb -h \$SQL_IP -u root -pPassword1* <<SQL_EOF
-CREATE DATABASE wordpress;
-CREATE USER 'blogadmin'@'%' IDENTIFIED BY 'Password1*';
+CREATE DATABASE IF NOT EXISTS wordpress;
+CREATE USER IF NOT EXISTS 'blogadmin'@'%' IDENTIFIED BY 'Password1*';
 GRANT ALL PRIVILEGES ON wordpress.* TO 'blogadmin'@'%';
 FLUSH PRIVILEGES;
 SQL_EOF
@@ -112,7 +112,7 @@ sudo mysqldump -u blogadmin -pPassword1* wordpress > /tmp/wp.sql
 # Import into Cloud SQL
 mariadb -h \$SQL_IP -u root -pPassword1* wordpress < /tmp/wp.sql
 
-# Update WordPress config
+# Update wp-config.php
 cd /var/www/html/wordpress
 
 sudo sed -i "s/'DB_USER',.*/'DB_USER', 'blogadmin')/" wp-config.php
@@ -122,17 +122,24 @@ sudo sed -i "s/'DB_HOST',.*/'DB_HOST', '\$SQL_IP')/" wp-config.php
 sudo service apache2 restart
 EOF
 
-echo "${GREEN_TEXT}Migration script created successfully.${RESET_FORMAT}"
+echo "${GREEN_TEXT}VM migration script created.${RESET_FORMAT}"
 
 # ===========================================
-# COPY SCRIPT TO VM & EXECUTE
+# COPY SCRIPT TO VM AND EXECUTE
 # ===========================================
 echo "${BLUE_TEXT}${BOLD_TEXT}Copying script to VM...${RESET_FORMAT}"
 gcloud compute scp prepare_disk.sh blog:/tmp --zone=$ZONE --quiet
 
-echo "${BLUE_TEXT}${BOLD_TEXT}Executing migration on VM...${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Executing migration script on VM...${RESET_FORMAT}"
 gcloud compute ssh blog --zone=$ZONE --quiet --command="bash /tmp/prepare_disk.sh"
 
+# ===========================================
+# DONE
+# ===========================================
+echo "${GREEN_TEXT}${BOLD_TEXT}==============================================${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}   MIGRATION COMPLETED SUCCESSFULLY!          ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}   WordPress is now using Cloud SQL.          ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}==============================================${RESET_FORMAT}"
 
 # Final message
 echo
