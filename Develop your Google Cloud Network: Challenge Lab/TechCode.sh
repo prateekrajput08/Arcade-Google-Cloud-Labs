@@ -209,6 +209,9 @@ for USER in $USERS; do
   fi
 done
 
+echo "${BLUE_TEXT}${BOLD_TEXT}Kubernetes Discovery: https://console.cloud.google.com/kubernetes/discovery${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Uptime Monitoring: https://console.cloud.google.com/monitoring/uptime${RESET_FORMAT}"
+
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
