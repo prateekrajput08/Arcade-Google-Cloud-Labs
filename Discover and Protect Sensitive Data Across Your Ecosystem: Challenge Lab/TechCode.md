@@ -19,7 +19,7 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-## 🚀 Run in Jupiter Terminal:
+## 🚀 Run in Notebook Terminal:
 ```bash
 rm deidentify-model-response-challenge-lab-v1.0.0.ipynb
 
