@@ -19,6 +19,8 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
+## Task 3. Create an aspect and apply it to the BigLake table
+### Enumerated field named Sensitive Data Type that contains three values: `Location info`, `Contact info`, and `None`.
 ### Dataplex Universal Catalog `customer_online_session`
 
 </div>
