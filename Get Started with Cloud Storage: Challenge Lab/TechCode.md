@@ -1,4 +1,4 @@
-# 🌐 Get Started with Cloud Storage: Challenge Lab || ARC 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/course_templates/725/labs/461639)
+# 🌐 Get Started with Cloud Storage: Challenge Lab || ARC111 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/focuses/62706?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=60867493)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -15,22 +15,9 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-gsutil mb -c nearline gs://$Bucket_1
-
-gcloud alpha storage buckets update gs://$Bucket_2 --no-uniform-bucket-level-access
-
-gsutil acl ch -u $USER_EMAIL:OWNER gs://$Bucket_2
-
-gsutil rm gs://$Bucket_2/sample.txt
-
-echo "Cloud Storage Demo" > sample.txt
-
-gsutil cp sample.txt gs://$Bucket_2
-
-gsutil acl ch -u allUsers:R gs://$Bucket_2/sample.txt
-
-gcloud storage buckets update gs://$Bucket_3 --update-labels=key=value
-
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Get%20Started%20with%20Cloud%20Storage%3A%20Challenge%20Lab/TechCode.sh
+sudo chmod +x TechCode.sh 
+./TechCode.sh
 ```
 
 </div>
@@ -39,18 +26,24 @@ gcloud storage buckets update gs://$Bucket_3 --update-labels=key=value
 
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
-<div align="center" style="padding: 5px;">
-  <h3>📱 Join the Tech & Code Community</h3>
-  
-  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1">
+<div style="text-align:center; padding: 10px 0; max-width: 640px; margin: 0 auto;">
+  <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 14px;">📱 Join the Tech & Code Community</h3>
+
+  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1" style="margin: 0 6px; display: inline-block;">
     <img src="https://img.shields.io/badge/Subscribe-Tech%20&%20Code-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Channel">
   </a>
-  &nbsp;
-  <a href="https://www.linkedin.com/in/prateekrajput08/">
-    <img src="https://img.shields.io/badge/LINKEDIN-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-</a>
 
+  <a href="https://www.linkedin.com/in/prateekrajput08/" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+  </a>
 
+  <a href="https://t.me/techcode9" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Telegram-Tech%20Code-0088cc?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel">
+  </a>
+
+  <a href="https://www.instagram.com/techcodefacilitator" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Instagram-Tech%20Code-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram Profile">
+  </a>
 </div>
 
 ---
@@ -60,6 +53,6 @@ gcloud storage buckets update gs://$Bucket_3 --update-labels=key=value
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: May 2025</em>
+    <em>Last updated: November 2025</em>
   </p>
 </div>
