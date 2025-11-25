@@ -13,9 +13,7 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-```bash
-export ZONE=
-```
+
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Migrate%20a%20MySQL%20Database%20to%20Google%20Cloud%20SQL%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
