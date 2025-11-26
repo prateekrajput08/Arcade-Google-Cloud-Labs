@@ -19,7 +19,7 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
-* **Reserve Static External IP** address name **static-ip**
+* **Reserve Static External IP** address name **`static-ip`**
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Mitigate%20Threats%20and%20Vulnerabilities%20with%20Security%20Command%20Center%3A%20Challenge%20Lab/TechCode2.sh
 sudo chmod +x TechCode2.sh 
