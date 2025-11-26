@@ -13,7 +13,13 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+export BUCKET_NAME=
+export TOPIC_NAME=
+export FUNCTION_NAME=
+export REGION=
+export BUCKET_USER=
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Monitor%20and%20Manage%20Google%20Cloud%20Resources%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
