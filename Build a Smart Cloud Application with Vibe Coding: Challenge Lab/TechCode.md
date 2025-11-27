@@ -25,146 +25,24 @@ run.googleapis.com
 
 ```bash
 read -p $'\e[1;36mEnter your student email address (the one used to start the lab): \e[0m' STUDENT_EMAIL
-
 PROJECT_ID=$(gcloud config get-value project)
-
 echo -e "\n\e[1;34m Using Project ID:\e[0m \e[1;33m$PROJECT_ID\e[0m"
 echo -e "\e[1;34m Using Student Email:\e[0m \e[1;33m$STUDENT_EMAIL\e[0m\n"
-
 echo -e "\e[1;35mGranting Cloud Run Admin role...\e[0m"
+
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="user:$STUDENT_EMAIL" \
   --role="roles/run.admin" \
   --quiet
-
 echo -e "\e[1;35mGranting Vertex AI User role...\e[0m"
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="user:$STUDENT_EMAIL" \
   --role="roles/aiplatform.user" \
   --quiet
 
-echo -e "\n\e[1;32m✅ IAM roles applied successfully for\e[0m \e[1;33m$STUDENT_EMAIL\e[0m \e[1;32mon project\e[0m \e[1;33m$PROJECT_ID\e[0m\n"
+echo -e "\n\e[1;32mIAM roles applied successfully for\e[0m \e[1;33m$STUDENT_EMAIL\e[0m \e[1;32mon project\e[0m \e[1;33m$PROJECT_ID\e[0m\n"
 ```
-### *Ask `Gemini` to fix the error
-```bash
-Fix the error in server.py
-```
-### Task 5. Dockerize and deploy the ADK agent to Cloud Run
-```bash
-import os
-import logging
 
-import google.adk.framework
-
-from dotenv import load_dotenv
-import google.cloud.logging
-
-from langchain_community.tools import WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
-from google.adk.tools.langchain_tool import LangchainTool
-from google.adk.agents import Agent, SequentialAgent
-from google.adk.tools import google_search
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams
-from google.adk.tools.tool_context import ToolContext
-
-import google.auth.transport.requests
-import google.oauth2.id_token
-
-
-# --- Logging and environment setup ---
-google.cloud.logging.Client().setup_logging()
-load_dotenv()
-
-model_name = os.getenv("MODEL")
-if not model_name:
-    raise ValueError("MODEL environment variable is not set.")
-
-mcp_server_url = os.getenv("MCP_SERVER_URL")
-if not mcp_server_url:
-    raise ValueError("MCP_SERVER_URL environment variable is not set.")
-
-
-# --- Helper function to update the prompt state ---
-def add_prompt_to_state(tool_context: ToolContext, prompt: str) -> dict[str, str]:
-    tool_context.state["PROMPT"] = prompt
-    logging.info(f"[State updated] Added to PROMPT: {prompt}")
-    return {"status": "success"}
-
-
-# --- Function to fetch ID token for MCP auth ---
-def get_id_token() -> str:
-    audience = mcp_server_url.split("/mcp/")[0]
-    request = google.auth.transport.requests.Request()
-    return google.oauth2.id_token.fetch_id_token(request, audience)
-
-
-# --- Setup MCP tools connection ---
-mcp_tools = MCPToolset(
-    connection_params=StreamableHTTPConnectionParams(
-        url=mcp_server_url,
-        headers={"Authorization": f"Bearer {get_id_token()}"},
-    ),
-)
-
-
-# --- Wikipedia integration ---
-wikipedia_tool = LangchainTool(
-    tool=WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-)
-
-
-# --- Define Agents ---
-comprehensive_researcher = Agent(
-    name="comprehensive_researcher",
-    model=model_name,
-    description="Researches using zoo data (MCP), Wikipedia, and Google Search.",
-    instruction="""
-    Analyze the PROMPT and gather all required information.
-    Use zoo data (via MCP), Wikipedia, and Google Search as needed.
-    Summarize your findings as research_data.
-    PROMPT:
-    {{ PROMPT }}
-    """,
-    tools=[mcp_tools, wikipedia_tool, google_search],
-    output_key="research_data"
-)
-
-response_formatter = Agent(
-    name="response_formatter",
-    model=model_name,
-    description="Formats research into a conversational answer.",
-    instruction="""
-    Format RESEARCH_DATA as a response suitable for a zoo visitor.
-    Include zoo facts, fun information, and global animal species count.
-    RESEARCH_DATA:
-    {{ research_data }}
-    """,
-    tools=[google_search]
-)
-
-tour_guide_workflow = SequentialAgent(
-    name="tour_guide_workflow",
-    sub_agents=[comprehensive_researcher, response_formatter]
-)
-
-root_agent = Agent(
-    name="greeter",
-    model=model_name,
-    description="Initial agent that greets and starts the zoo tour guide sequence.",
-    instruction="""
-    Greet the visitor and ask which animal they want to learn about.
-    Save their query by calling 'add_prompt_to_state', then run 'tour_guide_workflow'.
-    """,
-    tools=[add_prompt_to_state],
-    sub_agents=[tour_guide_workflow]
-)
-
-
-# --- Register the root agent as the application entry point ---
-from google.adk.framework.agent import register_agent
-
-register_agent(root_agent)
-```
 
 </div>
 
