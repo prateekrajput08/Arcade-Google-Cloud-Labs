@@ -67,7 +67,7 @@ echo "${CYAN_TEXT}${BOLD_TEXT}Fetch the developer email and prepare details file
 EMAIL="$(gcloud config get-value core/account)"
 
 cat > details.json << EOF
-  App name: drabhishek
+  App name: TechCode
   Authorized domains: $AUTH_DOMAIN
   Developer contact email: $EMAIL
 EOF
