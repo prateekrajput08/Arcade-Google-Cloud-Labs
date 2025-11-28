@@ -64,7 +64,7 @@ gcloud pubsub topics create $TOPIC
 gcloud pubsub subscriptions create $TOPIC-sub --topic=$TOPIC
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}========================== Starting Dataflow Flex Template Job${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Starting Dataflow Flex Template Job${RESET_FORMAT}"
 echo
 
 gcloud dataflow flex-template run $JOB --region $REGION \
