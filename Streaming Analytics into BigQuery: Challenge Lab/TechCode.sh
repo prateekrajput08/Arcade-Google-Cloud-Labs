@@ -64,7 +64,7 @@ gcloud pubsub topics create $TOPIC
 gcloud pubsub subscriptions create $TOPIC-sub --topic=$TOPIC
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT} ========================== Starting Dataflow Flex Template Job ========================== ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}========================== Starting Dataflow Flex Template Job${RESET_FORMAT}"
 echo
 
 gcloud dataflow flex-template run $JOB --region $REGION \
@@ -80,7 +80,7 @@ numStorageWriteApiStreams=0
 
 #!/bin/bash
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT} ========================== Monitoring and Interacting with Dataflow Job ========================== ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Monitoring and Interacting with Dataflow Job${RESET_FORMAT}"
 echo
 
 while true; do
@@ -101,12 +101,12 @@ while true; do
 done
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT} ========================== Starting Another Dataflow Job ========================== ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Starting Another Dataflow Job${RESET_FORMAT}"
 echo
 gcloud dataflow jobs run $JOB-techcode --gcs-location gs://dataflow-templates-$REGION/latest/PubSub_to_BigQuery --region=$REGION --project=$PROJECT_ID --staging-location gs://$PROJECT_ID/temp --parameters inputTopic=projects/$PROJECT_ID/topics/$TOPIC,outputTableSpec=$PROJECT_ID:$DATASET.$TABLE
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT} ========================== Monitoring and Interacting with Second Dataflow Job ========================== ${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Monitoring and Interacting with Second Dataflow Job${RESET_FORMAT}"
 echo
 
 while true; do
