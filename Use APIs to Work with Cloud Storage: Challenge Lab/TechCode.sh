@@ -117,7 +117,7 @@ curl -s -X POST --data-binary @public_access.json \
 success "Public access set successfully"
 
 # Verification prompt
-read -p "${INFO_COLOR}Please verify progress up to TASK 4 before continuing (press any key): ${RESET}" -n 1 -r
+read -p "${YELLOW_TEXT}Please verify progress up to TASK 4 before continuing (press any key): ${RESET_FORMAT}" -n 1 -r
 echo
 
 # Step 9: Delete the image from bucket1
