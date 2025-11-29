@@ -35,6 +35,7 @@ sudo chmod +x TechCode.sh
 | **Branch Pattern**           | ^dev$          |  
 | **Build Configuration File** | cloudbuild-dev.yaml |  
 
+## ☁️ Run in Cloud Shell:
 ```bash
 curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Implement%20DevOps%20Workflows%20in%20Google%20Cloud%3A%20Challenge%20Lab/TechCode2.sh
 sudo chmod +x TechCode2.sh 
