@@ -107,7 +107,7 @@ run_form_2() {
     
       console.log(`Hello, ${name}!`);
     });
-    EOF_END
+EOF_END
     
     echo
     echo "${BLUE_TEXT}${BOLD_TEXT}Step 5:${RESET_FORMAT} ${WHITE_TEXT}Creating package.json with dependencies...${RESET_FORMAT}"
