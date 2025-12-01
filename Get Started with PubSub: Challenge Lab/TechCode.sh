@@ -125,7 +125,7 @@ run_form_2() {
         "@google-cloud/functions-framework": "^3.0.0"
       }
     }
-    EOF_END
+EOF_END
     
     echo
     echo "${BLUE_TEXT}${BOLD_TEXT}Step 6:${RESET_FORMAT} ${WHITE_TEXT}Deploying the Cloud Function...${RESET_FORMAT}"
