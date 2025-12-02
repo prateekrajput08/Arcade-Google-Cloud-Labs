@@ -24,6 +24,15 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 
+# Ask user for INSTANCE and ZONE
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter Instance Name:${RESET_FORMAT}"
+read INSTANCE
+export INSTANCE=$INSTANCE
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter Zone:${RESET_FORMAT}"
+read ZONE
+export ZONE=$ZONE
+
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
@@ -48,7 +57,6 @@ echo
 echo "${GREEN_TEXT}${BOLD_TEXT}WEBSITE READY!${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Open in browser:${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}http://$IP${RESET_FORMAT}"
-
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
