@@ -31,26 +31,26 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 
-read -p "${YELLOW_TEXT}Enter Pub/Sub TOPIC name:${RESET_COLOR} " TOPIC
-read -p "${YELLOW_TEXT}Enter MESSAGE body:${RESET_COLOR} " MESSAGE
+read -p "${YELLOW_TEXT}Enter Pub/Sub TOPIC name:${RESET_FORMAT} " TOPIC
+read -p "${YELLOW_TEXT}Enter MESSAGE body:${RESET_FORMAT} " MESSAGE
 
-echo "${GREEN_TEXT}Detecting region...${RESET_COLOR}"
+echo "${GREEN_TEXT}Detecting region...${RESET_FORMAT}"
 ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
 gcloud config set compute/region $REGION
 
-echo "${PINK_TEXT}Enabling APIs...${RESET_COLOR}"
+echo "${PINK_TEXT}Enabling APIs...${RESET_FORMAT}"
 gcloud services disable dataflow.googleapis.com
 gcloud services enable dataflow.googleapis.com pubsub.googleapis.com cloudscheduler.googleapis.com appengine.googleapis.com storage.googleapis.com cloudresourcemanager.googleapis.com
 sleep 80
 
-echo "${TEAL_TEXT}Creating Pub/Sub topic...${RESET_COLOR}"
+echo "${TEAL_TEXT}Creating Pub/Sub topic...${RESET_FORMAT}"
 gcloud pubsub topics create $TOPIC
 
 PROJECT_ID=$(gcloud config get-value project)
 BUCKET="${PROJECT_ID}-bucket"
 
-echo "${PINK_TEXT}Creating bucket...${RESET_COLOR}"
+echo "${PINK_TEXT}Creating bucket...${RESET_FORMAT}"
 gsutil mb -l $REGION gs://$BUCKET
 
 if [[ "$REGION" == "us-central1" ]]; then
@@ -63,28 +63,28 @@ else
   AE_REGION="us-central"
 fi
 
-echo "${PINK_TEXT}Creating App Engine...${RESET_COLOR}"
+echo "${PINK_TEXT}Creating App Engine...${RESET_FORMAT}"
 gcloud app create --region=$AE_REGION
 
-echo "${GREEN_TEXT}Creating Scheduler job...${RESET_COLOR}"
+echo "${GREEN_TEXT}Creating Scheduler job...${RESET_FORMAT}"
 gcloud scheduler jobs create pubsub publisher-job \
     --schedule="* * * * *" \
     --topic=$TOPIC \
     --message-body="$MESSAGE" \
     --location=$AE_REGION
 
-echo "${GREEN_TEXT}Triggering Scheduler...${RESET_COLOR}"
+echo "${GREEN_TEXT}Triggering Scheduler...${RESET_FORMAT}"
 while true; do
     if gcloud scheduler jobs run publisher-job --location=$AE_REGION; then
-        echo "${GREEN_TEXT}Scheduler triggered.${RESET_COLOR}"
+        echo "${GREEN_TEXT}Scheduler triggered.${RESET_FORMAT}"
         break
     else
-        echo "${RED_TEXT}Retrying...${RESET_COLOR}"
+        echo "${RED_TEXT}Retrying...${RESET_FORMAT}"
         sleep 10
     fi
 done
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Preparing Dataflow script...${RESET_COLOR}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Preparing Dataflow script...${RESET_FORMAT}"
 cat > shell.sh <<EOF_CP
 #!/bin/bash
 git clone https://github.com/GoogleCloudPlatform/python-docs-samples.git
