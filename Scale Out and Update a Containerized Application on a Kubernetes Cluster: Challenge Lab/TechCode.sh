@@ -43,43 +43,43 @@ echo
 
 # Step 1: Download files
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 1: Downloading application files...${RESET_FORMAT}"
-gsutil cp gs://$DEVSHELL_PROJECT_ID/echo-web-v2.tar.gz . & spinner
+gsutil cp gs://$DEVSHELL_PROJECT_ID/echo-web-v2.tar.gz .
 echo "${GREEN_TEXT}Download complete!${RESET_FORMAT}"
 echo
 
 # Step 2: Extract files
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 2: Extracting application files...${RESET_FORMAT}"
-tar -xzvf echo-web-v2.tar.gz & spinner
+tar -xzvf echo-web-v2.tar.gz 
 echo "${GREEN_TEXT}Extraction complete!${RESET_FORMAT}"
 echo
 
 # Step 3: Build container
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 3: Building container image...${RESET_FORMAT}"
-gcloud builds submit --tag gcr.io/$DEVSHELL_PROJECT_ID/echo-app:v2 . & spinner
+gcloud builds submit --tag gcr.io/$DEVSHELL_PROJECT_ID/echo-app:v2 .
 echo "${GREEN_TEXT}Build complete!${RESET_FORMAT}"
 echo
 
 # Step 4: Get cluster credentials
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 4: Connecting to GKE cluster...${RESET_FORMAT}"
-gcloud container clusters get-credentials echo-cluster --zone=$ZONE & spinner
+gcloud container clusters get-credentials echo-cluster --zone=$ZONE
 echo "${GREEN_TEXT}Cluster connection established!${RESET_FORMAT}"
 echo
 
 # Step 5: Create deployment
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 5: Creating deployment...${RESET_FORMAT}"
-kubectl create deployment echo-web --image=gcr.io/qwiklabs-resources/echo-app:v2 & spinner
+kubectl create deployment echo-web --image=gcr.io/qwiklabs-resources/echo-app:v2 
 echo "${GREEN_TEXT}Deployment created!${RESET_FORMAT}"
 echo
 
 # Step 6: Expose service
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 6: Exposing service...${RESET_FORMAT}"
-kubectl expose deployment echo-web --type=LoadBalancer --port 80 --target-port 8000 & spinner
+kubectl expose deployment echo-web --type=LoadBalancer --port 80 --target-port 8000 
 echo "${GREEN_TEXT}Service exposed!${RESET_FORMAT}"
 echo
 
 # Step 7: Scale deployment
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 7: Scaling deployment...${RESET_FORMAT}"
-kubectl scale deploy echo-web --replicas=2 & spinner
+kubectl scale deploy echo-web --replicas=2 
 echo "${GREEN_TEXT}Deployment scaled to 2 replicas!${RESET_FORMAT}"
 echo
 
