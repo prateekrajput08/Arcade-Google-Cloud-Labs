@@ -37,7 +37,7 @@ echo
 
 # Step 1: Download files
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 1: Downloading application files...${RESET_FORMAT}"
-gsutil cp gs://$DEVSHELL_PROJECT_ID/echo-web-v2.tar.gz .
+gsutil cp gs://$DEVSHELL_PROJECT_ID/echo-web-v2.tar.gz
 echo "${GREEN_TEXT}Download complete!${RESET_FORMAT}"
 echo
 
@@ -49,7 +49,7 @@ echo
 
 # Step 3: Build container
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 3: Building container image...${RESET_FORMAT}"
-gcloud builds submit --tag gcr.io/$DEVSHELL_PROJECT_ID/echo-app:v2 .
+gcloud builds submit --tag gcr.io/$DEVSHELL_PROJECT_ID/echo-app:v2
 echo "${GREEN_TEXT}Build complete!${RESET_FORMAT}"
 echo
 
