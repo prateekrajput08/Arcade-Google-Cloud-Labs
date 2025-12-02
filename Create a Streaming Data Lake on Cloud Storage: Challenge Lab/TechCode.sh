@@ -103,7 +103,7 @@ EOF_CP
 
 chmod +x shell.sh
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Running Dataflow pipeline...${RESET_COLOR}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Running Dataflow pipeline...${RESET_FORMAT}"
 docker run -it \
   -e PROJECT_ID=$PROJECT_ID \
   -e REGION=$REGION \
@@ -113,7 +113,7 @@ docker run -it \
   python:3.10 \
   /bin/bash -c "/shell.sh"
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Dataflow job submitted. Check Cloud Storage.${RESET_COLOR}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Dataflow job submitted. Check Cloud Storage.${RESET_FORMAT}"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
