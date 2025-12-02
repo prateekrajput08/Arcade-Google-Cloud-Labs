@@ -30,90 +30,91 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+echo "${YELLOW_TEXT}Enter Pub/Sub Topic name:${RESET_FORMAT}"
+read TOPIC
 
-read -p "${YELLOW_TEXT}Enter Pub/Sub TOPIC name:${RESET_FORMAT} " TOPIC
-read -p "${YELLOW_TEXT}Enter MESSAGE body:${RESET_FORMAT} " MESSAGE
+echo "${YELLOW_TEXT}Enter Scheduler Message to publish:${RESET_FORMAT}"
+read MESSAGE
 
-echo "${GREEN_TEXT}Detecting region...${RESET_FORMAT}"
-ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
-gcloud config set compute/region $REGION
+echo "${YELLOW_TEXT}Enter Cloud Storage Bucket name (must be globally unique):${RESET_FORMAT}"
+read BUCKET
 
-echo "${PINK_TEXT}Enabling APIs...${RESET_FORMAT}"
-gcloud services disable dataflow.googleapis.com
-gcloud services enable dataflow.googleapis.com pubsub.googleapis.com cloudscheduler.googleapis.com appengine.googleapis.com storage.googleapis.com cloudresourcemanager.googleapis.com
-sleep 80
+export ZONE=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
-echo "${TEAL_TEXT}Creating Pub/Sub topic...${RESET_FORMAT}"
-gcloud pubsub topics create $TOPIC
+export REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
 
-PROJECT_ID=$(gcloud config get-value project)
-BUCKET="${PROJECT_ID}-bucket"
+echo "${YELLOW_TEXT}Using REGION: $REGION ${RESET_FORMAT}"
 
-echo "${PINK_TEXT}Creating bucket...${RESET_FORMAT}"
-gsutil mb -l $REGION gs://$BUCKET
+echo "${GREEN_TEXT}Creating Pub/Sub topic...${RESET_FORMAT}"
+gcloud pubsub topics create $TOPIC --quiet
 
-if [[ "$REGION" == "us-central1" ]]; then
-  AE_REGION="us-central"
-elif [[ "$REGION" == "europe-west1" ]]; then
-  AE_REGION="europe-west"
-elif [[ "$REGION" == "asia-east1" ]]; then
-  AE_REGION="asia-east"
-else
-  AE_REGION="us-central"
-fi
+echo "${GREEN_TEXT}Creating App Engine app (required by Scheduler)...${RESET_FORMAT}"
+gcloud app create --region=$REGION
 
-echo "${PINK_TEXT}Creating App Engine...${RESET_FORMAT}"
-gcloud app create --region=$AE_REGION
+echo "${GREEN_TEXT}Creating Cloud Scheduler job...${RESET_FORMAT}"
+gcloud scheduler jobs create pubsub send-msg-job \
+  --schedule="* * * * *" \
+  --topic=$TOPIC \
+  --message-body="$MESSAGE" \
+  --location=$REGION
 
-echo "${GREEN_TEXT}Creating Scheduler job...${RESET_FORMAT}"
-gcloud scheduler jobs create pubsub publisher-job \
-    --schedule="* * * * *" \
-    --topic=$TOPIC \
-    --message-body="$MESSAGE" \
-    --location=$AE_REGION
+echo "${GREEN_TEXT}Starting Scheduler job...${RESET_FORMAT}"
+gcloud scheduler jobs run send-msg-job --location=$REGION
 
-echo "${GREEN_TEXT}Triggering Scheduler...${RESET_FORMAT}"
-while true; do
-    if gcloud scheduler jobs run publisher-job --location=$AE_REGION; then
-        echo "${GREEN_TEXT}Scheduler triggered.${RESET_FORMAT}"
-        break
-    else
-        echo "${RED_TEXT}Retrying...${RESET_FORMAT}"
-        sleep 10
-    fi
-done
+echo "${GREEN_TEXT}Creating Cloud Storage bucket...${RESET_FORMAT}"
+gsutil mb -l $REGION gs://$BUCKET/
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Preparing Dataflow script...${RESET_FORMAT}"
-cat > shell.sh <<EOF_CP
-#!/bin/bash
-git clone https://github.com/GoogleCloudPlatform/python-docs-samples.git
-cd python-docs-samples/pubsub/streaming-analytics
-pip install -U -r requirements.txt
-python PubSubToGCS.py \
---project=$PROJECT_ID \
---region=$REGION \
---input_topic=projects/$PROJECT_ID/topics/$TOPIC \
---output_path=gs://$BUCKET/samples/output \
---runner=DataflowRunner \
---window_size=2 \
---num_shards=2 \
---temp_location=gs://$BUCKET/temp
-EOF_CP
+echo "${GREEN_TEXT}Disabling Dataflow API (required)...${RESET_FORMAT}"
+gcloud services disable dataflow.googleapis.com --quiet
 
-chmod +x shell.sh
+echo "${GREEN_TEXT}Enabling Dataflow API...${RESET_FORMAT}"
+gcloud services enable dataflow.googleapis.com --quiet
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Running Dataflow pipeline...${RESET_FORMAT}"
-docker run -it \
-  -e PROJECT_ID=$PROJECT_ID \
-  -e REGION=$REGION \
-  -e TOPIC=$TOPIC \
-  -e BUCKET=$BUCKET \
-  -v $(pwd)/shell.sh:/shell.sh \
-  python:3.10 \
-  /bin/bash -c "/shell.sh"
+echo "${GREEN_TEXT}Installing Apache Beam (Python)...${RESET_FORMAT}"
+pip install apache-beam[gcp] -q
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Dataflow job submitted. Check Cloud Storage.${RESET_FORMAT}"
+cat << 'EOF' > stream_pipeline.py
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions, StandardOptions
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_topic')
+parser.add_argument('--output_path')
+args, beam_args = parser.parse_known_args()
+
+beam_options = PipelineOptions(
+    beam_args,
+    streaming=True,
+    save_main_session=True,
+)
+
+p = beam.Pipeline(options=beam_options)
+
+(
+    p
+    | "Read From PubSub" >> beam.io.ReadFromPubSub(topic=args.input_topic)
+    | "Window 2 Minutes" >> beam.WindowInto(beam.window.FixedWindows(120))
+    | "Decode" >> beam.Map(lambda x: x.decode('utf-8'))
+    | "Write to GCS" >> beam.io.WriteToText(args.output_path)
+)
+
+p.run().wait_until_finish()
+EOF
+
+echo "${GREEN_TEXT}Running Dataflow streaming job...${RESET_FORMAT}"
+
+python3 stream_pipeline.py \
+  --input_topic=projects/$(gcloud config get-value project)/topics/$TOPIC \
+  --output_path=gs://$BUCKET/output \
+  --region=$REGION \
+  --runner=DataflowRunner \
+  --job_name=streaming-pipeline-$(date +%s)
+
+echo "${GREEN_TEXT}Checking output files in bucket...${RESET_FORMAT}"
+gsutil ls gs://$BUCKET/
+
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
