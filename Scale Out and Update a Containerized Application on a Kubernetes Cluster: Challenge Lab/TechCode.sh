@@ -30,15 +30,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Check if zone is already set
-if [ -z "$ZONE" ]; then
-  read -p "${CYAN_TEXT}${BOLD_TEXT}Enter your zone (e.g., us-central1-a): ${RESET_FORMAT}" ZONE
-  export ZONE
-  echo "${GREEN_TEXT}${BOLD_TEXT}Zone set to: $ZONE${RESET_FORMAT}"
-else
-  echo "${GREEN_TEXT}${BOLD_TEXT}Using pre-configured zone: $ZONE${RESET_FORMAT}"
-  echo "${YELLOW_TEXT}To change zone, run: export ZONE=your-new-zone${RESET_FORMAT}"
-fi
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter your zone (e.g., us-central1-a): ${RESET_FORMAT}"" ZONE
+export ZONE
+echo "${GREEN_TEXT}${BOLD_TEXT}Zone set to: $ZONE ${RESET_FORMAT}"
 echo
 
 # Step 1: Download files
