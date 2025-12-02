@@ -19,23 +19,19 @@ BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 BLINK_TEXT=$'\033[5m'
 NO_COLOR=$'\033[0m'
-RESET_FORMAT_FORMAT=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
 REVERSE_TEXT=$'\033[7m'
 
 clear
 
 # Welcome message
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
 # Check if zone is already set
 if [ -z "$ZONE" ]; then
-  echo "${YELLOW_TEXT}${BOLD_TEXT}No default zone configured.${RESET_FORMAT}"
-  echo "${BLUE_TEXT}Available zones:${RESET_FORMAT}"
-  gcloud compute zones list --format="value(name)" | sort
-  echo
   read -p "${CYAN_TEXT}${BOLD_TEXT}Enter your zone (e.g., us-central1-a): ${RESET_FORMAT}" ZONE
   export ZONE
   echo "${GREEN_TEXT}${BOLD_TEXT}Zone set to: $ZONE${RESET_FORMAT}"
