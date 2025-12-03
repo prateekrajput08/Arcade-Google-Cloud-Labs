@@ -19,15 +19,15 @@ BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 BLINK_TEXT=$'\033[5m'
 NO_COLOR=$'\033[0m'
-RESET_FORMAT_FORMAT=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
 REVERSE_TEXT=$'\033[7m'
 
 clear
 
 # Welcome message
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
 echo "${GOLD_TEXT}${BOLD_TEXT}Fetching Project ID...${RESET_FORMAT}"
