@@ -30,19 +30,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-#!/bin/bash
-
-# Colors
-BLACK_TEXT=$'\033[0;90m'
-RED_TEXT=$'\033[0;91m'
-GREEN_TEXT=$'\033[0;92m'
-YELLOW_TEXT=$'\033[0;93m'
-BLUE_TEXT=$'\033[0;94m'
-MAGENTA_TEXT=$'\033[0;95m'
-WHITE_TEXT=$'\033[0;97m'
-BOLD_TEXT=$'\033[1m'
-RESET_FORMAT=$'\033[0m'
-
 echo "${YELLOW_TEXT}${BOLD_TEXT}# Auto-fetch project, region, and zone${RESET_FORMAT}"
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
