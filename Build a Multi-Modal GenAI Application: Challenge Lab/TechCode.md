@@ -16,7 +16,7 @@
 
 ```bash
 curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Build%20a%20Multi-Modal%20GenAI%20Application%3A%20Challenge%20Lab/TechCode.sh
-source techcode.sh
+source TechCode.sh
 ```
 
 </div>
