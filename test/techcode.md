@@ -1,6 +1,6 @@
-This challenge lab tests your skills and knowledge from the labs in the course, Build a Smart Cloud Application with Vibe Coding.
-Task 1. Enable the necessary APIs
-In this task, you create the project-specific foundation in Google Cloud to support an AI deployment at scale. You ensure your Google Cloud project is configured to allow the required services to function and communicate effectively.
+# This challenge lab tests your skills and knowledge from the labs in the course, Build a Smart Cloud Application with Vibe Coding.
+## Task 1. Enable the necessary APIs
+*In this task, you create the project-specific foundation in Google Cloud to support an AI deployment at scale. You ensure your Google Cloud project is configured to allow the required services to function and communicate effectively.
  
 For this task, perform the steps that follow.
  
@@ -13,7 +13,8 @@ In the terminal, run the following commands to download and extract the boilerpl
 gcloud storage cp gs://<filled in at lab start>-labconfig-bucket/labs_code.zip .
 unzip labs_code.zip   
  
-Run the following command to create environment variables (copy the command from the lab instructions):
+## Run the following command to create environment variables (copy the command from the lab instructions): 
+```bash
 cd ~/zoo_guide_agent
 cat <<EOF > .env
 MODEL="gemini-2.5-flash"
@@ -24,33 +25,33 @@ GOOGLE_CLOUD_PROJECT=<filled in at lab start>
 PROJECT_NUMBER=<filled in at lab start>
 GOOGLE_CLOUD_LOCATION=<filled in at lab start>
 EOF
- 
+```
 Your final directory structure for mcp-on-cloudrun should look similar to the following:
  
 Output:
 .
-├── mcp-on-cloudrun
-│   ├── Dockerfile
-│   ├── local_mcp_call.py
-│   ├── pyproject.toml
-│   ├── server.py
-│   └── uv.lock
-└── zoo_guide_agent
-    ├── agent.py
-    ├── __init__.py
-    ├── .env
-    └── requirements.txt           
+├── mcp-on-cloudrun <br>
+│   ├── Dockerfile <br>
+│   ├── local_mcp_call.py <br>
+│   ├── pyproject.toml <br>
+│   ├── server.py <br>
+│   └── uv.lock <br>
+└── zoo_guide_agent <br>
+    ├── agent.py <br>
+    ├── __init__.py <br>
+    ├── .env <br>
+    └── requirements.txt <br>        
  
 In the terminal, run the following command to enable the APIs:
- 
+```bash
 gcloud services enable \
 run.googleapis.com \
 artifactregistry.googleapis.com \
 cloudbuild.googleapis.com \
 aiplatform.googleapis.com \
 compute.googleapis.com     
- 
-Task 2. Perform the necessary policy bindings (IAM setup)
+```
+## Task 2. Perform the necessary policy bindings (IAM setup)
 The automated services (Cloud Build and Cloud Run) need specific permissions to interact with each other and the AI Platform.
  
 In this task, you must perform the necessary policy bindings to give the user/service account permissions to invoke Cloud Run and use the AI Platform.
@@ -103,7 +104,7 @@ CallToolResult(content=[TextContent(type='text', text='[{"species":"walrus","nam
  
 Deploy to Cloud Run
 Run the following gcloud command to deploy the application to Cloud Run (copy the command from lab instructions):
- 
+```bash
 cd ~/mcp-on-cloudrun
 gcloud run deploy zoo-mcp-server \
     --no-allow-unauthenticated \
@@ -112,7 +113,7 @@ gcloud run deploy zoo-mcp-server \
     --min=1 \
     --project=<filled in at lab start> \
     --labels=lab-dev=mcp-zoo-cloud-run-service   
- 
+ ```
 Task 4. Update the agent to use MCP
 In this task, you deploy your Python Agent code and link it to the newly deployed MCP server.
  
@@ -120,15 +121,16 @@ Using the ADK commands within the Gemini CLI, deploy the local (updated) agent.p
  
 Token generation
 
- 
+```bash
 Save your Google Cloud credentials and project number in environment variables for use in the Gemini settings file (copy the command from the lab instructions):
 export PROJECT_NUMBER=$(gcloud projects describe $GOOGLE_CLOUD_PROJECT --format="value(projectNumber)")
 export ID_TOKEN=$(gcloud auth print-identity-token)
- 
+```
  
 Note: If you see an authentication error in Gemini CLI, your ID_TOKEN may have expired. Exit with /quit, set your project using gcloud config set project filled in at lab start command.
    
 In Cloud Shell, create and/or update ~/.gemini/settings.json. Replace your Gemini CLI settings file to add the Cloud Run MCP server (copy the command from the lab instructions):
+```bash
 {
 "mcpServers": {
     "zoo-remote": {
@@ -141,6 +143,7 @@ In Cloud Shell, create and/or update ~/.gemini/settings.json. Replace your Gemin
 "selectedAuthType": "cloud-shell",
 "hasSeenIdeIntegrationNudge": true
 }
+```
 Open the Gemini CLI
 Perform the steps that follow.
  
@@ -192,16 +195,18 @@ tools=[google_search]
  
  
 Run the following commands to install the package zoo_guide_agent (copy the command from the lab instructions):
- 
+```bash
 gcloud config set project qwiklabs-gcp-04-a6266fef991d 
 cd ~/zoo_guide_agent 
 python -m venv .venv 
 source .venv/bin/activate 
-pip install --no-cache-dir -r requirements.txt     
+pip install --no-cache-dir -r requirements.txt
+``` 
 Run the following to deploy the Zoo Guide agent to Cloud Run 
- 
+```bash
 cd ~      
 adk web
+```
 In Cloud Shell, click or CTRL+click the http://localhost:8000 or http://127.0.0.1:8000 link to open the ADK dev UI in a new browser tab.
 In the ADK dev UI, select the zoo_guide_agent and ask it a query such as the following:
 Where can I find bears?
@@ -209,7 +214,7 @@ Where can I find bears?
 Expected output: You should see events for all function calls, and finally a resolution to your query that combines information from all sources.
 Deploy to Cloud Run
 In a new terminal, run the following commands to deploy your agent (copy the command from the lab instructions):
- 
+```bash
 cd ~/zoo_guide_agent     
 uvx --from google-adk \
 adk deploy cloud_run \
@@ -220,6 +225,7 @@ adk deploy cloud_run \
 . \
 -- \
 --labels=lab-dev=cloud-zoo-run-adk-service
+```
 Verify the deployed ADK Agent
 With your agent now live on Cloud Run, perform a test to confirm a successful deployment and to verify that the agent is working as expected. Use the public Service URL to access the ADK's web interface and interact with the agent.
  
