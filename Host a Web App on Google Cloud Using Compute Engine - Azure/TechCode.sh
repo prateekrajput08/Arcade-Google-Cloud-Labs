@@ -31,14 +31,14 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# AUTO DETECT ZONE
-echo "Detecting zone..."
-export ZONE=$(gcloud compute instances list --format="value(zone)" --limit=1)
-if [[ -z "$ZONE" ]]; then
-  ZONE=$(gcloud config get-value compute/zone)
-fi
-echo "Using zone: $ZONE"
 echo
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter your Compute Zone (example: us-central1-a):${RESET_FORMAT}"
+read -p "ZONE: " ZONE
+
+if [[ -z "$ZONE" ]]; then
+    echo "${RED_TEXT}${BOLD_TEXT}No zone entered — exiting script.${RESET_FORMAT}"
+    exit 1
+fi
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Enabling Compute Engine API...${RESET_FORMAT}"
 gcloud services enable compute.googleapis.com
