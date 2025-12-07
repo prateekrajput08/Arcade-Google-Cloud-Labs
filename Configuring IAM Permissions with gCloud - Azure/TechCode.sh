@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 BLACK_TEXT=$'\033[0;90m'
@@ -25,106 +24,99 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 
-# Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Check gcloud version
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Checking gcloud version${RESET_FORMAT}"
 gcloud --version
 
-# Authenticate
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Authenticating user${RESET_FORMAT}"
 gcloud auth login
 
-# Set environment variables
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Fetching default PROJECT, ZONE and REGION${RESET_FORMAT}"
 export PROJECT_ID=$(gcloud config get-value core/project)
 export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
-echo $ZONE
-echo $REGION
+echo "${GOLD_TEXT}Zone: $ZONE${RESET_FORMAT}"
+echo "${GOLD_TEXT}Region: $REGION${RESET_FORMAT}"
 
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Setting gcloud region and zone${RESET_FORMAT}"
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $ZONE
 
-# Create a VM instance
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Creating first VM instance${RESET_FORMAT}"
 gcloud compute instances create lab-1 --zone $ZONE --machine-type=e2-standard-2
 
-# Show config
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Showing current gcloud config${RESET_FORMAT}"
 gcloud config list
 
-# Update Region and Zone if needed
-export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
-
-echo ""
-echo -e "\033[1;33mThis is your current zone: $ZONE.\033[0m" 
-echo "You could select a different zone from those listed below:"
-echo ""
-
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Listing available zones in current region${RESET_FORMAT}"
 gcloud compute zones list --filter="region:($REGION)" --format="value(name)" | while read -r zone; do
-  echo -e "\033[1;33m$zone\033[0m"
+  echo "${GOLD_TEXT}${BOLD_TEXT}$zone${RESET_FORMAT}"
 done
 
-read -e -p $'\033[1;33mEnter the ZONE: \033[0m' ZONE
-
+read -e -p "${GOLD_TEXT}${BOLD_TEXT}Enter the ZONE: ${RESET_FORMAT}" ZONE
 gcloud config set compute/zone $ZONE
-
-echo -e "\033[1;33mNow this is your new zone: $ZONE.\033[0m"
-
-gcloud config list
+echo "${GREEN_TEXT}${BOLD_TEXT}Zone updated to: $ZONE${RESET_FORMAT}"
 
 cat ~/.config/gcloud/configurations/config_default
 
-# Init without browser launch
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Running gcloud init in no-browser mode${RESET_FORMAT}"
 gcloud init --no-launch-browser
 
 echo ""
-echo -e "\033[1;33mOpen this link.\033[0m \033[1;34mhttps://console.cloud.google.com/iam-admin/iam?invt=AbutQA&project=$PROJECT_ID\033[0m"
+echo "${PURPLE_TEXT}${BOLD_TEXT}# IAM Console link to verify permissions${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}https://console.cloud.google.com/iam-admin/iam?invt=AbutQA&project=$PROJECT_ID${RESET_FORMAT}"
 echo ""
 
 # Confirmation loop
 while true; do
-    echo -ne "\e[1;93mDo you want to proceed? (Y/n): \e[0m"
+    echo -ne "${GOLD_TEXT}${BOLD_TEXT}Do you want to proceed? (Y/n): ${RESET_FORMAT}"
     read confirm
     case "$confirm" in
         [Yy]) 
-            echo -e "\e[34mRunning the command...\e[0m"
+            echo "${BLUE_TEXT}${BOLD_TEXT}Running the command...${RESET_FORMAT}"
             break
             ;;
         [Nn]|"") 
-            echo "Operation canceled."
+            echo "${RED_TEXT}Operation canceled.${RESET_FORMAT}"
             break
             ;;
         *) 
-            echo -e "\e[31mInvalid input. Please enter Y or N.\e[0m" 
+            echo "${RED_TEXT}${BOLD_TEXT}Invalid input. Please enter Y or N.${RESET_FORMAT}" 
             ;;
     esac
 done
 
-# IAM role and permissions setup
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Displaying available IAM roles${RESET_FORMAT}"
 gcloud iam roles list | grep "name:"
+
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Showing compute.instanceAdmin role details${RESET_FORMAT}"
 gcloud iam roles describe roles/compute.instanceAdmin
 
-read -e -p $'\033[1;33mEnter the USER2: \033[0m' USER2
-read -e -p $'\033[1;33mEnter the PROJECT_ID2: \033[0m' PROJECT_ID2
-read -e -p $'\033[1;33mEnter the VM ZONE: \033[0m' ZONE
+read -e -p "${GOLD_TEXT}${BOLD_TEXT}Enter USER2: ${RESET_FORMAT}" USER2
+read -e -p "${GOLD_TEXT}${BOLD_TEXT}Enter PROJECT_ID2: ${RESET_FORMAT}" PROJECT_ID2
+read -e -p "${GOLD_TEXT}${BOLD_TEXT}Enter VM ZONE: ${RESET_FORMAT}" ZONE
 
 gcloud config configurations activate user2
 
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Storing PROJECTID2 in bashrc${RESET_FORMAT}"
 echo "export PROJECTID2=$PROJECT_ID2" >> ~/.bashrc
 source ~/.bashrc
 
 gcloud config configurations activate default
 
-# Install utilities
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Installing essential tools (epel-release + jq)${RESET_FORMAT}"
 sudo yum -y install epel-release
 sudo yum -y install jq
 
 echo "export USERID2=$USER2" >> ~/.bashrc
 source ~/.bashrc
 
-# Assign viewer role
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Assigning viewer role to USER2${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $PROJECT_ID2 --member user:$USER2 --role=roles/viewer
 
 gcloud config configurations activate user2
@@ -132,21 +124,16 @@ gcloud config set project $PROJECT_ID2
 
 gcloud compute instances list
 
-# Optional VM creation
-# gcloud compute instances create lab-2 --zone $ZONE 
-
-gcloud config configurations activate default
-
-# Create a custom DevOps role
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Creating custom DevOps role${RESET_FORMAT}"
 gcloud iam roles create devops --project $PROJECTID2 --permissions "compute.instances.create,compute.instances.delete,compute.instances.start,compute.instances.stop,compute.instances.update,compute.disks.create,compute.subnetworks.use,compute.subnetworks.useExternalIp,compute.instances.setMetadata,compute.instances.setServiceAccount"
 
-# Bind IAM roles
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Binding roles to USER2${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $PROJECT_ID2 --member user:$USER2 --role=roles/iam.serviceAccountUser
 gcloud projects add-iam-policy-binding $PROJECT_ID2 --member user:$USER2 --role=projects/$PROJECT_ID2/roles/devops
 
 gcloud config configurations activate user2
 
-# Create instance with new role
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Creating VM using DevOps role${RESET_FORMAT}"
 gcloud compute instances create lab-2 --zone $ZONE
 
 gcloud compute instances list
@@ -154,21 +141,17 @@ gcloud compute instances list
 gcloud config configurations activate default
 gcloud config set project $PROJECT_ID2
 
-# Create service account
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Creating service account (devops)${RESET_FORMAT}"
 gcloud iam service-accounts create devops --display-name devops
-
-gcloud iam service-accounts list --filter "displayName=devops"
 
 SA=$(gcloud iam service-accounts list --format="value(email)" --filter "displayName=devops")
 
-# Bind service account permissions
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Assigning permissions to service account${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $PROJECT_ID2 --member serviceAccount:$SA --role=roles/iam.serviceAccountUser
 gcloud projects add-iam-policy-binding $PROJECT_ID2 --member serviceAccount:$SA --role=roles/compute.instanceAdmin
 
-# Create instance with service account
-export ZONE=$ZONE
+echo "${PURPLE_TEXT}${BOLD_TEXT}# Creating VM using service account${RESET_FORMAT}"
 gcloud compute instances create lab-3 --zone $ZONE --machine-type=e2-standard-2 --service-account $SA --scopes "https://www.googleapis.com/auth/compute"
-
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
