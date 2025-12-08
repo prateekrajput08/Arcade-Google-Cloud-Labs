@@ -20,6 +20,11 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ### Sink Name: `vpc-flows`
+
+```bash
+export ZONE=$(gcloud compute instances list --filter="name=centos-clean" --format="value(zone)")
+gcloud compute ssh centos-clean --zone=$ZONE --quiet
+```
 </div>
 
 ---
