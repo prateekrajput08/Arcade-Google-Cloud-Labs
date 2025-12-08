@@ -31,46 +31,107 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Ask for zone input
-echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter the zone value to export (e.g., us-central1-a):${RESET_FORMAT}"
+# ------------------ ASK FOR ZONE ------------------
+echo "${YELLOW}${BOLD}Enter zone (e.g., us-central1-a):${RESET}"
 read ZONE
 export ZONE
 
-# Create instances
-gcloud compute instances create blue --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-medium --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default --metadata=enable-oslogin=true --maintenance-policy=MIGRATE --provisioning-model=STANDARD --tags=web-server,http-server --create-disk=auto-delete=yes,boot=yes,device-name=blue,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=projects/$DEVSHELL_PROJECT_ID/zones/$ZONE/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --labels=goog-ec-src=vm_add-gcloud --reservation-affinity=any
+echo "${CYAN}${BOLD}Creating Blue & Green servers...${RESET}"
 
-gcloud compute instances create green --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-medium --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default --metadata=enable-oslogin=true --maintenance-policy=MIGRATE --provisioning-model=STANDARD --create-disk=auto-delete=yes,boot=yes,device-name=blue,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=projects/$DEVSHELL_PROJECT_ID/zones/$ZONE/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --labels=goog-ec-src=vm_add-gcloud --reservation-affinity=any
+# ------------------ CREATE BLUE SERVER (TAGGED) ------------------
+gcloud compute instances create blue \
+  --project=$DEVSHELL_PROJECT_ID \
+  --zone=$ZONE \
+  --machine-type=e2-micro \
+  --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
+  --metadata=enable-oslogin=true \
+  --tags=web-server \
+  --create-disk=auto-delete=yes,boot=yes,device-name=blue,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=pd-balanced \
+  --quiet
 
-# Create firewall rule
-gcloud compute --project=$DEVSHELL_PROJECT_ID firewall-rules create allow-http-web-server --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80,icmp --source-ranges=0.0.0.0/0 --target-tags=web-server
+# ------------------ CREATE GREEN SERVER (NO TAG) ------------------
+gcloud compute instances create green \
+  --project=$DEVSHELL_PROJECT_ID \
+  --zone=$ZONE \
+  --machine-type=e2-micro \
+  --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
+  --metadata=enable-oslogin=true \
+  --create-disk=auto-delete=yes,boot=yes,device-name=green,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=pd-balanced \
+  --quiet
 
-# Create test VM
-gcloud compute instances create test-vm --machine-type=f1-micro --subnet=default --zone=$ZONE
+echo "${GREEN}${BOLD}VMs Created Successfully!${RESET}"
 
-# Create service account and grant permissions
-gcloud iam service-accounts create network-admin --description="Service account for Network Admin role" --display-name="Network-admin"
+# ------------------ CREATE FIREWALL RULE ------------------
+echo "${CYAN}${BOLD}Creating Firewall Rule...${RESET}"
 
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAccount:network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com --role=roles/compute.networkAdmin
+gcloud compute firewall-rules create allow-http-web-server \
+  --project=$DEVSHELL_PROJECT_ID \
+  --direction=INGRESS \
+  --priority=1000 \
+  --network=default \
+  --allow=tcp:80,icmp \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=web-server \
+  --quiet
 
-gcloud iam service-accounts keys create credentials.json --iam-account=network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com
+echo "${GREEN}${BOLD}Firewall Rule Created Successfully!${RESET}"
 
-# Create and copy blue server setup script
+# ------------------ CREATE TEST VM ------------------
+echo "${CYAN}${BOLD}Creating test-vm...${RESET}"
+
+gcloud compute instances create test-vm \
+  --project=$DEVSHELL_PROJECT_ID \
+  --zone=$ZONE \
+  --machine-type=e2-micro \
+  --subnet=default \
+  --quiet
+
+echo "${GREEN}${BOLD}test-vm Created Successfully!${RESET}"
+
+# ------------------ CREATE SERVICE ACCOUNT ------------------
+echo "${CYAN}${BOLD}Creating Service Account & Keys...${RESET}"
+
+gcloud iam service-accounts create network-admin \
+  --description="Service account for Network Admin role" \
+  --display-name="Network-admin" \
+  --quiet
+
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+  --member=serviceAccount:network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/compute.networkAdmin \
+  --quiet
+
+gcloud iam service-accounts keys create credentials.json \
+  --iam-account=network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com \
+  --quiet
+
+echo "${GREEN}${BOLD}Service Account + Key Created Successfully!${RESET}"
+
+# ------------------ BLUE SERVER NGINX SETUP ------------------
+echo "${CYAN}${BOLD}Configuring Blue Server...${RESET}"
+
 cat > bluessh.sh <<'EOF_END'
+sudo apt-get update -y
 sudo apt-get install nginx-light -y
-sudo sed -i "14c\<h1>Welcome to the blue server!</h1>" /var/www/html/index.nginx-debian.html
+sudo sed -i '14c\<h1>Welcome to the blue server!</h1>' /var/www/html/index.nginx-debian.html
+sudo systemctl restart nginx
 EOF_END
 
-gcloud compute scp bluessh.sh blue:/tmp --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --quiet
-gcloud compute ssh blue --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --quiet --command="bash /tmp/bluessh.sh" --ssh-flag="-o ConnectTimeout=60"
+gcloud compute scp bluessh.sh blue:/tmp --zone=$ZONE --quiet
+gcloud compute ssh blue --zone=$ZONE --quiet --command="bash /tmp/bluessh.sh"
 
-# Create and copy green server setup script
+# ------------------ GREEN SERVER NGINX SETUP ------------------
+echo "${CYAN}${BOLD}Configuring Green Server...${RESET}"
+
 cat > greenssh.sh <<'EOF_END'
+sudo apt-get update -y
 sudo apt-get install nginx-light -y
-sudo sed -i "14c\<h1>Welcome to the green server!</h1>" /var/www/html/index.nginx-debian.html
+sudo sed -i '14c\<h1>Welcome to the green server!</h1>' /var/www/html/index-nginx-debian.html
+sudo systemctl restart nginx
 EOF_END
 
-gcloud compute scp greenssh.sh green:/tmp --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --quiet
-gcloud compute ssh green --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --quiet --command="bash /tmp/greenssh.sh"
+gcloud compute scp greenssh.sh green:/tmp --zone=$ZONE --quiet
+gcloud compute ssh green --zone=$ZONE --quiet --command="bash /tmp/greenssh.sh"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
