@@ -31,6 +31,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+#!/bin/bash
+
 gcloud auth list
 
 export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
@@ -38,7 +40,7 @@ export ZONE=$(gcloud compute project-info describe --format="value(commonInstanc
 export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
 
-gcloud compute networks create vpc-net --project=$DEVSHELL_PROJECT_ID --description="Subscribe to Techcps" --subnet-mode=custom
+gcloud compute networks create vpc-net --project=$DEVSHELL_PROJECT_ID --description="Subscribe to Dr. Abhishek's YouTube Channel" --subnet-mode=custom
 
 
 gcloud compute networks subnets create vpc-subnet --project=$DEVSHELL_PROJECT_ID --network=vpc-net --region=$REGION --range=10.1.3.0/24 --enable-flow-logs
@@ -81,9 +83,7 @@ gcloud compute firewall-rules create allow-http-alt \
     --description="Allow HTTP traffic on alternate rule"
 
 
-
-bq mk bq_vpc_flows
-
+bq mk bq_vpcflows
 
 
 CP_IP=$(gcloud compute instances describe web-server --zone=$ZONE --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
