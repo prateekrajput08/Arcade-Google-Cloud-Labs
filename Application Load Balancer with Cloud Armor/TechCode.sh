@@ -71,8 +71,7 @@ echo
 DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
 TOKEN=$(gcloud auth application-default print-access-token)
 
-echo "${RED_TEXT}${BOLD_TEXT}Creating corrected Cloud Armor policy...${RESET_FORMAT}"
-
+echo "${RED_TEXT}${BOLD_TEXT}Creating corrected Cloud Armor deny policy...${RESET_FORMAT}"
 curl -X POST \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
@@ -85,18 +84,18 @@ curl -X POST \
                 \"action\": \"deny(403)\",
                 \"match\": {
                     \"versionedExpr\": \"SRC_IPS_V1\",
-                    \"config\": {\"srcIpRanges\": [\"$EXTERNAL_IP\"]}
+                    \"config\": {\"srcIpRanges\": [\"$EXTERNAL_IP/32\"]}
                 }
             }
         ]
      }" \
   "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/securityPolicies"
 
-echo "Waiting for policy create..."
-sleep 30
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting 45 seconds for policy creation...${RESET_FORMAT}"
+sleep 45
 
-echo "${RED_TEXT}${BOLD_TEXT}Attaching Cloud Armor policy using correct PATCH method...${RESET_FORMAT}"
 
+echo "${RED_TEXT}${BOLD_TEXT}Attaching policy with PATCH (correct method)...${RESET_FORMAT}"
 curl -X PATCH \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
   -H "Content-Type: application/json" \
@@ -105,13 +104,22 @@ curl -X PATCH \
       }" \
   "https://compute.googleapis.com/compute/v1/projects/$DEVSHELL_PROJECT_ID/global/backendServices/http-backend"
 
-echo "Waiting for enforcement..."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting 180 seconds for Cloud Armor enforcement...${RESET_FORMAT}"
 sleep 180
 
+
+echo "${BLUE_TEXT}${BOLD_TEXT}Retrieving the IP address of the load balancer...${RESET_FORMAT}"
+LB_IP_ADDRESS=$(gcloud compute forwarding-rules describe http-lb-forwarding-rule --global --format="value(IPAddress)")
+echo "${GREEN_TEXT}${BOLD_TEXT}Load Balancer IP Address:${RESET_FORMAT} ${CYAN_TEXT}${BOLD_TEXT}$LB_IP_ADDRESS${RESET_FORMAT}"
+echo
+
+echo "${BLUE_TEXT}${BOLD_TEXT}Connecting to siege VM and initiating load test...${RESET_FORMAT}"
+gcloud compute ssh --zone "$VM_ZONE" "siege-vm" --project "$DEVSHELL_PROJECT_ID" --quiet --command "sudo apt-get -y update && sudo apt-get -y install siege && export LB_IP=$LB_IP_ADDRESS && siege -c 150 -t 120s http://\$LB_IP"
+
+echo
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo
