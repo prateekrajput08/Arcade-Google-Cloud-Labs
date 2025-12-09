@@ -16,11 +16,7 @@
 
 ```bash
 bq load --source_format=CSV --skip_leading_rows=1 --autodetect DATASET.products_information gs://PROJECT-ID-bucket/products.csv
-```
-```bash
 bq query --use_legacy_sql=false 'CREATE SEARCH INDEX product_search_index ON DATASET.products_information(ALL COLUMNS)'
-```
-```bash
 bq query --use_legacy_sql=false 'SELECT * FROM DATASET.products_information WHERE SEARCH(products_information, "22 oz Water Bottle")'
 ```
 
