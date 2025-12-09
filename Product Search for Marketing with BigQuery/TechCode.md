@@ -1,4 +1,4 @@
-# 🌐 Product Search for Marketing with BigQuery 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6465/labs/40643)
+# 🌐 Product Search for Marketing with BigQuery 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6957/labs/43193)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -15,12 +15,13 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Product%20Search%20for%20Marketing%20with%20BigQuery/TechCode.sh
-sudo chmod +x TechCode.sh 
-./TechCode.sh
+bq load --source_format=CSV --skip_leading_rows=1 --autodetect DATASET.products_information gs://PROJECT-ID-bucket/products.csv
 ```
 ```bash
-bq query --use_legacy_sql=false 'SELECT * FROM products.products_information WHERE SEARCH(products_information, "22 oz Water Bottle")'
+bq query --use_legacy_sql=false 'CREATE SEARCH INDEX product_search_index ON DATASET.products_information(ALL COLUMNS)'
+```
+```bash
+bq query --use_legacy_sql=false 'SELECT * FROM DATASET.products_information WHERE SEARCH(products_information, "22 oz Water Bottle")'
 ```
 
 </div>
@@ -29,18 +30,24 @@ bq query --use_legacy_sql=false 'SELECT * FROM products.products_information WHE
 
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
-<div align="center" style="padding: 5px;">
-  <h3>📱 Join the Tech & Code Community</h3>
-  
-  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1">
+<div style="text-align:center; padding: 10px 0; max-width: 640px; margin: 0 auto;">
+  <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 14px;">📱 Join the Tech & Code Community</h3>
+
+  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1" style="margin: 0 6px; display: inline-block;">
     <img src="https://img.shields.io/badge/Subscribe-Tech%20&%20Code-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Channel">
   </a>
-  &nbsp;
-  <a href="https://www.linkedin.com/in/prateekrajput08/">
-    <img src="https://img.shields.io/badge/LINKEDIN-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-</a>
 
+  <a href="https://www.linkedin.com/in/prateekrajput08/" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+  </a>
 
+  <a href="https://t.me/techcode9" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Telegram-Tech%20Code-0088cc?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel">
+  </a>
+
+  <a href="https://www.instagram.com/techcodefacilitator" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Instagram-Tech%20Code-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram Profile">
+  </a>
 </div>
 
 ---
@@ -50,6 +57,6 @@ bq query --use_legacy_sql=false 'SELECT * FROM products.products_information WHE
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: May 2025</em>
+    <em>Last updated: November 2025</em>
   </p>
 </div>
