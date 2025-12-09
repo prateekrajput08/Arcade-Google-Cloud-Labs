@@ -1,4 +1,4 @@
-# 🌐 Export Data from BigQuery to Cloud Storage 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6465/labs/40644)
+# 🌐 Export Data from BigQuery to Cloud Storage 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6957/labs/43194)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -15,17 +15,10 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-bq load --source_format=CSV --autodetect customer_details.customers customers.csv ;
-```
-```bash
-bq query --use_legacy_sql=false --destination_table customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender="Male"' ;
-PROJECT_ID=$(gcloud config get-value project) ;
-```
-```bash
-bq extract customer_details.male_customers gs://$PROJECT_ID-bucket/exported_male_customers.csv ;
-```
-```bash
-bq query --use_legacy_sql=false --replace --destination_table=customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender = "Male"' ;
+bq load --source_format=CSV --autodetect customer_details.customers customers.csv
+bq query --use_legacy_sql=false --destination_table customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender="Male"'
+bq extract customer_details.male_customers gs://PROJECY-ID-bucket/exported_male_customers.csv
+bq query --use_legacy_sql=false --replace --destination_table=customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender = "Male"'
 ```
 
 </div>
@@ -34,17 +27,24 @@ bq query --use_legacy_sql=false --replace --destination_table=customer_details.m
 
 ## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
-<div align="center" style="padding: 5px;">
-  <h3>📱 Join the Tech & Code Community</h3>
-  
-  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1">
+<div style="text-align:center; padding: 10px 0; max-width: 640px; margin: 0 auto;">
+  <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 14px;">📱 Join the Tech & Code Community</h3>
+
+  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1" style="margin: 0 6px; display: inline-block;">
     <img src="https://img.shields.io/badge/Subscribe-Tech%20&%20Code-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Channel">
   </a>
-  &nbsp;
-  <a href="https://www.linkedin.com/in/prateekrajput08/">
-    <img src="https://img.shields.io/badge/LINKEDIN-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
-</a>
 
+  <a href="https://www.linkedin.com/in/prateekrajput08/" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+  </a>
+
+  <a href="https://t.me/techcode9" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Telegram-Tech%20Code-0088cc?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel">
+  </a>
+
+  <a href="https://www.instagram.com/techcodefacilitator" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Instagram-Tech%20Code-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram Profile">
+  </a>
 </div>
 
 ---
@@ -54,6 +54,6 @@ bq query --use_legacy_sql=false --replace --destination_table=customer_details.m
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: May 2025</em>
+    <em>Last updated: November 2025</em>
   </p>
 </div>
