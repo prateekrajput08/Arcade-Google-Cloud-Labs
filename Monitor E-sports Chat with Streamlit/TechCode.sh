@@ -68,26 +68,36 @@ sleep 1
 ############################################################
 echo "${BLUE_TEXT}[*] Task 3: Creating Pub/Sub topic & BigQuery subscription${RESET_FORMAT}"
 
-# Create Topic
 if gcloud pubsub topics list --format="value(name)" | grep -q "topics/esports_messages_topic$"; then
-    echo "${YELLOW_TEXT}[!] Topic already exists${RESET_FORMAT}"
+  warn "Pub/Sub topic esports_messages_topic already exists, skipping."
 else
-    gcloud pubsub topics create esports_messages_topic >/dev/null
-    echo "${GREEN_TEXT}[✓] Topic esports_messages_topic created${RESET_FORMAT}"
+  gcloud pubsub topics create esports_messages_topic
+  ok "Created topic esports_messages_topic."
 fi
 
-# Create Subscription → Writes to BigQuery
+PROJECT_NUMBER="$(gcloud projects describe "${GCP_PROJECT_ID}" --format='value(projectNumber)')"
+
+# Grant BigQuery Data Editor to Pub/Sub service agent so it can write to the table
+PUBSUB_SA="service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
+log "Granting BigQuery Data Editor to Pub/Sub service account ${PUBSUB_SA}..."
+
+gcloud projects add-iam-policy-binding "${GCP_PROJECT_ID}" \
+  --member="serviceAccount:${PUBSUB_SA}" \
+  --role="roles/bigquery.dataEditor" \
+  --quiet >/dev/null || warn "Pub/Sub SA IAM binding may already exist."
+
+ok "Pub/Sub service account has BigQuery Data Editor at project-level."
+
+# Create subscription that writes directly to BigQuery raw_chat_messages
 if gcloud pubsub subscriptions list --format="value(name)" | grep -q "subscriptions/esports_messages_topic-sub$"; then
-    echo "${YELLOW_TEXT}[!] Subscription already exists${RESET_FORMAT}"
+  warn "Subscription esports_messages_topic-sub already exists, skipping."
 else
-    gcloud pubsub subscriptions create esports_messages_topic-sub \
-        --topic=esports_messages_topic \
-        --bigquery-table="${GCP_PROJECT_ID}:esports_analytics.raw_chat_messages" \
-        --use-table-schema >/dev/null
-
-    echo "${GREEN_TEXT}[✓] Subscription esports_messages_topic-sub created & connected to BigQuery${RESET_FORMAT}"
+  gcloud pubsub subscriptions create esports_messages_topic-sub \
+    --topic=esports_messages_topic \
+    --bigquery-table="${GCP_PROJECT_ID}:esports_analytics.raw_chat_messages" \
+    --use-table-schema
+  ok "Subscription esports_messages_topic-sub created and configured to write to BigQuery."
 fi
-
 ############################################################
 # MANUAL IAM REQUIRED (YOU ASKED)
 ############################################################
