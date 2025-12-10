@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 BLACK_TEXT=$'\033[0;90m'
@@ -25,9 +24,8 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 
-# Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE — EXECUTING LAB SCRIPT...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
@@ -54,41 +52,31 @@ sleep 1
 ############################################
 echo "${BLUE_TEXT}${BOLD_TEXT}[*] Creating BigQuery dataset, tables and Bigtable instance${RESET_FORMAT}"
 
-# BigQuery Dataset
 bq --location=$GCP_REGION mk -d esports_analytics >/dev/null 2>&1
 
-# BigQuery Table 1
 bq mk --table esports_analytics.raw_chat_messages \
 message_id:STRING,user_id:STRING,timestamp:TIMESTAMP,message_text:STRING,game_id:STRING,server_region:STRING >/dev/null 2>&1
 
-# BigQuery Table 2
 bq mk --table --description "Unsportsmanlike" \
 --time_partitioning_field timestamp --time_partitioning_type DAY \
 esports_analytics.unsportsmanlike_messages \
 message_id:STRING,user_id:STRING,timestamp:TIMESTAMP,message_text:STRING,message_type:STRING,game_id:STRING,server_region:STRING >/dev/null 2>&1
 
-# Bigtable Instance
 gcloud bigtable instances create instance \
 --display-name="My Bigtable Instance" \
 --cluster-config=id=my-cluster,zone=${GCP_REGION}-b,nodes=1 >/dev/null 2>&1
 
-# Bigtable Table
 cbt -project $GCP_PROJECT_ID -instance instance createtable unsportsmanlike families=messages >/dev/null 2>&1
 
 echo "${GREEN_TEXT}${BOLD_TEXT}[✓] BigQuery & Bigtable resources created${RESET_FORMAT}"
 sleep 1
 
 ############################################
-# TASK 2 + TASK 3 + TASK 4 AUTOMATION
+# TASK 3 — HALF AUTOMATED
 ############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Automating Pub/Sub + IAM setup${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 3: Creating Pub/Sub Topic (automatic)${RESET_FORMAT}"
 
-# Project Number
-PROJECT_NUMBER="$(gcloud projects describe "${GCP_PROJECT_ID}" --format='value(projectNumber)')"
-
-############################################
-# Create Pub/Sub Topic
-############################################
+# Create Topic Automatically
 if gcloud pubsub topics list --format="value(name)" | grep -q "topics/esports_messages_topic$"; then
     echo "${YELLOW_TEXT}${BOLD_TEXT}[!] Topic esports_messages_topic already exists${RESET_FORMAT}"
 else
@@ -97,46 +85,37 @@ else
 fi
 
 ############################################
-# IAM — BigQuery Data Editor for Pub/Sub SA
+# MANUAL PART OF TASK-3
 ############################################
-PUBSUB_SA="service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
 
-gcloud projects add-iam-policy-binding "${GCP_PROJECT_ID}" \
-  --member="serviceAccount:${PUBSUB_SA}" \
-  --role="roles/bigquery.dataEditor" \
-  --quiet >/dev/null || echo "${YELLOW_TEXT}[!] IAM already set${RESET_FORMAT}"
+echo
+echo "${MAGENTA_TEXT}${BOLD_TEXT}===== MANUAL STEPS REQUIRED FOR TASK 3 =====${RESET_FORMAT}"
+echo
+echo "${WHITE_TEXT}${BOLD_TEXT}Now do these in Console UI:${RESET_FORMAT}"
+echo "${WHITE_TEXT}1) Create Pub/Sub Subscription: esports_messages_topic-sub${RESET_FORMAT}"
+echo "${WHITE_TEXT}2) Delivery type: Write to BigQuery${RESET_FORMAT}"
+echo "${WHITE_TEXT}3) Dataset: esports_analytics${RESET_FORMAT}"
+echo "${WHITE_TEXT}4) Table: raw_chat_messages${RESET_FORMAT}"
+echo
+echo "${WHITE_TEXT}${BOLD_TEXT}Then grant IAM manually:${RESET_FORMAT}"
+echo "${WHITE_TEXT}• Dataset → Share → Add principal → Pub/Sub SA${RESET_FORMAT}"
+echo "${WHITE_TEXT}• Role: BigQuery Data Editor${RESET_FORMAT}"
+echo
+echo "${YELLOW_TEXT}${BOLD_TEXT}After finishing manual Task-3, press Y to continue...${RESET_FORMAT}"
+echo
 
-echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Granted BigQuery Data Editor to Pub/Sub SA${RESET_FORMAT}"
+read -p "Continue? (Y/N): " ANSWER
 
-############################################
-# Create BigQuery Write Subscription
-############################################
-if gcloud pubsub subscriptions list --format="value(name)" | grep -q "subscriptions/esports_messages_topic-sub$"; then
-    echo "${YELLOW_TEXT}${BOLD_TEXT}[!] Subscription already exists${RESET_FORMAT}"
-else
-    gcloud pubsub subscriptions create esports_messages_topic-sub \
-      --topic=esports_messages_topic \
-      --bigquery-table="${GCP_PROJECT_ID}:esports_analytics.raw_chat_messages" \
-      --use-table-schema >/dev/null
-    echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Subscription writing directly to BigQuery${RESET_FORMAT}"
+if [[ $ANSWER != "Y" && $ANSWER != "y" ]]; then
+    echo "${RED_TEXT}${BOLD_TEXT}Stopping script — complete manual Task-3 first${RESET_FORMAT}"
+    exit 1
 fi
-
-############################################
-# IAM — Pub/Sub Publisher for Compute SA
-############################################
-COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
-
-gcloud projects add-iam-policy-binding "${GCP_PROJECT_ID}" \
-  --member="serviceAccount:${COMPUTE_SA}" \
-  --role="roles/pubsub.publisher" \
-  --quiet >/dev/null || echo "${YELLOW_TEXT}[!] Compute SA IAM already exists${RESET_FORMAT}"
-
-echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Compute SA can publish to Pub/Sub${RESET_FORMAT}"
-sleep 1
 
 ############################################
 # TASK 5 — DOWNLOAD PYTHON FILES
 ############################################
+echo "${TEAL_TEXT}${BOLD_TEXT}# Running Task 5 & Task 6 automatically now...${RESET_FORMAT}"
+
 echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 5: Downloading Python files${RESET_FORMAT}"
 
 mkdir -p ~/esports
@@ -153,9 +132,10 @@ echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Task 5 complete${RESET_FORMAT}"
 ############################################
 # TASK 6 — SYNTHETIC DATA GENERATOR
 ############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 6: Installing Pub/Sub Python lib${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 6: Installing Pub/Sub python lib${RESET_FORMAT}"
 
 pip install --user google-cloud-pubsub >/dev/null
+
 echo "${LIME_TEXT}${BOLD_TEXT}[✓] python pubsub installed${RESET_FORMAT}"
 
 echo "${CYAN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}STARTING MESSAGE GENERATOR — DO NOT CLOSE THIS TAB${RESET_FORMAT}"
