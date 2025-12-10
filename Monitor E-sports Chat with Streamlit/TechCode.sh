@@ -36,7 +36,7 @@ echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 1: Configure environment variables${RESET
 GCP_PROJECT_ID="$(gcloud config get-value project)"
 echo "${CYAN_TEXT}${BOLD_TEXT}Detected Project: ${WHITE_TEXT}$GCP_PROJECT_ID${RESET_FORMAT}"
 
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION (example: us-central1): ${RESET_FORMAT}" GCP_REGION
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION: ${RESET_FORMAT}" GCP_REGION
 
 # Model always fixed
 GEMINI_MODEL_ID="gemini-2.5-flash"
