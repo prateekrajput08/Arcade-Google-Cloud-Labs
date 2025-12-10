@@ -9,48 +9,40 @@ MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
 WHITE_TEXT=$'\033[0;97m'
 TEAL_TEXT=$'\033[38;5;50m'
-PURPLE_TEXT=$'\033[0;35m'
 GOLD_TEXT=$'\033[0;33m'
 LIME_TEXT=$'\033[0;92m'
-MAROON_TEXT=$'\033[0;91m'
-NAVY_TEXT=$'\033[0;94m'
-
-BOLD_TEXT=$'\033[1m'
-UNDERLINE_TEXT=$'\033[4m'
-BLINK_TEXT=$'\033[5m'
 NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
-REVERSE_TEXT=$'\033[7m'
 
 clear
 
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE — EXECUTING LAB SCRIPT...  ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}=================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}      SUBSCRIBE TECH & CODE — EXECUTING LAB SCRIPT...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}=================================================================${RESET_FORMAT}"
 echo
 
-############################################
+############################################################
 # TASK 1 — ENVIRONMENT VARIABLES
-############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 1: Configure environment variables${RESET_FORMAT}"
+############################################################
+echo "${BLUE_TEXT}[*] Task 1: Configure environment variables${RESET_FORMAT}"
 
 GCP_PROJECT_ID="$(gcloud config get-value project)"
-echo "${CYAN_TEXT}${BOLD_TEXT}Detected Project: ${WHITE_TEXT}$GCP_PROJECT_ID${RESET_FORMAT}"
+echo "${CYAN_TEXT}Detected Project: ${WHITE_TEXT}$GCP_PROJECT_ID${RESET_FORMAT}"
 
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION: ${RESET_FORMAT}" GCP_REGION
+read -p "${YELLOW_TEXT}Enter REGION: ${RESET_FORMAT}" GCP_REGION
 
 GEMINI_MODEL_ID="gemini-2.5-flash"
 BUCKET_NAME="${GCP_PROJECT_ID}-bucket"
 
 export GCP_PROJECT_ID GCP_REGION GEMINI_MODEL_ID BUCKET_NAME
 
-echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Environment variables configured${RESET_FORMAT}"
+echo "${GREEN_TEXT}[✓] Environment variables configured${RESET_FORMAT}"
 sleep 1
 
-############################################
-# TASK 1 — BIGQUERY & BIGTABLE RESOURCES
-############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Creating BigQuery dataset, tables and Bigtable instance${RESET_FORMAT}"
+############################################################
+# CREATE BIGQUERY & BIGTABLE RESOURCES
+############################################################
+echo "${BLUE_TEXT}[*] Creating BigQuery dataset, tables & Bigtable${RESET_FORMAT}"
 
 bq --location=$GCP_REGION mk -d esports_analytics >/dev/null 2>&1
 
@@ -68,55 +60,63 @@ gcloud bigtable instances create instance \
 
 cbt -project $GCP_PROJECT_ID -instance instance createtable unsportsmanlike families=messages >/dev/null 2>&1
 
-echo "${GREEN_TEXT}${BOLD_TEXT}[✓] BigQuery & Bigtable resources created${RESET_FORMAT}"
+echo "${GREEN_TEXT}[✓] BigQuery & Bigtable created${RESET_FORMAT}"
 sleep 1
 
-############################################
-# TASK 3 — HALF AUTOMATED
-############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 3: Creating Pub/Sub Topic (automatic)${RESET_FORMAT}"
+############################################################
+# TASK 3 — AUTOMATIC TOPIC + SUBSCRIPTION CREATION
+############################################################
+echo "${BLUE_TEXT}[*] Task 3: Creating Pub/Sub topic & BigQuery subscription${RESET_FORMAT}"
 
-# Create Topic Automatically
+# Create Topic
 if gcloud pubsub topics list --format="value(name)" | grep -q "topics/esports_messages_topic$"; then
-    echo "${YELLOW_TEXT}${BOLD_TEXT}[!] Topic esports_messages_topic already exists${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}[!] Topic already exists${RESET_FORMAT}"
 else
     gcloud pubsub topics create esports_messages_topic >/dev/null
-    echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Topic esports_messages_topic created${RESET_FORMAT}"
+    echo "${GREEN_TEXT}[✓] Topic esports_messages_topic created${RESET_FORMAT}"
 fi
 
-############################################
-# MANUAL PART OF TASK-3
-############################################
+# Create Subscription → Writes to BigQuery
+if gcloud pubsub subscriptions list --format="value(name)" | grep -q "subscriptions/esports_messages_topic-sub$"; then
+    echo "${YELLOW_TEXT}[!] Subscription already exists${RESET_FORMAT}"
+else
+    gcloud pubsub subscriptions create esports_messages_topic-sub \
+        --topic=esports_messages_topic \
+        --bigquery-table="${GCP_PROJECT_ID}:esports_analytics.raw_chat_messages" \
+        --use-table-schema >/dev/null
+
+    echo "${GREEN_TEXT}[✓] Subscription esports_messages_topic-sub created & connected to BigQuery${RESET_FORMAT}"
+fi
+
+############################################################
+# MANUAL IAM REQUIRED (YOU ASKED)
+############################################################
 
 echo
-echo "${MAGENTA_TEXT}${BOLD_TEXT}===== MANUAL STEPS REQUIRED FOR TASK 3 =====${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}===== MANUAL IAM STEPS REQUIRED =====${RESET_FORMAT}"
 echo
-echo "${WHITE_TEXT}${BOLD_TEXT}Now do these in Console UI:${RESET_FORMAT}"
-echo "${WHITE_TEXT}1) Create Pub/Sub Subscription: esports_messages_topic-sub${RESET_FORMAT}"
-echo "${WHITE_TEXT}2) Delivery type: Write to BigQuery${RESET_FORMAT}"
-echo "${WHITE_TEXT}3) Dataset: esports_analytics${RESET_FORMAT}"
-echo "${WHITE_TEXT}4) Table: raw_chat_messages${RESET_FORMAT}"
+echo "${WHITE_TEXT}1) Go to BigQuery console${RESET_FORMAT}"
+echo "${WHITE_TEXT}2) Dataset: esports_analytics → Share Dataset${RESET_FORMAT}"
+echo "${WHITE_TEXT}3) Add principal: Pub/Sub SA (shown in subscription error if any)${RESET_FORMAT}"
+echo "${WHITE_TEXT}4) Role: BigQuery Data Editor${RESET_FORMAT}"
 echo
-echo "${WHITE_TEXT}${BOLD_TEXT}Then grant IAM manually:${RESET_FORMAT}"
-echo "${WHITE_TEXT}• Dataset → Share → Add principal → Pub/Sub SA${RESET_FORMAT}"
-echo "${WHITE_TEXT}• Role: BigQuery Data Editor${RESET_FORMAT}"
+echo "${WHITE_TEXT}5) Go to IAM & Admin${RESET_FORMAT}"
+echo "${WHITE_TEXT}6) Add role Pub/Sub Publisher to compute service account${RESET_FORMAT}"
 echo
-echo "${YELLOW_TEXT}${BOLD_TEXT}After finishing manual Task-3, press Y to continue...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}After finishing IAM steps, press Y to continue...${RESET_FORMAT}"
 echo
 
 read -p "Continue? (Y/N): " ANSWER
 
 if [[ $ANSWER != "Y" && $ANSWER != "y" ]]; then
-    echo "${RED_TEXT}${BOLD_TEXT}Stopping script — complete manual Task-3 first${RESET_FORMAT}"
+    echo "${RED_TEXT}Stopping script — complete IAM first${RESET_FORMAT}"
     exit 1
 fi
 
-############################################
+############################################################
 # TASK 5 — DOWNLOAD PYTHON FILES
-############################################
-echo "${TEAL_TEXT}${BOLD_TEXT}# Running Task 5 & Task 6 automatically now...${RESET_FORMAT}"
-
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 5: Downloading Python files${RESET_FORMAT}"
+############################################################
+echo "${BLUE_TEXT}[*] Task 5: Downloading Python files${RESET_FORMAT}"
 
 mkdir -p ~/esports
 cd ~/esports
@@ -127,19 +127,19 @@ wget -q https://storage.googleapis.com/spls/gsp1343/v2/requirements.txt
 
 gsutil cp message_generator.py gs://$BUCKET_NAME >/dev/null
 
-echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Task 5 complete${RESET_FORMAT}"
+echo "${GREEN_TEXT}[✓] Task 5 completed${RESET_FORMAT}"
 
-############################################
+############################################################
 # TASK 6 — SYNTHETIC DATA GENERATOR
-############################################
-echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 6: Installing Pub/Sub python lib${RESET_FORMAT}"
+############################################################
+echo "${BLUE_TEXT}[*] Task 6: Installing Pub/Sub python library${RESET_FORMAT}"
 
 pip install --user google-cloud-pubsub >/dev/null
 
-echo "${LIME_TEXT}${BOLD_TEXT}[✓] python pubsub installed${RESET_FORMAT}"
+echo "${LIME_TEXT}[✓] python pubsub installed${RESET_FORMAT}"
 
-echo "${CYAN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}STARTING MESSAGE GENERATOR — DO NOT CLOSE THIS TAB${RESET_FORMAT}"
-echo "${GOLD_TEXT}${BOLD_TEXT}If messages publish, Task 6 is successful${RESET_FORMAT}"
+echo "${CYAN_TEXT}${UNDERLINE_TEXT}Starting message generator — DO NOT CLOSE THIS TAB${RESET_FORMAT}"
+echo "${GOLD_TEXT}If messages publish, Task 6 is successful${RESET_FORMAT}"
 echo
 
 python3 message_generator.py
