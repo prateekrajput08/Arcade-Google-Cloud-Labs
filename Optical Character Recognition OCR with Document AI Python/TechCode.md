@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Optical%20Character%20Recognition%20(OCR)%20with%20Document%20AI%20(Python)/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Optical%20Character%20Recognition%20OCR%20with%20Document%20AI%20Python/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
