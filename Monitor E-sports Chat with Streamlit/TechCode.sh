@@ -34,20 +34,18 @@ echo
 echo "${BLUE_TEXT}${BOLD_TEXT}[*] Task 1: Configure environment variables${RESET_FORMAT}"
 
 GCP_PROJECT_ID="$(gcloud config get-value project)"
+echo "${CYAN_TEXT}${BOLD_TEXT}Detected Project: ${WHITE_TEXT}$GCP_PROJECT_ID${RESET_FORMAT}"
 
-# auto detect region or fallback
-AUTO_REGION="$(gcloud config get-value compute/region 2>/dev/null)"
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION (example: us-central1): ${RESET_FORMAT}" GCP_REGION
 
-if [[ -z "$AUTO_REGION" || "$AUTO_REGION" == "(unset)" ]]; then
-    AUTO_REGION="us-central1"
-fi
-
-GCP_REGION="$AUTO_REGION"
+# Model always fixed
 GEMINI_MODEL_ID="gemini-2.5-flash"
 BUCKET_NAME="${GCP_PROJECT_ID}-bucket"
 
 export GCP_PROJECT_ID GCP_REGION GEMINI_MODEL_ID BUCKET_NAME
 
+echo "${GREEN_TEXT}${BOLD_TEXT}[✓] Environment variables configured successfully.${RESET_FORMAT}"
+sleep 1
 echo "${WHITE_TEXT}${BOLD_TEXT}Project: ${GCP_PROJECT_ID}${RESET_FORMAT}"
 echo "${WHITE_TEXT}${BOLD_TEXT}Region (Auto): ${GCP_REGION}${RESET_FORMAT}"
 echo "${WHITE_TEXT}${BOLD_TEXT}Bucket: ${BUCKET_NAME}${RESET_FORMAT}"
