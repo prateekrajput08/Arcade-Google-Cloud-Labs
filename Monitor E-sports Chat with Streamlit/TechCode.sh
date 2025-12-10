@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 BLACK_TEXT=$'\033[0;90m'
@@ -10,7 +9,6 @@ MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
 WHITE_TEXT=$'\033[0;97m'
 TEAL_TEXT=$'\033[38;5;50m'
-PURPLE_TEXT=$'\033[0;35m'
 GOLD_TEXT=$'\033[0;33m'
 LIME_TEXT=$'\033[0;92m'
 MAROON_TEXT=$'\033[0;91m'
@@ -25,9 +23,8 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 
-# Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE - INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
@@ -69,7 +66,7 @@ cbt -project $GCP_PROJECT_ID -instance instance createtable unsportsmanlike fami
 echo "${GREEN_TEXT}[✓] BigQuery and Bigtable resources created${RESET_FORMAT}"
 sleep 1
 
-# Task 3: Topic and subscription automatic
+# Task 3: Topic auto + subscription (PULL)
 echo "${BLUE_TEXT}[*] Task 3: Creating Pub/Sub topic & subscription${RESET_FORMAT}"
 
 if gcloud pubsub topics list --format="value(name)" | grep -q "topics/esports_messages_topic$"; then
@@ -79,41 +76,51 @@ else
   echo "${GREEN_TEXT}[✓] Topic esports_messages_topic created${RESET_FORMAT}"
 fi
 
-echo "${BLUE_TEXT}[*] Creating subscription esports_messages_topic-sub${RESET_FORMAT}"
+echo "${BLUE_TEXT}[*] Creating subscription esports_messages_topic-sub (PULL TYPE)${RESET_FORMAT}"
 
-gcloud pubsub subscriptions create esports_messages_topic-sub \
-    --topic=esports_messages_topic \
-    --bigquery-table="${GCP_PROJECT_ID}:esports_analytics.raw_chat_messages" \
-    --use-table-schema >/dev/null 2>&1
-
-if [[ $? -ne 0 ]]; then
-    echo "${YELLOW_TEXT}[!] Subscription created but BigQuery write will not work until IAM is fixed manually${RESET_FORMAT}"
+if gcloud pubsub subscriptions list --format="value(name)" | grep -q "subscriptions/esports_messages_topic-sub$"; then
+    echo "${YELLOW_TEXT}[!] Subscription already exists${RESET_FORMAT}"
 else
-    echo "${GREEN_TEXT}[✓] Subscription configured${RESET_FORMAT}"
+    gcloud pubsub subscriptions create esports_messages_topic-sub \
+        --topic=esports_messages_topic >/dev/null 2>&1
+
+    if [[ $? -ne 0 ]]; then
+        echo "${RED_TEXT}[!] Subscription could not be created${RESET_FORMAT}"
+        exit 1
+    else
+        echo "${GREEN_TEXT}[✓] Subscription created${RESET_FORMAT}"
+    fi
 fi
 
-# Print Pub/Sub SA for manual IAM
+# Print service accounts
 PROJECT_NUMBER="$(gcloud projects describe "${GCP_PROJECT_ID}" --format='value(projectNumber)')"
 PUBSUB_SA="service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com"
 COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
 
+# Manual instructions
 echo
-echo "${MAGENTA_TEXT}===== MANUAL IAM STEPS REQUIRED =====${RESET_FORMAT}"
-echo "${WHITE_TEXT}1) BigQuery → esports_analytics dataset → Share dataset${RESET_FORMAT}"
-echo "${WHITE_TEXT}2) Add principal:${RESET_FORMAT}"
+echo "${MAGENTA_TEXT}===== MANUAL STEPS REQUIRED BEFORE CONTINUING =====${RESET_FORMAT}"
+echo
+echo "${WHITE_TEXT}STEP-1: Go to Pub/Sub → subscriptions → esports_messages_topic-sub → EDIT${RESET_FORMAT}"
+echo "${WHITE_TEXT}Change DELIVERY TYPE to: Write to BigQuery${RESET_FORMAT}"
+echo "${WHITE_TEXT}Dataset: esports_analytics${RESET_FORMAT}"
+echo "${WHITE_TEXT}Table: raw_chat_messages${RESET_FORMAT}"
+echo
+echo "${WHITE_TEXT}STEP-2: BigQuery Dataset → Share → Add THIS principal:${RESET_FORMAT}"
 echo "${CYAN_TEXT}${PUBSUB_SA}${RESET_FORMAT}"
 echo "${WHITE_TEXT}Role: BigQuery Data Editor${RESET_FORMAT}"
 echo
-echo "${WHITE_TEXT}3) IAM & Admin → Add role Pub/Sub Publisher to:${RESET_FORMAT}"
+echo "${WHITE_TEXT}STEP-3: IAM & Admin → Add THIS principal:${RESET_FORMAT}"
 echo "${CYAN_TEXT}${COMPUTE_SA}${RESET_FORMAT}"
+echo "${WHITE_TEXT}Role: Pub/Sub Publisher${RESET_FORMAT}"
 echo
-echo "${YELLOW_TEXT}Press Y after completing manual IAM steps${RESET_FORMAT}"
+echo "${YELLOW_TEXT}Press Y after completing all above steps${RESET_FORMAT}"
 echo
 
 read -p "Continue? (Y/N): " ANSWER
 
 if [[ $ANSWER != "Y" && $ANSWER != "y" ]]; then
-    echo "${RED_TEXT}Stopping script — complete IAM first${RESET_FORMAT}"
+    echo "${RED_TEXT}Stopping script — complete manual IAM and DB write first${RESET_FORMAT}"
     exit 1
 fi
 
@@ -129,14 +136,14 @@ wget -q https://storage.googleapis.com/spls/gsp1343/v2/requirements.txt
 
 gsutil cp message_generator.py gs://$BUCKET_NAME >/dev/null
 
-echo "${GREEN_TEXT}[✓] Python files downloaded and verified${RESET_FORMAT}"
+echo "${GREEN_TEXT}[✓] Python files downloaded${RESET_FORMAT}"
 
 # Task 6: Install Pub/Sub library
 echo "${BLUE_TEXT}[*] Task 6: Installing google-cloud-pubsub${RESET_FORMAT}"
 
 pip install --user google-cloud-pubsub >/dev/null
 
-echo "${LIME_TEXT}[✓] Library installed${RESET_FORMAT}"
+echo "${LIME_TEXT}[✓] Pub/Sub library installed${RESET_FORMAT}"
 
 echo "${CYAN_TEXT}Starting message generator — DO NOT CLOSE THIS TAB${RESET_FORMAT}"
 echo "${GOLD_TEXT}If events publish, Task 6 is successful${RESET_FORMAT}"
