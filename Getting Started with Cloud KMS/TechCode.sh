@@ -43,12 +43,6 @@ echo -e "${GREEN_TEXT}✔ Bucket created successfully!${RESET_FORMAT}\n"
 # =================== TASK 2 ==========================
 echo -e "${TEAL_TEXT}${BOLD_TEXT}TASK 2 → Downloading sample email file...${RESET_FORMAT}"
 
-# Fix: wildcard download (no list permission needed)
-gsutil cp gs://enron_emails/allen-p/inbox/* .
-
-# Select first downloaded file
-SAMPLE_FILE=$(ls | head -n 1)
-
 echo -e "${GOLD_TEXT}📄 Preview of file content:${RESET_FORMAT}"
 tail "$SAMPLE_FILE"
 
