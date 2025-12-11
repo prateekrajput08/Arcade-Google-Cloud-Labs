@@ -39,17 +39,6 @@ gsutil mb gs://${BUCKET_NAME} || true
 
 echo -e "${GREEN}✔ Bucket created!${RESET}\n"
 
-# =================== TASK 2 (Simplified) ==========================
-echo -e "${TEAL}${BOLD}TASK 2 → Downloading sample email file...${RESET}"
-
-# Download ANY file from inbox (safe even without list permission)
-gsutil cp gs://enron_emails/allen-p/inbox/* .
-
-# Pick 1st file automatically (no tail, no preview)
-SAMPLE_FILE=$(ls | head -n 1)
-
-echo -e "${GREEN}✔ Sample file downloaded: ${YELLOW}$SAMPLE_FILE${RESET}\n"
-
 # =================== TASK 3 ==========================
 echo -e "${TEAL}${BOLD}TASK 3 → Enabling Cloud KMS API...${RESET}"
 gcloud services enable cloudkms.googleapis.com
