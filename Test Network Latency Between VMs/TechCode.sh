@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 BLACK_TEXT=$'\033[0;90m'
