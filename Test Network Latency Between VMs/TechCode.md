@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Test%20Network%20Latency%20Between%20VMs/TechCode.sh20Balancing/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Test%20Network%20Latency%20Between%20VMs/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
