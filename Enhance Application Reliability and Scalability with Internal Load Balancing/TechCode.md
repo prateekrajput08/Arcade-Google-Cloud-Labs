@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO github.com/prateekrajput08/Arcade-Google-Cloud-Labs/blob/main/Enhance%20Application%20Reliability%20and%20Scalability%20with%20Internal%20Load%20Balancing/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Enhance%20Application%20Reliability%20and%20Scalability%20with%20Internal%20Load%20Balancing/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
