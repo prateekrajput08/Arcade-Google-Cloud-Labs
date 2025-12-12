@@ -31,15 +31,16 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${CYAN}Detecting Cloud Shell Zone...${RESET}"
+echo "${CYAN}Detecting Zone from gcloud config...${RESET}"
 
-# Auto-detect Cloud Shell zone
-ZONE=$(gcloud compute instances list --filter="name~'cloudshell'" --format="value(zone)")
+# Auto-detect from Qwiklabs settings
+ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
 REGION="${ZONE%-*}"
 
 PROJECT_ID=$(gcloud config get-value project)
 CLUSTER="example-cluster"
 
+# Display Info
 echo ""
 echo "${GREEN}----------------------------------------"
 echo "Project ID : $PROJECT_ID"
@@ -48,6 +49,16 @@ echo "Zone       : $ZONE"
 echo "Cluster    : $CLUSTER"
 echo "----------------------------------------${RESET}"
 echo ""
+
+# Validate Zone
+if [[ -z "$ZONE" ]]; then
+  echo "${RED}Error: Zone not set in gcloud config.${RESET}"
+  echo "Run this and rerun script:"
+  echo ""
+  echo "  gcloud config set compute/zone us-central1-a"
+  echo ""
+  exit 1
+fi
 
 echo "${CYAN}Enabling Dataproc API...${RESET}"
 gcloud services enable dataproc.googleapis.com
@@ -92,13 +103,14 @@ gcloud dataproc clusters update "$CLUSTER" \
 echo "${GREEN}Cluster scaled successfully!${RESET}"
 echo ""
 
-echo "${MAGENTA}Submitting SparkPi job (second run)...${RESET}"
+echo "${MAGENTA}Submitting SparkPi job after scaling...${RESET}"
 gcloud dataproc jobs submit spark \
   --cluster="$CLUSTER" \
   --region="$REGION" \
   --class=org.apache.spark.examples.SparkPi \
   --jars=file:///usr/lib/spark/examples/jars/spark-examples.jar \
   -- 1000
+
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
