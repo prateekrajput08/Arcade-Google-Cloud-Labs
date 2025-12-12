@@ -31,45 +31,28 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Enter your Compute Engine Zone (example: us-central1-a):${NO_COLOR}"
-read ZONE
+echo "${CYAN}Detecting Cloud Shell Zone...${RESET}"
 
+# Auto-detect Cloud Shell zone
+ZONE=$(gcloud compute instances list --filter="name~'cloudshell'" --format="value(zone)")
 REGION="${ZONE%-*}"
-CLUSTER="example-cluster"
+
 PROJECT_ID=$(gcloud config get-value project)
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
-SERVICE_ACCOUNT="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+CLUSTER="example-cluster"
 
 echo ""
-echo "${GREEN_TEXT}${BOLD_TEXT}----------------------------------------"
-echo "Project ID : ${WHITE_TEXT}$PROJECT_ID"
-echo "Project #  : ${WHITE_TEXT}$PROJECT_NUMBER"
-echo "Region     : ${WHITE_TEXT}$REGION"
-echo "Zone       : ${WHITE_TEXT}$ZONE"
-echo "Cluster    : ${WHITE_TEXT}$CLUSTER"
-echo "Service Acc: ${WHITE_TEXT}$SERVICE_ACCOUNT"
-echo "----------------------------------------${NO_COLOR}"
+echo "${GREEN}----------------------------------------"
+echo "Project ID : $PROJECT_ID"
+echo "Region     : $REGION"
+echo "Zone       : $ZONE"
+echo "Cluster    : $CLUSTER"
+echo "----------------------------------------${RESET}"
 echo ""
 
-# ------------------------------------------
-# ENABLE DATAPROC API
-# ------------------------------------------
-echo "${TEAL_TEXT}Enabling Dataproc API...${NO_COLOR}"
+echo "${CYAN}Enabling Dataproc API...${RESET}"
 gcloud services enable dataproc.googleapis.com
 
-# ------------------------------------------
-# IAM ROLE FIX (DYNAMIC SA)
-# ------------------------------------------
-echo "${TEAL_TEXT}Adding Storage Admin role to service account...${NO_COLOR}"
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-  --member="serviceAccount:$SERVICE_ACCOUNT" \
-  --role="roles/storage.admin" \
-  --quiet
-
-# ------------------------------------------
-# CREATE DATAPROC CLUSTER
-# ------------------------------------------
-echo "${GOLD_TEXT}${BOLD_TEXT}Creating Dataproc Cluster...${NO_COLOR}"
+echo "${CYAN}Creating Dataproc cluster...${RESET}"
 gcloud dataproc clusters create "$CLUSTER" \
   --region="$REGION" \
   --zone="$ZONE" \
@@ -82,17 +65,14 @@ gcloud dataproc clusters create "$CLUSTER" \
   --quiet
 
 if [ $? -ne 0 ]; then
-    echo "${RED_TEXT}${BOLD_TEXT}Cluster creation FAILED. Exiting.${NO_COLOR}"
+    echo "${RED}Cluster creation FAILED!${RESET}"
     exit 1
 fi
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Cluster created successfully!${NO_COLOR}"
+echo "${GREEN}Cluster created successfully!${RESET}"
 echo ""
 
-# ------------------------------------------
-# RUN SPARK JOB (PI ESTIMATION)
-# ------------------------------------------
-echo "${PURPLE_TEXT}${BOLD_TEXT}Submitting SparkPi job (first run)...${NO_COLOR}"
+echo "${MAGENTA}Submitting SparkPi job (first run)...${RESET}"
 gcloud dataproc jobs submit spark \
   --cluster="$CLUSTER" \
   --region="$REGION" \
@@ -100,25 +80,19 @@ gcloud dataproc jobs submit spark \
   --jars=file:///usr/lib/spark/examples/jars/spark-examples.jar \
   -- 1000
 
-echo "${GREEN_TEXT}${BOLD_TEXT}First Spark job completed!${NO_COLOR}"
+echo "${GREEN}First job completed!${RESET}"
 echo ""
 
-# ------------------------------------------
-# SCALE CLUSTER TO 4 WORKERS
-# ------------------------------------------
-echo "${YELLOW_TEXT}${BOLD_TEXT}Scaling cluster to 4 workers...${NO_COLOR}"
+echo "${YELLOW}Scaling cluster to 4 workers...${RESET}"
 gcloud dataproc clusters update "$CLUSTER" \
   --region="$REGION" \
   --num-workers=4 \
   --quiet
 
-echo "${GREEN_TEXT}${BOLD_TEXT}Cluster scaled successfully!${NO_COLOR}"
+echo "${GREEN}Cluster scaled successfully!${RESET}"
 echo ""
 
-# ------------------------------------------
-# RUN SPARK JOB AGAIN
-# ------------------------------------------
-echo "${MAGENTA_TEXT}${BOLD_TEXT}Submitting SparkPi job after scaling...${NO_COLOR}"
+echo "${MAGENTA}Submitting SparkPi job (second run)...${RESET}"
 gcloud dataproc jobs submit spark \
   --cluster="$CLUSTER" \
   --region="$REGION" \
