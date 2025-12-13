@@ -1,4 +1,4 @@
-# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Interacting with Vault Policies || GSP1004 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6959/labs/43212)
 
 ## ⚠️ Disclaimer ⚠️
 
