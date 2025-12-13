@@ -90,15 +90,11 @@ run() {
 run vault policy list
 vault policy list > policies.txt
 echo "policies.txt created"
-printf "\033[1;32mEnter Vault Token: \033[0m"
-read -s VAULT_TOKEN
-echo
-run vault token capabilities "$VAULT_TOKEN" sys/policies/acl
-vault token capabilities "$VAULT_TOKEN" sys/policies/acl > token_capabilities.txt
+run vault token capabilities "$YOUR_TOKEN" sys/policies/acl
+vault token capabilities "$YOUR_TOKEN" sys/policies/acl > token_capabilities.txt
 echo "token_capabilities.txt created"
 export PROJECT_ID=$(gcloud config get-value project)
 run gsutil cp policies.txt token_capabilities.txt "gs://$PROJECT_ID"
-
 ```
 
 
