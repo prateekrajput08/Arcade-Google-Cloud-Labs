@@ -76,7 +76,7 @@ echo "Attached is the Delta position for 1/18" > allen-p/inbox/1.
 echo "Please review the document and respond" > allen-p/inbox/2.
 echo "Meeting scheduled for tomorrow at 10 AM" > allen-p/inbox/3.
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Encrypt all files under allen-p (excluding already encrypted)${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}Encrypt all files under allen-p excluding already encrypted${RESET_FORMAT}"
 
 MYDIR=allen-p
 FILES=$(find $MYDIR -type f -not -name "*.encrypted")
