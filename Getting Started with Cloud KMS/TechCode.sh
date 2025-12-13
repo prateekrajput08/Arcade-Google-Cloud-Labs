@@ -58,7 +58,7 @@ curl -s "https://cloudkms.googleapis.com/v1/projects/$DEVSHELL_PROJECT_ID/locati
   -H "Content-Type:application/json" \
 | jq .ciphertext -r > 1.encrypted
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Decrypt to verify
+echo "${CYAN_TEXT}${BOLD_TEXT}Decrypt to verify${RESET_FORMAT}"
 curl -s "https://cloudkms.googleapis.com/v1/projects/$DEVSHELL_PROJECT_ID/locations/global/keyRings/$KEYRING_NAME/cryptoKeys/$CRYPTOKEY_NAME:decrypt" \
   -d "{\"ciphertext\":\"$(cat 1.encrypted)\"}" \
   -H "Authorization:Bearer $(gcloud auth application-default print-access-token)" \
