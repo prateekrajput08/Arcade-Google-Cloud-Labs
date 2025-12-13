@@ -14,7 +14,7 @@
 
 ## ☁️ Run in Cloud Shell:
 ##Task 7-
-``bash
+```bash
 mkdir -p allen-p/inbox
 ```
 ```bash
