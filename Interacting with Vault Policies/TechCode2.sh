@@ -31,6 +31,9 @@ set -e
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Vault Policy Management Script${RESET_FORMAT}"
 
+# Ask for Root Token
+read -s -p "Enter Vault ROOT TOKEN: " ROOT_TOKEN
+echo ""
 export VAULT_ADDR="http://127.0.0.1:8200"
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Logging into Vault as root...${RESET_FORMAT}"
