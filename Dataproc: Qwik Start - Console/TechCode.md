@@ -13,7 +13,9 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+```bash
+gcloud services enable dataproc.googleapis.com
+```
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Dataproc%3A%20Qwik%20Start%20-%20Console/TechCode.sh
 sudo chmod +x TechCode.sh 
