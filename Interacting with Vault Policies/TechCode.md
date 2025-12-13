@@ -1,4 +1,4 @@
-# 🌐 Interacting with Vault Policies || GSP1004 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6959/labs/43212)
+# 🌐  || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -24,9 +24,9 @@ export VAULT_ADDR='http://127.0.0.1:8200'
 vault status
 ```
 ```bash
-vault login token=<your root token>
-```
-```bash
+read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" ROOT_TOKEN
+echo ""
+vault login token=$ROOT_TOKEN
 vault secrets list
 vault auth enable userpass
 vault write auth/userpass/users/example-user password=password!
@@ -74,6 +74,7 @@ gsutil cp policies.txt token_capabilities.txt gs://$PROJECT_ID
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Interacting%20with%20Vault%20Policies/TechCode2.sh
 sudo chmod +x TechCode2.sh 
 ./TechCode2.sh
+```
 
 ## Create the admin policy
 
@@ -81,7 +82,7 @@ sudo chmod +x TechCode2.sh
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Interacting%20with%20Vault%20Policies/TechCode3.sh
 sudo chmod +x TechCode3.sh 
 ./TechCode3.sh
-
+```
 
 </div>
 
