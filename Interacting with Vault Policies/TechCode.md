@@ -22,8 +22,6 @@ sudo chmod +x TechCode1.sh
 ```bash
 export VAULT_ADDR='http://127.0.0.1:8200'
 vault status
-```
-```bash
 read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" ROOT_TOKEN
 echo ""
 vault login token=$ROOT_TOKEN
