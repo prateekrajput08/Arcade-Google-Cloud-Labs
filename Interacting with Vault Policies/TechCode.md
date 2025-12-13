@@ -25,7 +25,7 @@ sudo chmod +x TechCode1.sh
 ```bash
 export VAULT_ADDR='http://127.0.0.1:8200'
 vault status
-read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" ROOT_TOKEN
+read -s -p "\033[1;32mEnter Vault Token: \033[0m" ROOT_TOKEN
 echo ""
 vault login token=$ROOT_TOKEN
 vault secrets list
@@ -43,7 +43,7 @@ path "sys/mounts" {
 ## 👉Generated Token's Policies `demo-policy`
 
 ```bash
-read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" YOUR_TOKEN
+read -s -p "\033[1;32mEnter Vault Token: \033[0m" YOUR_TOKEN
 echo ""
 vault secrets list
 vault login -method=userpass username=example-user password=password!
@@ -60,7 +60,7 @@ path "sys/policies/acl" {
 ```
 
 ```bash
-read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" VAULT_TOKEN
+read -s -p "\033[1;32mEnter Vault Token: \033[0m" VAULT_TOKEN
 echo ""
 vault policy list
 vault policy list > policies.txt
