@@ -13,6 +13,32 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+##Task 7-
+``bash
+mkdir -p allen-p/inbox
+```
+```bash
+echo "Attached is the Delta position for 1/18" > allen-p/inbox/1.
+echo "Please review the document and respond" > allen-p/inbox/2.
+echo "Meeting scheduled for tomorrow at 10 AM" > allen-p/inbox/3.
+```
+```bash
+MYDIR=allen-p
+FILES=$(find $MYDIR -type f -not -name "*.encrypted")
+
+for file in $FILES; do
+  PLAINTEXT=$(cat $file | base64 -w0)
+
+  curl -s "https://cloudkms.googleapis.com/v1/projects/$DEVSHELL_PROJECT_ID/locations/global/keyRings/$KEYRING_NAME/cryptoKeys/$CRYPTOKEY_NAME:encrypt" \
+    -d "{\"plaintext\":\"$PLAINTEXT\"}" \
+    -H "Authorization:Bearer $(gcloud auth application-default print-access-token)" \
+    -H "Content-Type:application/json" \
+  | jq .ciphertext -r > $file.encrypted
+done
+```
+```bash
+gsutil -m cp allen-p/inbox/*.encrypted gs://${BUCKET_NAME}/allen-p/inbox/
+```
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Getting%20Started%20with%20Cloud%20KMS/TechCode.sh
