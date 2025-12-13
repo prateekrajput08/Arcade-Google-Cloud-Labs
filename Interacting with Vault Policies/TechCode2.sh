@@ -29,21 +29,21 @@ echo
 
 set -e
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Vault Policy Management Script${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Vault Policy Management Script${RESET_FORMAT}"
 
 # Ask for Root Token
 read -s -p "Enter Vault ROOT TOKEN: " ROOT_TOKEN
 echo ""
 export VAULT_ADDR="http://127.0.0.1:8200"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Logging into Vault as root...${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Logging into Vault as root...${RESET_FORMAT}"
 vault login "$ROOT_TOKEN"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Listing existing policies${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Listing existing policies${RESET_FORMAT}"
 
 vault read sys/policy || vault policy list
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating example-policy${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating example-policy${RESET_FORMAT}"
 
 tee example-policy.hcl <<EOF
 # List, create, update, and delete key/value secrets
@@ -66,7 +66,7 @@ cat example-policy.hcl
 
 vault policy write example-policy example-policy.hcl
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Updating example-policy${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Updating example-policy${RESET_FORMAT}"
 
 tee example-policy.hcl <<EOF
 # List, create, update, and delete key/value secrets
@@ -94,18 +94,18 @@ cat example-policy.hcl
 
 vault write sys/policy/example-policy policy=@example-policy.hcl
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Uploading policy to GCS bucket${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Uploading policy to GCS bucket${RESET_FORMAT}"
 
 gsutil cp example-policy.hcl gs://$PROJECT_ID
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Deleting example-policy${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Deleting example-policy${RESET_FORMAT}"
 
 vault delete sys/policy/example-policy
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Current policies:${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Current policies:${RESET_FORMAT}"
 vault policy list
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Associating policies with users (Task 6)${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Associating policies with users (Task 6)${RESET_FORMAT}"
 
 vault auth enable userpass || true
 
@@ -113,13 +113,13 @@ vault write auth/userpass/users/firstname-lastname \
   password="s3cr3t!" \
   policies="default,demo-policy"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}User firstname-lastname created${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}User firstname-lastname created${RESET_FORMAT}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating token with policies${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating token with policies${RESET_FORMAT}"
 
 vault token create -policy=dev-readonly -policy=logs || true
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Task 7: Creating users${RESET_FORMAT}""
+echo "${YELLOW_TEXT}${BOLD_TEXT}Task 7: Creating users${RESET_FORMAT}"
 
 vault write auth/userpass/users/admin \
   password="admin123" \
