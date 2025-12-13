@@ -20,7 +20,7 @@ sudo chmod +x TechCode1.sh
 ./TechCode1.sh
 ```
 
-## Open New Cloud Shell Tab
+## ⚠️Open New Cloud Shell Tab
 
 ```bash
 export VAULT_ADDR='http://127.0.0.1:8200'
@@ -34,13 +34,13 @@ vault write auth/userpass/users/example-user password=password!
 vault login -method=userpass username=example-user password=password!
 vault secrets list
 ```
-## Create Policy `demo-policy`
+## 👉Create Policy `demo-policy`
 ```bash
 path "sys/mounts" {
     capabilities = ["read"]
 }
 ```
-## Generated Token's Policies `demo-policy`
+## 👉Generated Token's Policies `demo-policy`
 
 ```bash
 read -s -p "${GREEN_TEXT}${BOLD_TEXT}Enter Vault Token: ${RESET_FORMAT}" YOUR_TOKEN
@@ -52,7 +52,7 @@ vault token capabilities $YOUR_TOKEN sys/mounts
 vault token capabilities $YOUR_TOKEN   sys/policies/acl
 vault policy list
 ```
-## Edit Policy `demo-policy`
+## 👉Edit Policy `demo-policy`
 ```bash
 path "sys/policies/acl" {
     capabilities = ["read", "list"]
@@ -77,7 +77,7 @@ sudo chmod +x TechCode2.sh
 ./TechCode2.sh
 ```
 
-## Create the admin policy
+## 👉Create the admin policies: Watch Video
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Interacting%20with%20Vault%20Policies/TechCode3.sh
