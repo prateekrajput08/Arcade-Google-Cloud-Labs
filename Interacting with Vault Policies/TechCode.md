@@ -23,10 +23,10 @@ sudo chmod +x TechCode1.sh
 ## ⚠️Open New Cloud Shell Tab
 
 ```bash
-export VAULT_ADDR='http://127.0.0.1:8200'
-vault status
 read -s -p $'\033[1;32mEnter Vault Token: \033[0m' ROOT_TOKEN
 echo
+export VAULT_ADDR='http://127.0.0.1:8200'
+vault status
 echo ""
 vault login token=$ROOT_TOKEN
 vault secrets list
