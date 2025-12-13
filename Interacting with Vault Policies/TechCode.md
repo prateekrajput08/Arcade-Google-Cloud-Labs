@@ -23,17 +23,27 @@ sudo chmod +x TechCode1.sh
 ## ⚠️Open New Cloud Shell Tab
 
 ```bash
-read -s -p $'\033[1;32mEnter Vault Token: \033[0m' ROOT_TOKEN
-echo
+run() {
+  echo -e "\n\033[1;36m▶ $*\033[0m"
+  "$@"
+  echo -e "\n\033[1;33mPress ENTER to continue...\033[0m"
+  read
+}
+
 export VAULT_ADDR='http://127.0.0.1:8200'
-vault status
-echo ""
-vault login token=$ROOT_TOKEN
-vault secrets list
-vault auth enable userpass
-vault write auth/userpass/users/example-user password=password!
-vault login -method=userpass username=example-user password=password!
-vault secrets list
+run vault status
+printf "\033[1;32mEnter Vault Token: \033[0m"
+read -s ROOT_TOKEN
+echo
+run vault login token="$ROOT_TOKEN"
+run vault secrets list
+run vault auth enable userpass
+run vault write auth/userpass/users/example-user password='password!'
+run vault login -method=userpass username=example-user password='password!'
+run vault secrets list
+echo -e "\n\033[1;32mAll commands completed. Shell will stay open.\033[0m"
+exec bash
+
 ```
 ## 👉Create Policy `demo-policy`
 ```bash
@@ -44,15 +54,23 @@ path "sys/mounts" {
 ## 👉Generated Token's Policies `demo-policy`
 
 ```bash
-read -s -p $'\033[1;32mEnter Vault Token: \033[0m' YOUR_TOKEN
+run() {
+  echo -e "\n\033[1;36m▶ $*\033[0m"
+  "$@"
+  echo -e "\n\033[1;33mPress ENTER to continue...\033[0m"
+  read
+}
+
+run vault secrets list
+run vault login -method=userpass username=example-user password='password!'
+run vault secrets list
+printf "\033[1;32mEnter Vault Token: \033[0m"
+read -s YOUR_TOKEN
 echo
-echo ""
-vault secrets list
-vault login -method=userpass username=example-user password=password!
-vault secrets list
-vault token capabilities $YOUR_TOKEN sys/mounts
-vault token capabilities $YOUR_TOKEN   sys/policies/acl
-vault policy list
+run vault token capabilities "$YOUR_TOKEN" sys/mounts
+run vault token capabilities "$YOUR_TOKEN" sys/policies/acl
+run vault policy list
+
 ```
 ## 👉Edit Policy `demo-policy`
 ```bash
@@ -62,15 +80,25 @@ path "sys/policies/acl" {
 ```
 
 ```bash
-read -s -p $'\033[1;32mEnter Vault Token: \033[0m' VAULT_TOKEN
-echo
-echo ""
-vault policy list
+run() {
+  echo -e "\n\033[1;36m▶ $*\033[0m"
+  "$@"
+  echo -e "\n\033[1;33mPress ENTER to continue...\033[0m"
+  read
+}
+
+run vault policy list
 vault policy list > policies.txt
-vault token capabilities $VAULT_TOKEN sys/policies/acl
-vault token capabilities $VAULT_TOKEN sys/policies/acl > token_capabilities.txt
+echo "policies.txt created"
+printf "\033[1;32mEnter Vault Token: \033[0m"
+read -s VAULT_TOKEN
+echo
+run vault token capabilities "$VAULT_TOKEN" sys/policies/acl
+vault token capabilities "$VAULT_TOKEN" sys/policies/acl > token_capabilities.txt
+echo "token_capabilities.txt created"
 export PROJECT_ID=$(gcloud config get-value project)
-gsutil cp policies.txt token_capabilities.txt gs://$PROJECT_ID
+run gsutil cp policies.txt token_capabilities.txt "gs://$PROJECT_ID"
+
 ```
 
 
