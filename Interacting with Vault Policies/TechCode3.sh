@@ -28,27 +28,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-set -e
-
-export VAULT_ADDR="http://127.0.0.1:8200"
-
-echo "${CYAN_TEXT}${BOLD_TEXT}STEP 1: LOGIN AS ROOT (FOR SETUP)${RESET_FORMAT}"
-
-# ================= READ ROOT TOKEN (PORTABLE) =================
-printf "${GREEN_TEXT}Enter Vault ROOT TOKEN: ${RESET_FORMAT}"
-stty -echo
-read ROOT_TOKEN
-stty echo
-echo
-
-if [ -z "$ROOT_TOKEN" ]; then
-  echo "${RED_TEXT}${BOLD_TEXT}❌ No token entered. Exiting.${RESET_FORMAT}"
-  exit 1
-fi
-echo
-vault login "$ROOT_TOKEN"
-
-echo "${CYAN_TEXT}${BOLD_TEXT}STEP 2: CREATE SECRETS${RESET_FORMAT}"
 
 # security secrets
 vault kv put secret/security/first username=password
