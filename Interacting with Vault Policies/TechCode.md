@@ -19,6 +19,9 @@ curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs
 sudo chmod +x TechCode1.sh 
 ./TechCode1.sh
 ```
+
+## Open New Cloud Shell Tab
+
 ```bash
 export VAULT_ADDR='http://127.0.0.1:8200'
 vault status
@@ -31,7 +34,7 @@ vault write auth/userpass/users/example-user password=password!
 vault login -method=userpass username=example-user password=password!
 vault secrets list
 ```
-## Create Pilicy `demo-policy`
+## Create Policy `demo-policy`
 ```bash
 path "sys/mounts" {
     capabilities = ["read"]
