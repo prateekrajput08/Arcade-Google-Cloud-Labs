@@ -1,4 +1,5 @@
 
+
 #!/bin/bash
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
@@ -32,6 +33,9 @@ set -e
 export VAULT_ADDR="http://127.0.0.1:8200"
 
 echo "${CYAN_TEXT}${BOLD_TEXT}STEP 1: LOGIN AS ROOT (FOR SETUP)${RESET_FORMAT}"
+
+read -s -p "${CYAN_TEXT}${BOLD_TEXT}Enter ROOT TOKEN: ${RESET_FORMAT}" ROOT_TOKEN
+echo ""
 vault login "$ROOT_TOKEN"
 
 echo "${CYAN_TEXT}${BOLD_TEXT}STEP 2: CREATE SECRETS${RESET_FORMAT}"
@@ -112,3 +116,4 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+
