@@ -16,8 +16,8 @@
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Managing%20Vault%20Tokens/TechCode.sh
-sudo chmod +x TechCode1.sh 
-./TechCode1.sh
+sudo chmod +x TechCode.sh 
+./TechCode.sh
 ```
 
 </div>
