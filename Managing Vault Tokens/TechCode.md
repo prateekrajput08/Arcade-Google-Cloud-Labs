@@ -20,6 +20,8 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+#!/bin/bash
+
 run() {
   echo -e "\n\033[1;36m▶ $*\033[0m"
   "$@"
@@ -28,24 +30,52 @@ run() {
 }
 
 export VAULT_ADDR='http://127.0.0.1:8200'
+
 printf "\033[1;32mEnter Root Token: \033[0m"
 read -s ROOT_TOKEN
 echo
-run export VAULT_TOKEN="$ROOT_TOKEN"
+
+export VAULT_TOKEN="$ROOT_TOKEN"
+
 run vault status
+
 run unset VAULT_TOKEN
-run vault auth enable approle
-run vault write auth/approle/role/jenkins policies="jenkins" period="24h"
-run vault read -format=json auth/approle/role/jenkins/role-id \ | jq -r ".data.role_id" > role_id.txt
-run vault write -f -format=json auth/approle/role/jenkins/secret-id | jq -r ".data.secret_id" > secret_id.txt
-run vault write auth/approle/login role_id=$(cat role_id.txt) \ secret_id=$(cat secret_id.txt)
+export VAULT_TOKEN="$ROOT_TOKEN"
+
+# Enable approle (ignore error if already enabled)
+run bash -c 'vault auth enable approle || echo "✔ AppRole already enabled"'
+
+run vault write auth/approle/role/jenkins \
+  policies="jenkins" \
+  period="24h"
+
+# Correct pipeline execution
+run bash -c 'vault read -format=json auth/approle/role/jenkins/role-id \
+  | jq -r ".data.role_id" > role_id.txt'
+
+run bash -c 'vault write -f -format=json auth/approle/role/jenkins/secret-id \
+  | jq -r ".data.secret_id" > secret_id.txt'
+
+ROLE_ID=$(cat role_id.txt)
+SECRET_ID=$(cat secret_id.txt)
+
+run vault write auth/approle/login \
+  role_id="$ROLE_ID" \
+  secret_id="$SECRET_ID"
+
 printf "\033[1;32mEnter Your Token: \033[0m"
 read -s YOUR_TOKEN
 echo
+
 run vault token lookup "$YOUR_TOKEN"
-run vault token lookup -format=json "$YOUR_TOKEN" | jq -r .data.policies > token_policies.txt
-run export PROJECT_ID=$(gcloud config get-value project)
-gsutil cp token_policies.txt gs://$PROJECT_ID
+
+run bash -c 'vault token lookup -format=json "'"$YOUR_TOKEN"'" \
+  | jq -r ".data.policies[]" > token_policies.txt'
+
+PROJECT_ID=$(gcloud config get-value project)
+
+run gsutil cp token_policies.txt gs://$PROJECT_ID
+
 echo -e "\n\033[1;32mAll commands completed. Shell will stay open.\033[0m"
 exec bash
 ```
