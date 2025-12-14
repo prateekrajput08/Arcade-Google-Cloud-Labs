@@ -73,7 +73,7 @@ echo
 echo "${PURPLE}${BOLD}STEP 4: IMAGE PROCESSING ${DARK_BLUE}${BOLD}${RESET}"
 echo
 echo -n "${TEAL}${BOLD}Downloading sample image..."
-(curl -LO raw.githubusercontent.com/ArcadeCrew/Google-Cloud-Labs/main/Extract%2C%20Analyze%2C%20and%20Translate%20Text%20from%20Images%20with%20the%20Cloud%20ML%20APIs/sign.jpg > /dev/null 2>&1) &
+(curl -LO raw.githubusercontent.com/prateekrajput08/Google-Cloud-Labs/main/Extract%2C%20Analyze%2C%20and%20Translate%20Text%20from%20Images%20with%20the%20Cloud%20ML%20APIs/sign.jpg > /dev/null 2>&1) &
 
 echo -e "\r${LIME}${BOLD}Sample image downloaded!${RESET}"
 
