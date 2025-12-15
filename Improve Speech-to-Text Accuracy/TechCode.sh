@@ -1,5 +1,9 @@
 #!/bin/bash
+set -e
 
+# ================================
+# Color Definitions
+# ================================
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
@@ -25,10 +29,10 @@ REVERSE_TEXT=$'\033[7m'
 clear
 
 # ================================
-# Welcome message
+# Welcome Banner
 # ================================
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE - INITIATING EXECUTION...              ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
@@ -41,17 +45,13 @@ PROJECT_ID=$(gcloud config get-value project)
 echo -e "${YELLOW_TEXT}Project ID:${RESET_FORMAT} $PROJECT_ID\n"
 
 # ================================
-# Auto Detect Region & Zone
+# LAB-SAFE Region & Zone
 # ================================
-ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
+REGION="us-central1"
+ZONE="us-central1-a"
 
-if [[ -z "$ZONE" ]]; then
-  echo -e "${YELLOW_TEXT}Detecting available zone...${RESET_FORMAT}"
-  ZONE=$(gcloud compute zones list --limit=1 --format="value(name)")
-  gcloud config set compute/zone $ZONE
-fi
-
-REGION="${ZONE%-*}"
+gcloud config set compute/region $REGION >/dev/null
+gcloud config set compute/zone $ZONE >/dev/null
 
 echo -e "${GREEN_TEXT}Region:${RESET_FORMAT} $REGION"
 echo -e "${GREEN_TEXT}Zone  :${RESET_FORMAT} $ZONE\n"
@@ -67,22 +67,26 @@ gcloud services enable \
   compute.googleapis.com \
   storage.googleapis.com
 
-echo -e "${YELLOW_TEXT}APIs enabled successfully!${RESET_FORMAT}\n"
+echo -e "${GREEN_TEXT}APIs enabled successfully!${RESET_FORMAT}\n"
 
 # ================================
 # Create Vertex AI Workbench Instance
 # ================================
 echo -e "${YELLOW_TEXT}Creating Vertex AI Workbench instance...${RESET_FORMAT}"
 
-gcloud notebooks instances create lab-workbench \
+if gcloud notebooks instances create lab-workbench \
   --location=$ZONE \
   --machine-type=e2-standard-4 \
   --boot-disk-size=100 \
   --boot-disk-type=PD_STANDARD \
   --vm-image-project=deeplearning-platform-release \
   --vm-image-family=tf-latest-cpu
-
-echo -e "\n${YELLOW_TEXT}Vertex AI Workbench instance created successfully!${RESET_FORMAT}"
+then
+  echo -e "\n${GREEN_TEXT}Vertex AI Workbench instance created successfully!${RESET_FORMAT}"
+else
+  echo -e "\n${RED_TEXT}Failed to create Vertex AI Workbench instance.${RESET_FORMAT}"
+  exit 1
+fi
 
 # ================================
 # Final Info
@@ -97,6 +101,9 @@ echo "----------------------------------"
 echo -e "\n${GREEN_TEXT}You can now access it from:${RESET_FORMAT}"
 echo "Vertex AI → Workbench → Instances"
 
+# ================================
+# Completion Banner
+# ================================
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
@@ -104,4 +111,3 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
-
