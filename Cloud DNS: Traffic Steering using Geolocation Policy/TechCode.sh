@@ -99,7 +99,7 @@ gcloud compute instances create us-web-vm \
 --metadata=startup-script='#! /bin/bash
 apt-get update
 apt-get install apache2 -y
-echo "Page served from: us-east1" | tee /var/www/html/index.html
+echo "Page served from: $region1" | tee /var/www/html/index.html
 systemctl restart apache2'
 
 gcloud compute instances create europe-web-vm \
@@ -111,7 +111,7 @@ gcloud compute instances create europe-web-vm \
 --metadata=startup-script='#! /bin/bash
 apt-get update
 apt-get install apache2 -y
-echo "Page served from: europe-west4" | tee /var/www/html/index.html
+echo "Page served from: $region2" | tee /var/www/html/index.html
 systemctl restart apache2'
 
 sleep 20
