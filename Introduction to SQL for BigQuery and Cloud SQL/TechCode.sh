@@ -52,7 +52,7 @@ gcloud sql instances create my-demo \
     --database-version=MYSQL_8_0 \
     --region=$REGION \
     --tier=db-f1-micro \
-    --root-password=arcadehelper
+    --root-password=techcode
 
 
 echo
