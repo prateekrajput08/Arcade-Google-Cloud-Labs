@@ -55,7 +55,30 @@ gcloud sql instances create my-demo \
     --root-password=arcadehelper
 
 echo "${YELLOW}${BOLD}================= CREATE DATABASE =================${RESET_FORMAT}"
-gcloud sql databases create bike --instance=my-demo
+echo
+echo "${YELLOW_TEXT}${BOLD_TEXT}================= TASK 6: CLOUD SQL DATABASE CREATION =================${RESET_FORMAT}"
+
+# ================= SET PROJECT ID =================
+echo "${CYAN_TEXT}${BOLD_TEXT}Setting PROJECT_ID...${RESET_FORMAT}"
+export PROJECT_ID=$(gcloud config get-value project)
+gcloud config set project $PROJECT_ID
+
+# ================= AUTH LOGIN (NO BROWSER) =================
+echo
+echo "${YELLOW_TEXT}${BOLD_TEXT}Authenticate with gcloud (no browser)...${RESET_FORMAT}"
+echo "${GREEN_TEXT}If prompted [Y/n], press Y and ENTER${RESET_FORMAT}"
+gcloud auth login --no-launch-browser
+
+# ================= CONNECT TO CLOUD SQL & CREATE DB =================
+echo
+echo "${YELLOW_TEXT}${BOLD_TEXT}Connecting to Cloud SQL instance...${RESET_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}NOTE:${RESET_FORMAT} Enter root password when prompted (cursor will not move)"
+
+gcloud sql connect my-demo --user=root --quiet <<EOF
+CREATE DATABASE bike;
+SHOW DATABASES;
+EXIT;
+EOF
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
