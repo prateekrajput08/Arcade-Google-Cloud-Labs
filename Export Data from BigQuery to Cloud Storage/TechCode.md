@@ -15,10 +15,15 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export PROJECT=$(gcloud config get-value project)
+export BUCKET=$PROJECT-bucket
+echo $BUCKET
+
 bq load --source_format=CSV --autodetect customer_details.customers customers.csv
 bq query --use_legacy_sql=false --destination_table customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender="Male"'
-bq extract customer_details.male_customers gs://PROJECT-ID-bucket/exported_male_customers.csv
+bq extract customer_details.male_customers gs://$BUCKET/exported_male_customers.csv
 bq query --use_legacy_sql=false --replace --destination_table=customer_details.male_customers 'SELECT CustomerID, Gender FROM customer_details.customers WHERE Gender = "Male"'
+
 ```
 
 </div>
