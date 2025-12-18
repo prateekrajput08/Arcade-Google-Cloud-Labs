@@ -27,10 +27,10 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${YELLOW_TEXT}================= ASK USER FOR REGION =================${RESET_FORMAT}"
-read "${YELLOW}${BOLD}Enter your GCP REGION (example: us-central1, asia-south1): " REGION
+echo "${YELLOW_TEXT}${BOLD_TEXT}================= ASK USER FOR REGION =================${RESET_FORMAT}"
+read -p "$(echo -e "${YELLOW_TEXT}${BOLD_TEXT}Enter your GCP REGION (example: us-central1, asia-south1): ${RESET_FORMAT}")" REGION
 
-echo "${GREEN_TEXT}${BOLD}Using REGION: ${RESET_FORMAT}$REGION"
+echo "${GREEN_TEXT}${BOLD_TEXT}Using REGION: ${RESET_FORMAT}$REGION"
 echo "--------------------------------------------"
 
 echo "${YELLOW}${BOLD}================= CREATE GCS BUCKET =================${RESET_FORMAT}"
