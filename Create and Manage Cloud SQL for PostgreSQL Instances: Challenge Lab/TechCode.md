@@ -30,9 +30,9 @@ sudo apt install postgresql-14-pglogical
 ```
 sudo su - postgres -c "gsutil cp gs://cloud-training/gsp918/pg_hba_append.conf ."
 sudo su - postgres -c "gsutil cp gs://cloud-training/gsp918/postgresql_append.conf ."
-sudo su - postgres -c "cat pg_hba_append.conf >> /etc/postgresql/13/main/pg_hba.conf"
-sudo su - postgres -c "cat postgresql_append.conf >> /etc/postgresql/13/main/postgresql.conf"
-sudo systemctl restart postgresql@13-main
+sudo su - postgres -c "cat pg_hba_append.conf >> /etc/postgresql/14/main/pg_hba.conf"
+sudo su - postgres -c "cat postgresql_append.conf >> /etc/postgresql/14/main/postgresql.conf"
+sudo systemctl restart postgresql@14-main
 ```
 
 - **Apply required privileges to postgres and orders databases**
