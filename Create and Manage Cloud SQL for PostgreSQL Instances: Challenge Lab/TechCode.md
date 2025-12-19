@@ -23,7 +23,7 @@ gcloud services enable servicenetworking.googleapis.com --quiet
 
 - **install the pglogical database extension and jquery**
 ```
-sudo apt install postgresql-13-pglogical
+sudo apt install postgresql-14-pglogical
 ```
 
 - **Download and apply some additions to the PostgreSQL configuration files (to enable pglogical extension)**
