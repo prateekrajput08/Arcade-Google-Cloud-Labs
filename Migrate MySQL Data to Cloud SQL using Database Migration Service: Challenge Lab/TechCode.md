@@ -20,7 +20,7 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ## ✨For Database Migration: Click [Here](https://console.cloud.google.com/dbmigration/migrations?)
-
+## One-Time Migration Name: `mysql-onetime-migration`
 ## Task 4: Connect to the MySQL Interactive Console**
 
 * Run the following command in your terminal:
