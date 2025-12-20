@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-export Zone=
+export ZONE=
 ```
 ```bash
 gcloud compute instances attach-disk gcelab \
