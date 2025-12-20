@@ -32,9 +32,6 @@ gsutil cp gs://$PROJECT_ID/analyze-images-v2.py .
  > TBD: Create a Vision API image object called image_object
 ```bash
 image_object = vision.Image(content=file_content)
-```
- > TBD: Detect text in the image and save the response data into an object called response
-```bash
 response = vision_client.text_detection(image=image_object)
 ```
  > TBD: According to the target language pass the description data to the translation API
