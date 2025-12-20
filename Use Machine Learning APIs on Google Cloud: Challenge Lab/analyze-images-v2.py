@@ -1,5 +1,4 @@
 import sys
-import os
 from google.cloud import vision
 from google.cloud import translate_v2 as translate
 from google.cloud import storage
@@ -31,67 +30,69 @@ bucket = storage_client.bucket(BUCKET_NAME)
 
 print("Processing image files from GCS. This will take a few minutes..")
 
-rows_to_insert = []
+rows = []
 
 # =========================
 # PROCESS IMAGES
 # =========================
 for blob in bucket.list_blobs():
-    file_name = blob.name.lower()
-
-    if not file_name.endswith((".jpg", ".jpeg", ".png")):
+    if not blob.name.lower().endswith((".jpg", ".jpeg", ".png")):
         continue
 
-    print(f"Processing: {blob.name}")
+    print(f"Processing {blob.name}")
 
-    image_content = blob.download_as_bytes()
+    image_bytes = blob.download_as_bytes()
 
-    # -------------------------
-    # VISION API – TEXT DETECT
-    # -------------------------
-    image = vision.Image(content=image_content)
-    response = vision_client.text_detection(image=image)
+    image = vision.Image(content=image_bytes)
 
-    if not response.text_annotations:
-        print(f"No text found in {blob.name}")
+    # ✅ REQUIRED BY LAB
+    response = vision_client.document_text_detection(image=image)
+
+    if not response.full_text_annotation.text:
         continue
 
-    text_data = response.text_annotations[0].description
-    locale = response.text_annotations[0].locale or "und"
+    extracted_text = response.full_text_annotation.text
 
-    # -------------------------
-    # SAVE EXTRACTED TEXT TO GCS
-    # -------------------------
-    text_blob = bucket.blob(blob.name + ".txt")
-    text_blob.upload_from_string(text_data, content_type="text/plain")
+    # ✅ REQUIRED LOCALE EXTRACTION
+    locale = "und"
+    try:
+        locale = response.full_text_annotation.pages[0] \
+            .property.detected_languages[0].language_code
+    except Exception:
+        pass
 
-    translated_text = text_data
+    # =========================
+    # WRITE TEXT BACK TO GCS
+    # =========================
+    txt_blob = bucket.blob(blob.name + ".txt")
+    txt_blob.upload_from_string(extracted_text, content_type="text/plain")
 
-    # -------------------------
-    # TRANSLATION API (TO JA)
-    # -------------------------
+    translated_text = extracted_text
+
+    # =========================
+    # TRANSLATE IF NOT JAPANESE
+    # =========================
     if locale != "ja":
         translation = translate_client.translate(
-            text_data,
+            extracted_text,
             target_language="ja"
         )
         translated_text = translation["translatedText"]
 
-    rows_to_insert.append({
+    rows.append({
         "image_name": blob.name,
         "locale": locale,
-        "extracted_text": text_data,
+        "extracted_text": extracted_text,
         "translated_text": translated_text
     })
 
 # =========================
-# LOAD INTO BIGQUERY
+# INSERT INTO BIGQUERY
 # =========================
-table_ref = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
-errors = bq_client.insert_rows_json(table_ref, rows_to_insert)
+table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
+errors = bq_client.insert_rows_json(table, rows)
 
 if errors:
-    print("BigQuery insertion errors:")
-    print(errors)
+    print("BigQuery insert errors:", errors)
 else:
-    print("SUCCESS: Data loaded into BigQuery")
+    print("SUCCESS: Data inserted into BigQuery")
