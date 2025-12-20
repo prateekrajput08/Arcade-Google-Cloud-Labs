@@ -20,6 +20,24 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+gcloud compute instances attach-disk gcelab \
+  --disk mydisk \
+  --zone "$ZONE"
+```
+```bash
+gcloud compute disks create mydisk \
+  --size=200GB \
+  --zone $ZONE
+```
+```bash
+gcloud compute instances attach-disk gcelab \
+  --disk mydisk 
+  --zone $ZONE
+```
+```bash
+gcloud compute ssh "$INSTANCE_NAME" --zone="$ZONE" --command="echo SSH Connected Successfully"
+```
+```bash
 sudo apt-get update
 sudo apt-get install -y nginx
 ps auwx | grep nginx
