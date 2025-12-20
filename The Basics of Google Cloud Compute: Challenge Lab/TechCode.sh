@@ -57,14 +57,8 @@ echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Enabling Compute Engine API...${RESET_FORMAT
 gcloud services enable compute.googleapis.com
 echo
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Create Instance Manually ...${RESET_FORMAT}"
 pause_for_yes
-
-# ========================= ATTACH DISK =========================
-echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Attaching Disk to VM...${RESET_FORMAT}"
-gcloud compute instances attach-disk gcelab \
-  --disk mydisk \
-  --zone "$ZONE"
-echo
 
 # ========================= CREATE DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Persistent Disk...${RESET_FORMAT}"
@@ -75,9 +69,9 @@ echo
 
 # ========================= ATTACH DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Attaching Disk to VM...${RESET_FORMAT}"
-gcloud compute instances attach-disk gcelab \
-  --disk mydisk 
-  --zone $ZONE
+gcloud compute instances attach-disk my-instance \
+  --disk mydisk \
+  --zone "$ZONE"
 echo
 
 # ========================= SSH TEST =========================
