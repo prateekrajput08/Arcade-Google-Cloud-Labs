@@ -20,6 +20,9 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+rm -f analyze-images-v2.py
+```
+```bash
 nano analyze-images-v2.py
 ```
 ```bash
