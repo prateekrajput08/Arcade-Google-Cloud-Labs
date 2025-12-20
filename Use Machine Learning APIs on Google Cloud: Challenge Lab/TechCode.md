@@ -20,6 +20,9 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+nano analyze-images-v2.py
+```
+```bash
 import sys
 from google.cloud import vision
 from google.cloud import translate_v2 as translate
