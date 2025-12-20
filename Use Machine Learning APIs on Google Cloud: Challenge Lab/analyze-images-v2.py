@@ -4,9 +4,6 @@ from google.cloud import translate_v2 as translate
 from google.cloud import storage
 from google.cloud import bigquery
 
-# =========================
-# ARGUMENT CHECK
-# =========================
 if len(sys.argv) != 3:
     print("You must provide parameters for the Google Cloud project ID and Storage bucket")
     print("python3 analyze-images-v2.py [PROJECT_NAME] [BUCKET_NAME]")
@@ -18,9 +15,6 @@ BUCKET_NAME = sys.argv[2]
 DATASET_ID = "image_classification_dataset"
 TABLE_ID = "image_text_detail"
 
-# =========================
-# CLIENTS
-# =========================
 vision_client = vision.ImageAnnotatorClient()
 translate_client = translate.Client()
 storage_client = storage.Client(project=PROJECT_ID)
@@ -32,9 +26,6 @@ print("Processing image files from GCS. This will take a few minutes..")
 
 rows = []
 
-# =========================
-# PROCESS IMAGES
-# =========================
 for blob in bucket.list_blobs():
     if not blob.name.lower().endswith((".jpg", ".jpeg", ".png")):
         continue
@@ -42,10 +33,9 @@ for blob in bucket.list_blobs():
     print(f"Processing {blob.name}")
 
     image_bytes = blob.download_as_bytes()
-
     image = vision.Image(content=image_bytes)
 
-    # ✅ REQUIRED BY LAB
+    # THIS LINE DEFINES response — NO ERROR POSSIBLE
     response = vision_client.document_text_detection(image=image)
 
     if not response.full_text_annotation.text:
@@ -53,7 +43,6 @@ for blob in bucket.list_blobs():
 
     extracted_text = response.full_text_annotation.text
 
-    # ✅ REQUIRED LOCALE EXTRACTION
     locale = "und"
     try:
         locale = response.full_text_annotation.pages[0] \
@@ -61,23 +50,15 @@ for blob in bucket.list_blobs():
     except Exception:
         pass
 
-    # =========================
-    # WRITE TEXT BACK TO GCS
-    # =========================
     txt_blob = bucket.blob(blob.name + ".txt")
     txt_blob.upload_from_string(extracted_text, content_type="text/plain")
 
     translated_text = extracted_text
-
-    # =========================
-    # TRANSLATE IF NOT JAPANESE
-    # =========================
     if locale != "ja":
-        translation = translate_client.translate(
+        translated_text = translate_client.translate(
             extracted_text,
             target_language="ja"
-        )
-        translated_text = translation["translatedText"]
+        )["translatedText"]
 
     rows.append({
         "image_name": blob.name,
@@ -86,9 +67,6 @@ for blob in bucket.list_blobs():
         "translated_text": translated_text
     })
 
-# =========================
-# INSERT INTO BIGQUERY
-# =========================
 table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
 errors = bq_client.insert_rows_json(table, rows)
 
