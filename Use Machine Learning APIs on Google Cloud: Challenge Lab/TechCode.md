@@ -20,6 +20,13 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+gcloud iam service-accounts keys create credentials.json \
+    --iam-account=ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com
+```
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/credentials.json
+```
+```bash
 gsutil cp gs://$PROJECT_ID/analyze-images-v2.py .
 ```
 ```bash
