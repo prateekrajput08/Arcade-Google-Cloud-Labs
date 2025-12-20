@@ -211,11 +211,14 @@ gcloud projects get-iam-policy $DEVSHELL_PROJECT_ID
 
 
 ```
-export INSTANCE_ID=
+export CLOUDSQL_INSTANCE=
+export NEW_INSTANCE_NAME=
+export TIME_STAMP=
 ```
 
 ```
-gcloud sql instances clone $INSTANCE_ID  postgres-orders-pitr --point-in-time 'CHANGE_TIMESTAMP'
+gcloud sql instances clone $CLOUDSQL_INSTANCE $NEW_INSTANCE_NAME \
+ --point-in-time "$TIME_STAMP"
 ```
 
 
