@@ -21,8 +21,9 @@ sudo chmod +x TechCode.sh
 ```
 ```bash
 export PROJECT_ID=$(gcloud config get-value project)
-gcloud iam service-accounts keys create credentials.json \
-    --iam-account=ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com
+export SA_EMAIL=$(gcloud iam service-accounts list --filter="NOT email ~ .*@developer.gserviceaccount.com" --format="value(email)" | head -n 1)
+
+echo "Using Service Account: $SA_EMAIL"
 ```
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/credentials.json
@@ -43,11 +44,14 @@ translation = translate_client.translate(desc, target_language='en')
 export PROJECT_ID=$(gcloud config get-value project)
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member="serviceAccount:ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --member="serviceAccount:$SA_EMAIL" \
     --role="roles/serviceusage.serviceUsageConsumer"
 ```
 ```bash
-python3 analyze-images-v2.py $GOOGLE_CLOUD_PROJECT $GOOGLE_CLOUD_PROJECT
+gcloud iam service-accounts keys create credentials.json \
+    --iam-account=$SA_EMAIL
+
+export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/credentials.json
 ```
 ```bash
 bq query --use_legacy_sql=false \
