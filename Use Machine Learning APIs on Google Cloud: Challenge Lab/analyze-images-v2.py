@@ -4,6 +4,9 @@ from google.cloud import translate_v2 as translate
 from google.cloud import storage
 from google.cloud import bigquery
 
+# =========================
+# ARGUMENT CHECK
+# =========================
 if len(sys.argv) != 3:
     print("You must provide parameters for the Google Cloud project ID and Storage bucket")
     print("python3 analyze-images-v2.py [PROJECT_NAME] [BUCKET_NAME]")
@@ -35,7 +38,7 @@ for blob in bucket.list_blobs():
     image_bytes = blob.download_as_bytes()
     image = vision.Image(content=image_bytes)
 
-    # THIS LINE DEFINES response — NO ERROR POSSIBLE
+    # -------- TASK 3 --------
     response = vision_client.document_text_detection(image=image)
 
     if not response.full_text_annotation.text:
@@ -50,9 +53,12 @@ for blob in bucket.list_blobs():
     except Exception:
         pass
 
-    txt_blob = bucket.blob(blob.name + ".txt")
-    txt_blob.upload_from_string(extracted_text, content_type="text/plain")
+    # Save extracted text to GCS
+    bucket.blob(blob.name + ".txt").upload_from_string(
+        extracted_text, content_type="text/plain"
+    )
 
+    # -------- TASK 4 --------
     translated_text = extracted_text
     if locale != "ja":
         translated_text = translate_client.translate(
@@ -60,6 +66,7 @@ for blob in bucket.list_blobs():
             target_language="ja"
         )["translatedText"]
 
+    # -------- TASK 5 --------
     rows.append({
         "image_name": blob.name,
         "locale": locale,
@@ -67,10 +74,11 @@ for blob in bucket.list_blobs():
         "translated_text": translated_text
     })
 
-table = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
-errors = bq_client.insert_rows_json(table, rows)
+# Insert into BigQuery
+table_id = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
+errors = bq_client.insert_rows_json(table_id, rows)
 
 if errors:
     print("BigQuery insert errors:", errors)
 else:
-    print("SUCCESS: Data inserted into BigQuery")
+    print("SUCCESS: Tasks 3, 4, 5 completed")
