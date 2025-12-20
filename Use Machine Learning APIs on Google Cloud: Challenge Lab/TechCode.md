@@ -37,6 +37,7 @@ image_object = vision.Image(content=file_content)
 ```bash
 response = vision_client.text_detection(image=image_object)
 ```
+ > # TBD: According to the target language pass the description data to the translation API
 ```bash
 translation = translate_client.translate(desc, target_language='en')
 ```
