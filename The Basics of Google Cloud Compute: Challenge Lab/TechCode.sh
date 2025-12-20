@@ -20,6 +20,14 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 set -e
+pause_for_yes() {
+  echo
+  read -p "Press Y to continue: " choice
+  if [[ "$choice" != "Y" && "$choice" != "y" ]]; then
+    echo "${RED_TEXT}${BOLD_TEXT}❌ Script stopped by user.${RESET_FORMAT}"
+    exit 1
+  fi
+}
 
 # ========================= WELCOME MESSAGE =========================
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
@@ -49,28 +57,27 @@ echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Enabling Compute Engine API...${RESET_FORMAT
 gcloud services enable compute.googleapis.com
 echo
 
-# ========================= CREATE VM =========================
-echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Compute Engine VM...${RESET_FORMAT}"
-gcloud compute instances create "$INSTANCE_NAME" \
-  --zone="$ZONE" \
-  --machine-type=e2-medium \
-  --image-family=debian-11 \
-  --image-project=debian-cloud
+pause_for_yes
+
+# ========================= ATTACH DISK =========================
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Attaching Disk to VM...${RESET_FORMAT}"
+gcloud compute instances attach-disk gcelab \
+  --disk mydisk \
+  --zone "$ZONE"
 echo
 
 # ========================= CREATE DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Persistent Disk...${RESET_FORMAT}"
-gcloud compute disks create "$DISK_NAME" \
-  --zone="$ZONE" \
-  --size=10GB \
-  --type=pd-balanced
+gcloud compute disks create mydisk \
+  --size=200GB \
+  --zone $ZONE
 echo
 
 # ========================= ATTACH DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Attaching Disk to VM...${RESET_FORMAT}"
-gcloud compute instances attach-disk "$INSTANCE_NAME" \
-  --disk="$DISK_NAME" \
-  --zone="$ZONE"
+gcloud compute instances attach-disk gcelab \
+  --disk mydisk 
+  --zone $ZONE
 echo
 
 # ========================= SSH TEST =========================
