@@ -20,20 +20,20 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+export PROJECT_ID=$(gcloud config get-value project)
 gcloud iam service-accounts keys create credentials.json \
     --iam-account=ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com
 ```
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/credentials.json
-```
-```bash
 gsutil cp gs://$PROJECT_ID/analyze-images-v2.py .
 ```
+ > TBD: Create a Vision API image object called image_object
 ```bash
-# TBD: Create a Vision API image object called image_object
 image_object = vision.Image(content=file_content)
-
-# TBD: Detect text in the image and save the response data into an object called response
+```
+ > TBD: Detect text in the image and save the response data into an object called response
+```bash
 response = vision_client.text_detection(image=image_object)
 ```
 ```bash
