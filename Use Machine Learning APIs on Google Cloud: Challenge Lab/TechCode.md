@@ -50,6 +50,7 @@ gcloud iam service-accounts keys create credentials.json \
     --iam-account=$SA_EMAIL
 
 export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/credentials.json
+python3 analyze-images-v2.py $PROJECT_ID $PROJECT_ID
 ```
 ```bash
 bq query --use_legacy_sql=false \
