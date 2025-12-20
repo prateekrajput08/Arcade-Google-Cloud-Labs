@@ -33,6 +33,13 @@ response = vision_client.text_detection(image=image_object)
 translation = translate_client.translate(desc, target_language='en')
 ```
 ```bash
+export PROJECT_ID=$(gcloud config get-value project)
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/serviceusage.serviceUsageConsumer"
+```
+```bash
 python3 analyze-images-v2.py $GOOGLE_CLOUD_PROJECT $GOOGLE_CLOUD_PROJECT
 ```
 ```bash
