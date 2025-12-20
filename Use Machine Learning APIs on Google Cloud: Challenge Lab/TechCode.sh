@@ -61,6 +61,12 @@ echo ""
 
 echo -e "${YELLOW_TEXT}${BOLD_TEXT}→ Assigning IAM roles...${RESET_FORMAT}"
 
+export PROJECT_ID=$(gcloud config get-value project)
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:ml-lab-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/serviceusage.serviceUsageConsumer"
+
 for ROLE in "${BIGQUERY_ROLE}" "${CLOUD_STORAGE_ROLE}" "roles/serviceusage.serviceUsageConsumer"; do
   gcloud projects add-iam-policy-binding ${DEVSHELL_PROJECT_ID} \
     --member="serviceAccount:${SA_EMAIL}" \
