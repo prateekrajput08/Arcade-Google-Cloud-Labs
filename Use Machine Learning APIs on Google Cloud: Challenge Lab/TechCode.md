@@ -20,6 +20,9 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+export GOOGLE_APPLICATION_CREDENTIALS=$PWD/sample-sa-key.json
+```
+```bash
 python3 analyze-images-v2.py
 ```
 ```bash
