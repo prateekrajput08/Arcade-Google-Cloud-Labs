@@ -209,16 +209,9 @@ gcloud auth login --quiet
 gcloud projects get-iam-policy $DEVSHELL_PROJECT_ID
 ```
 
-
 ```
-export CLOUDSQL_INSTANCE=
-export NEW_INSTANCE_NAME=
-export TIME_STAMP=
-```
-
-```
-gcloud sql instances clone $CLOUDSQL_INSTANCE $NEW_INSTANCE_NAME \
- --point-in-time "$TIME_STAMP"
+gcloud sql instances clone [CLOUDSQL_INSTANCE] [NEW_INSTANCE_NAME] \
+ --point-in-time "[TIME_STAMP]"
 ```
 
 
