@@ -1,3 +1,4 @@
+
 # 🌐 The Basics of Google Cloud Compute: Challenge Lab || ARC120 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/course_templates/754/labs/584203)
 
 ## ⚠️ Disclaimer ⚠️
@@ -15,25 +16,9 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-export ZONE=
-```
-```bash
-gcloud compute instances attach-disk gcelab \
-  --disk mydisk \
-  --zone "$ZONE"
-```
-```bash
-gcloud compute disks create mydisk \
-  --size=200GB \
-  --zone $ZONE
-```
-```bash
-gcloud compute instances attach-disk gcelab \
-  --disk mydisk 
-  --zone $ZONE
-```
-```bash
-gcloud compute ssh "$INSTANCE_NAME" --zone="$ZONE" --command="echo SSH Connected Successfully"
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/The%20Basics%20of%20Google%20Cloud%20Compute%3A%20Challenge%20Lab/TechCode.sh
+sudo chmod +x TechCode.sh 
+./TechCode.sh
 ```
 ```bash
 sudo apt-get update
