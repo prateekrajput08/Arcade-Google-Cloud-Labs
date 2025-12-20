@@ -22,6 +22,12 @@ sudo chmod +x TechCode.sh
 ```bash
 python3 analyze-images-v2.py
 ```
+```bash
+SELECT locale, COUNT(locale) AS lcount
+FROM image_classification_dataset.image_text_detail
+GROUP BY locale
+ORDER BY lcount DESC;
+```
 
 </div>
 
