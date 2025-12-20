@@ -107,10 +107,11 @@ export GOOGLE_APPLICATION_CREDENTIALS=$PWD/sample-sa-key.json
 python3 analyze-images-v2.py
 ```
 ```bash
-SELECT locale, COUNT(locale) AS lcount
-FROM image_classification_dataset.image_text_detail
-GROUP BY locale
-ORDER BY lcount DESC;
+bq query --use_legacy_sql=false \
+"SELECT locale, COUNT(locale) AS lcount
+ FROM image_classification_dataset.image_text_detail
+ GROUP BY locale
+ ORDER BY lcount DESC"
 ```
 
 </div>
