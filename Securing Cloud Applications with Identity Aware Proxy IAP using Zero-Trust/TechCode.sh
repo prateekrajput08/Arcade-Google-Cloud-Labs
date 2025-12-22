@@ -67,6 +67,15 @@ gcloud app deploy --quiet
 echo "${GREEN_TEXT}${BOLD_TEXT}Task 1 Deployment Complete${RESET_FORMAT}"
 gcloud app browse
 
+# ---------- SHOW REQUIRED LINKS HERE ----------
+echo
+echo "${CYAN_TEXT}${BOLD_TEXT}Next: Complete these Console steps now${RESET_FORMAT}"
+echo "${WHITE_TEXT}• OAuth consent screen:${RESET_FORMAT}"
+echo "${BLUE_TEXT}  https://console.cloud.google.com/apis/credentials/consent${RESET_FORMAT}"
+echo "${WHITE_TEXT}• Identity-Aware Proxy:${RESET_FORMAT}"
+echo "${BLUE_TEXT}  https://console.cloud.google.com/security/iap${RESET_FORMAT}"
+echo "${CYAN_TEXT}----------------------------------------------------${RESET_FORMAT}"
+
 cd ..
 
 # ========================= MANUAL IAP STEPS =========================
