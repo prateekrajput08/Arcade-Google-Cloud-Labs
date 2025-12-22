@@ -43,7 +43,7 @@ echo "${YELLOW_TEXT}Region     : ${WHITE_TEXT}${REGION}${RESET_FORMAT}"
 echo "${YELLOW_TEXT}AuthDomain : ${WHITE_TEXT}${AUTH_DOMAIN}${RESET_FORMAT}"
 echo "${CYAN_TEXT}----------------------------------------------------${RESET_FORMAT}"
 
-echo "${BLUE_TEXT}${BOLD_TEXT}========================= CLONE REPO =========================${RESET_FORMAT}"
+# ========================= CLONE REPO =========================
 echo "${BLUE_TEXT}${BOLD_TEXT}Cloning lab repository...${RESET_FORMAT}"
 cd ~
 rm -rf user-authentication-with-iap
@@ -55,7 +55,8 @@ echo "${PURPLE_TEXT}${BOLD_TEXT}Task 1 – Deploy HelloWorld App${RESET_FORMAT}"
 
 cd 1-HelloWorld
 
-sed -i 's/runtime: python38/runtime: python310/' app.yaml
+# FORCE python310 (handles python37 / 38 / 39)
+sed -i 's/runtime: python.*/runtime: python310/' app.yaml
 
 echo "${TEAL_TEXT}Creating App Engine application...${RESET_FORMAT}"
 gcloud app create --region=$REGION || true
@@ -86,7 +87,8 @@ echo "${PURPLE_TEXT}${BOLD_TEXT}Task 2 – Deploy HelloUser App${RESET_FORMAT}"
 
 cd 2-HelloUser
 
-sed -i 's/runtime: python38/runtime: python310/' app.yaml
+# FORCE python310 again
+sed -i 's/runtime: python.*/runtime: python310/' app.yaml
 
 echo "${TEAL_TEXT}Deploying updated app...${RESET_FORMAT}"
 gcloud app deploy --quiet
@@ -95,6 +97,7 @@ echo "${GREEN_TEXT}${BOLD_TEXT}Task 2 Deployment Complete${RESET_FORMAT}"
 gcloud app browse
 
 # ========================= FINISH =========================
+echo
 echo "${YELLOW_TEXT}If access denied persists, clear IAP cookie:${RESET_FORMAT}"
 echo "${GOLD_TEXT}https://${AUTH_DOMAIN}/_gcp_iap/clear_login_cookie${RESET_FORMAT}"
 
