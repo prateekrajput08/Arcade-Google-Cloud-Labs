@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-export PROJECT_ID=qwiklabs-gcp-01-305cad06f5bf
+export PROJECT_ID=
 
 bq mk --connection --connection_type='CLOUD_SPANNER' --properties="{\"database\":\"projects/${PROJECT_ID}/instances/ecommerce-instance/databases/ecommerce\"}" --location=us-east4 spanner_connection
 
