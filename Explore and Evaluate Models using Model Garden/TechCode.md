@@ -15,7 +15,7 @@
 ### Task 1: Explore Model Garden
 
 1.  Enable `Vertex AI API` from [here](https://console.cloud.google.com/marketplace/product/google/aiplatform.googleapis.com) 
-1. Click [here](https://console.cloud.google.com/vertex-ai/publishers/google/model-garden/text-bison?project=) to open `PaLM2` for Text in the AI Studio Language interface.
+1. Click [here](https://console.cloud.google.com/vertex-ai/model-garden) to open `PaLM2` for Text in the AI Studio Language interface.
 
 2. Write any `Prompt`.
 
