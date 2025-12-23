@@ -15,9 +15,11 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export PROJECT_ID=qwiklabs-gcp-01-305cad06f5bf
+
 bq mk --connection --connection_type='CLOUD_SPANNER' --properties="{\"database\":\"projects/${PROJECT_ID}/instances/ecommerce-instance/databases/ecommerce\"}" --location=us-east4 spanner_connection
 
-bq query --use_legacy_sql=false "order_history \`${PROJECT_ID}.ecommerce.order_history\` AS SELECT * FROM EXTERNAL_QUERY(\"${PROJECT_ID}.us-east4.spanner_connection\", \"SELECT * FROM orders;\");"
+bq query --use_legacy_sql=false "CREATE OR REPLACE VIEW \`${PROJECT_ID}.ecommerce.order_history\` AS SELECT * FROM EXTERNAL_QUERY(\"${PROJECT_ID}.us-east4.spanner_connection\", \"SELECT * FROM orders;\");"
 ```
 
 </div>
