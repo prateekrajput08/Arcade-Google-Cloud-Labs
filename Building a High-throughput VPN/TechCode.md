@@ -15,11 +15,6 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-export ZONE_1=
-export ZONE_2=
-```
-
-```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Building%20a%20High-throughput%20VPN/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
@@ -52,6 +47,6 @@ sudo chmod +x TechCode.sh
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: May 2025</em>
+    <em>Last updated: January 2026</em>
   </p>
 </div>
