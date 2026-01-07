@@ -25,10 +25,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# Ask user for zones
+read -p "Enter ZONE_1 (example: us-east1-b): " ZONE_1
+read -p "Enter ZONE_2 (example: us-central1-a): " ZONE_2
+
+# Export zones
+export ZONE_1
+export ZONE_2
+
+# Derive regions from zones
 export REGION_1="${ZONE_1%-*}"
-
 export REGION="${ZONE_2%-*}"
-
 
 gcloud compute networks create cloud --subnet-mode custom
 
