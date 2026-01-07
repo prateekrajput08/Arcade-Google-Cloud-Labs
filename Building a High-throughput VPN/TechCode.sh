@@ -25,17 +25,33 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Ask user for zones
-read -p "Enter ZONE_1 (example: us-east1-b): " ZONE_1
-read -p "Enter ZONE_2 (example: us-central1-a): " ZONE_2
+# Ask user for regions
+read -p "Enter REGION_1 (example: us-east1): " REGION_1
+read -p "Enter REGION_2 (example: us-central1): " REGION
 
-# Export zones
-export ZONE_1
-export ZONE_2
+# Export regions
+export REGION_1
+export REGION
 
-# Derive regions from zones
-export REGION_1="${ZONE_1%-*}"
-export REGION="${ZONE_2%-*}"
+# Automatically pick a zone from each region
+export ZONE_1=$(gcloud compute zones list \
+  --filter="region:($REGION_1)" \
+  --format="value(name)" | head -n 1)
+
+export ZONE_2=$(gcloud compute zones list \
+  --filter="region:($REGION)" \
+  --format="value(name)" | head -n 1)
+
+# Safety check
+if [[ -z "$ZONE_1" || -z "$ZONE_2" ]]; then
+  echo "❌ Invalid region entered. Please check region names."
+  exit 1
+fi
+
+echo "Using:"
+echo "  REGION_1 = $REGION_1 → ZONE_1 = $ZONE_1"
+echo "  REGION_2 = $REGION → ZONE_2 = $ZONE_2"
+echo
 
 gcloud compute networks create cloud --subnet-mode custom
 
