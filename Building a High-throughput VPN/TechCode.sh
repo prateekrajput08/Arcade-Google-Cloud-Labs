@@ -26,8 +26,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 # Ask user for regions
-read -p "Enter REGION_1 (example: us-east1): " REGION_1
-read -p "Enter REGION_2 (example: us-central1): " REGION
+read -p "${CYAN_TEXT}${BOLD_TEXT}Enter REGION_1 (example: us-east1): ${RESET_FORMAT}" REGION_1
+read -p "${CYAN_TEXT}${BOLD_TEXT}Enter REGION_2 (example: us-central1): ${RESET_FORMAT}" REGION
 
 # Export regions
 export REGION_1
@@ -48,9 +48,9 @@ if [[ -z "$ZONE_1" || -z "$ZONE_2" ]]; then
   exit 1
 fi
 
-echo "Using:"
-echo "  REGION_1 = $REGION_1 → ZONE_1 = $ZONE_1"
-echo "  REGION_2 = $REGION → ZONE_2 = $ZONE_2"
+echo "${CYAN_TEXT}${BOLD_TEXT}Using:${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}REGION_1 = $REGION_1 → ZONE_1 = $ZONE_1${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}REGION_2 = $REGION → ZONE_2 = $ZONE_2${RESET_FORMAT}"
 echo
 
 gcloud compute networks create cloud --subnet-mode custom
