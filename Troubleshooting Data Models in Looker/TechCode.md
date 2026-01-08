@@ -51,9 +51,7 @@ view: user_order_lifetime {
   set: detail {
     fields: [user_id, lifetime_orders, lifetime_sales]
   }
-
 }
-
 ```
 
 ## Step 2: Update `users.view`
@@ -151,7 +149,7 @@ view: users {
     sql: ${user_order_lifetime.lifetime_sales} / ${user_order_lifetime.lifetime_orders} ;;
     value_format_name: usd
   }
-
+  
   dimension: average_order_price  {
     type: number
     sql: ${user_order_lifetime.lifetime_sales} / ${user_order_lifetime.lifetime_orders} ;;
@@ -185,8 +183,8 @@ persist_with: training_ecommerce_default_datagroup
 label: "E-Commerce Training"
 
 explore: order_items {
-
-  query: TechCode {
+  
+  query: drabhishek {
     dimensions: [users.age, users.average_sales, users.country, users.id, users.state]
   }
   join: user_order_lifetime {
@@ -194,25 +192,25 @@ explore: order_items {
     sql_on: ${order_items.user_id} = ${user_order_lifetime.user_id} ;;
     relationship: many_to_one
   }
-
+  
   join: users {
     type: left_outer
     sql_on: ${order_items.user_id} = ${users.id} ;;
     relationship: many_to_one
   }
-
+  
   join: inventory_items {
     type: left_outer
     sql_on: ${order_items.inventory_item_id} = ${inventory_items.id} ;;
     relationship: many_to_one
   }
-
+  
   join: products {
     type: left_outer
     sql_on: ${inventory_items.product_id} = ${products.id} ;;
     relationship: many_to_one
   }
-
+  
   join: distribution_centers {
     type: left_outer
     sql_on: ${products.distribution_center_id} = ${distribution_centers.id} ;;
@@ -241,13 +239,13 @@ explore: events {
     sql_on: ${events.user_id} = ${users.id} ;;
     relationship: many_to_one
   }
-
+  
   join: user_order_lifetime {
     type: left_outer
     sql_on: ${order_items.user_id} = ${user_order_lifetime.user_id} ;;
     relationship: many_to_one
   }
-
+  
 }
 ```
 
