@@ -21,8 +21,8 @@ from vertexai.generative_models import GenerativeModel, Part
 # -----------------------------
 # CONFIG
 # -----------------------------
-PROJECT_ID = "your-project-id"   # replace
-LOCATION = "us-central1"
+PROJECT_ID = "YOUR_PROJECT_ID"   # replace
+LOCATION = "YOUR_REGION"
 
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 
