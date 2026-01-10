@@ -18,8 +18,8 @@
 import vertexai
 from vertexai.generative_models import GenerativeModel
 
-PROJECT_ID = "your-project-id"
-LOCATION = "us-central1"
+PROJECT_ID = "YOUR_PROJECT_ID"
+LOCATION = "YOUR_REGION"
 
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 
