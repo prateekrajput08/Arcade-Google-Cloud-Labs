@@ -24,7 +24,7 @@ LOCATION = "YOUR_REGION"
 vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 def get_chat_response(prompt):
-    model = GenerativeModel("gemini-2.0-flash")
+    model = GenerativeModel("gemini-2.5-flash")
     response = model.generate_content(prompt)
     return response.text
 
