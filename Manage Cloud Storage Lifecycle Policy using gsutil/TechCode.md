@@ -16,7 +16,7 @@
 
 ```bash
 curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Manage%20Cloud%20Storage%20Lifecycle%20Policy%20using%20gsutil/TechCode.sh
-sudo chmod +x TechCode.sh 
+chmod +x TechCode.sh 
 ./TechCode.sh
 ```
 
