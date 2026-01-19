@@ -92,7 +92,7 @@ javascript:(function () {
     });
 
     // Notify user when script is executed
-    showNotification('Follow Tech & Code');
+    showNotification('Subscribe Tech & Code');
 })();
 ```
 
