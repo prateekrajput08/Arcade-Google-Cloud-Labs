@@ -27,7 +27,7 @@ gsutil -m rsync -r gs://$BUCKET gs://$NEW_BUCKET
 gcloud compute backend-buckets create backend-new  --gcs-bucket-name=$NEW_BUCKET  --enable-cdn
 gcloud compute url-maps create website-map  --default-backend-bucket=backend-new
 gcloud compute target-http-proxies create website-proxy  --url-map=website-map
-gcloud compute forwarding-rules create website-rule  --global  --target-http-proxy=website-proxy
+gcloud compute forwarding-rules create website-rule  --global  --target-http-proxy=website-proxy  --ports=80
 ```
 </div>
 
