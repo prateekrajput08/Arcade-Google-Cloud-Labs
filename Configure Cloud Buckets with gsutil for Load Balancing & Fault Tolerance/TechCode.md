@@ -15,11 +15,9 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-PROJECT_ID=
-BUCKET=
-NEW_BUCKET=
-```
-```bash
+PROJECT_ID=$(gcloud config get-value project)
+BUCKET=${PROJECT_ID}-bucket
+NEW_BUCKET=${PROJECT_ID}-new
 gsutil mb gs://$NEW_BUCKET
 gsutil web set -m index.html -e error.html gs://$NEW_BUCKET
 gsutil iam ch allUsers:roles/storage.admin gs://$NEW_BUCKET
