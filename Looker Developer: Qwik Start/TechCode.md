@@ -155,6 +155,6 @@ explore: events {
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: November 2025</em>
+    <em>Last updated: January 2026</em>
   </p>
 </div>
