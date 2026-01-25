@@ -24,3 +24,24 @@ Here are some of the benefits of using Google Cloud Skills Boost:
 
 If you’re interested in learning more about Google Cloud, I highly recommend checking out our [YouTube channel.](https://www.youtube.com/@TechCode9)
 
+## 🎁 Earn Exclusive Google Cloud Swags
+Participants can also earn exciting swags by completing selected Google Cloud labs, skill badges, and challenges. These swags may include goodies like T-shirts, stickers, certificates, and other exclusive rewards. They not only make learning more fun but also recognize your effort and achievements in Google Cloud learning.
+<p align="center">
+  <img src="https://github.com/prateekrajput08/TechCodeHub-Images/blob/main/Images/Swags.png?raw=true" alt="Swags" width="100%">
+</p>
+
+## ⚠️ Disclaimer
+
+> **Google Cloud** may update/remove badges, labs, or assessment paths anytime.  
+> **Respect the work, don’t copy-paste without giving credit — it takes hours of research.**
+
+## 💫 If you find this useful...
+
+- Give this repo a ⭐
+- Share with your learning groups
+
+## 📢 Connect with Me
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-blue?logo=linkedin)](https://www.linkedin.com/in/prateekrajput08)
+[![GitHub](https://img.shields.io/badge/GitHub-Prateek%20Rajput-black?logo=github)](https://github.com/prateekrajput08)
+[![YouTube](https://img.shields.io/badge/YouTube-Tech%20&%20Code-red?logo=youtube)](https://www.youtube.com/@TechCode9/playlists)
