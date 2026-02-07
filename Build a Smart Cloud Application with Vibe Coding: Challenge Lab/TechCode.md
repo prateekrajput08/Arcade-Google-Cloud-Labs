@@ -13,7 +13,7 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
+### Sahi se copy karna kya pta logo ko pta chal jaye code mera h  
 ```bash
 gcloud services enable \
 aiplatform.googleapis.com \
