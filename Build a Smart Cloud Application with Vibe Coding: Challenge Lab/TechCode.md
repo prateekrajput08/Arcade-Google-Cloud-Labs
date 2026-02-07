@@ -43,7 +43,7 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 echo -e "\n\e[1;32mIAM roles applied successfully for\e[0m \e[1;33m$STUDENT_EMAIL\e[0m \e[1;32mon project\e[0m \e[1;33m$PROJECT_ID\e[0m\n"
 ```
 ```bash
-todo = [google_search]
+tools = [google_search]
 ```
 
 
