@@ -13,7 +13,7 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-### Sahi se copy karna kya pta logo ko pta chal jaye code mera h  
+### Abhi kuch log ye tutorial dekhne ke baad video post karege or bolege 1st video on youtube 😏
 ```bash
 gcloud services enable \
 aiplatform.googleapis.com \
