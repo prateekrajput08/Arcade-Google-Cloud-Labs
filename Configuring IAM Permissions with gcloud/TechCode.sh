@@ -181,17 +181,20 @@ gcloud config set project $PROJECTID2
 
 # Step 21: Create service account named devops
 echo "${BOLD}${CYAN}Creating service account 'devops'${RESET}"
-gcloud iam service-accounts create devops --display-name devops
+
+# FIX: prevent error if already exist
+gcloud iam service-accounts create devops --display-name devops || true
 
 # Step 22: Get service account email
 echo "${BOLD}${BLUE}Retrieving service account email${RESET}"
 SA=$(gcloud iam service-accounts list --format="value(email)" --filter "displayName=devops")
 
-# Step 23: Grant service account roles
+# Step 23: Grant service account ro
 echo "${BOLD}${YELLOW}Granting IAM roles to service account${RESET}"
-gcloud projects add-iam-policy-binding $PROJECTID2 --member serviceAccount:$SA --role=roles/iam.serviceAccountUser
 
-gcloud projects add-iam-policy-binding $PROJECTID2 --member serviceAccount:$SA --role=roles/compute.instanceAdmin
+# FIX: safer quoting
+gcloud projects add-iam-policy-binding $PROJECTID2 --member="serviceAccount:$SA" --role=roles/iam.serviceAccountUser
+gcloud projects add-iam-policy-binding $PROJECTID2 --member="serviceAccount:$SA" --role=roles/compute.instanceAdmin
 
 # Step 24: Create lab-3 instance with service account
 echo "${BOLD}${MAGENTA}Creating lab-3 VM instance using service account${RESET}"
