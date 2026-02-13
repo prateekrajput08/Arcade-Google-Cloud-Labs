@@ -26,17 +26,24 @@ sudo chmod +x TechCode.sh
 ./TechCode.sh
 ```
 ```bash
+echo -n "Enter PROJECTID2: "
+read PROJECTID2
+if [[ -z "$PROJECTID2" ]]; then
+echo "ERROR: PROJECTID2 cannot be empty"
+exit 1
+fi
 gcloud config set project $PROJECTID2
-gcloud iam service-accounts create instance-admin-sa \
-  --display-name "Instance Admin SA"
+gcloud iam service-accounts create instance-admin-sa 
+--display-name "Instance Admin SA" || true
 export SA=instance-admin-sa@$PROJECTID2.iam.gserviceaccount.com
-echo $SA
-gcloud projects add-iam-policy-binding $PROJECTID2 \
-  --member="serviceAccount:$SA" \
-  --role="roles/iam.serviceAccountUser"
-gcloud projects add-iam-policy-binding $PROJECTID2 \
-  --member="serviceAccount:$SA" \
-  --role="roles/compute.instanceAdmin"
+echo "Using Service Account: $SA"
+gcloud projects add-iam-policy-binding $PROJECTID2 
+--member="serviceAccount:$SA" 
+--role="roles/iam.serviceAccountUser"
+gcloud projects add-iam-policy-binding $PROJECTID2 
+--member="serviceAccount:$SA" 
+--role="roles/compute.instanceAdmin"
+
 ```
 
 </div>
