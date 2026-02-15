@@ -13,13 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
+
 ```bash
-gcloud compute firewall-rules delete critical-fw-rule
-```
-```bash
-gcloud compute firewall-rules create critical-fw-rule --network client-vpc --action deny --rules tcp:80,22 --direction ingress \ --target-tags compromised-vm
-gcloud compute firewall-rules create allow-ssh-from-bastion --network client-vpc --action allow --direction ingress --rules tcp:22 --source-ranges dynamic_bastationhost_ip --target-tags compromised-vm
-gcloud compute networks subnets update my-subnet --region=dynamic_region --enable-flow-logs
+gcloud compute firewall-rules delete critical-fw-rule --quiet 2>/dev/null; gcloud compute firewall-rules create critical-fw-rule --network=client-vpc --direction=INGRESS --priority=1000 --action=DENY --rules=tcp:80,tcp:22 --target-tags=compromised-vm --enable-logging
+gcloud compute firewall-rules delete allow-ssh-from-bastion --quiet 2>/dev/null; gcloud compute firewall-rules create allow-ssh-from-bastion --network=client-vpc --direction=INGRESS --priority=1000 --allow=tcp:22 --source-ranges=$(gcloud compute instances describe bastion-host --zone=$(gcloud compute instances list --filter="name=bastion-host" --format="get(zone)") --format="get(networkInterfaces[0].accessConfigs[0].natIP)")/32 --target-tags=compromised-vm --enable-logging
+gcloud compute networks subnets update my-subnet --region=$(gcloud compute networks subnets list --filter="name=my-subnet" --format="get(region)") --enable-flow-logs
 ```
 
 </div>
