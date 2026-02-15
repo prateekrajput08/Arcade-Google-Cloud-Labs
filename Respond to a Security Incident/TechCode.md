@@ -12,6 +12,11 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
+<img src="https://github.com/user-attachments/assets/aa0c8199-7091-46fb-8536-7c1280929b21" alt="nana-patekar-clap" width="314">
+
+<img src="https://github.com/user-attachments/assets/32c75344-3ac9-422f-b10d-49b385db7c37" alt="im-not-sure-gifkaro" width="400">
+
+
 ## ☁️ Run in Cloud Shell:
 
 ```bash
