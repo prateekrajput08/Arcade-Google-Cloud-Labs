@@ -1,4 +1,4 @@
-# 🌐 Respond to a Security Incident || GSP 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Respond to a Security Incident 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -13,9 +13,10 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
 ```bash
 gcloud compute firewall-rules delete critical-fw-rule
+```
+```bash
 gcloud compute firewall-rules create critical-fw-rule \
 --network client-vpc \
 --action deny \
