@@ -17,24 +17,9 @@
 gcloud compute firewall-rules delete critical-fw-rule
 ```
 ```bash
-gcloud compute firewall-rules create critical-fw-rule \
---network client-vpc \
---action deny \
---rules tcp:80,22 \
---direction ingress \
---target-tags compromised-vm
-
-gcloud compute firewall-rules create allow-ssh-from-bastion \
---network client-vpc \
---action allow \
---direction ingress \
---rules tcp:22 \
---source-ranges dynamic_bastationhost_ip\
---target-tags compromised-vm
-
-gcloud compute networks subnets update my-subnet \
---region=dynamic_region \
---enable-flow-logs
+gcloud compute firewall-rules create critical-fw-rule --network client-vpc --action deny --rules tcp:80,22 --direction ingress \ --target-tags compromised-vm
+gcloud compute firewall-rules create allow-ssh-from-bastion --network client-vpc --action allow --direction ingress --rules tcp:22 --source-ranges dynamic_bastationhost_ip --target-tags compromised-vm
+gcloud compute networks subnets update my-subnet --region=dynamic_region --enable-flow-logs
 ```
 
 </div>
