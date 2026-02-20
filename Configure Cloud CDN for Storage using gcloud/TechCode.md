@@ -18,7 +18,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-BUCKET_NAME="gs://${PROJECT_ID}-bucket"
+BUCKET_NAME="${PROJECT_ID}-bucket"
 BACKEND_BUCKET=static-backend-bucket
 URL_MAP=cdn-map
 PROXY=cdn-http-proxy
