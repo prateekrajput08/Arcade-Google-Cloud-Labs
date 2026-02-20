@@ -13,6 +13,8 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
+<img src="https://media1.tenor.com/m/AbX9FLBPBb4AAAAd/gyani-baba-aap-kahan-the-gyani-baba.gif">
+  
 ## ☁️ Run in Cloud Shell:
 
 ```bash
