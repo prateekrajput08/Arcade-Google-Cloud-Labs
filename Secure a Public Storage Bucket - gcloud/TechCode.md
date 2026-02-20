@@ -13,10 +13,11 @@
 <div style="padding: 15px; margin: 10px 0;">
 
 ## ☁️ Run in Cloud Shell:
-
 ```bash
-gsutil iam ch -d allUsers:objectViewer gs://Bucket name
-gsutil iam get gs://Bucket name
+export BUCKET=
+```
+```bash
+gsutil iam ch -d allUsers:objectViewer gs://$BUCKET
 ```
 
 </div>
