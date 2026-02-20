@@ -15,15 +15,10 @@
 ## ☁️ Run in Cloud Shell:
 ### Copy to tu bhi karta h
 ```bash
-export BUCKET=
-```
-```bash
+export PROJECT_ID=$(gcloud config get-value project)
+BUCKET=${PROJECT_ID}-bucket
 gsutil web set -m index.html -e error.html gs://$BUCKET
-```
-```bash
 gsutil uniformbucketlevelaccess set off gs://$BUCKET
-```
-```bash
 gsutil defacl set public-read gs://$BUCKET
 ```
 ```bash
