@@ -18,6 +18,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
+export PROJECT_ID=$(gcloud config get-value project)
 BUCKET_NAME=${PROJECT_ID}-bucket
 BACKEND_BUCKET=static-backend-bucket
 URL_MAP=cdn-map
