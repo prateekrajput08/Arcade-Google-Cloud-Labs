@@ -15,10 +15,8 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-PROJECT=$(gcloud config get-value project)
-```
-```bash
-export BUCKET=
+export PROJECT_ID=$(gcloud config get-value project)
+export BUCKET=${PROJECT_ID}-bucket
 ```
 ```bash
 gsutil setmeta -h "Content-Type:text/html" gs://${BUCKET}/index.html
