@@ -16,22 +16,12 @@
 
 ```bash
 export VM_NAME="lab-vm"
-export ZONE="YOUR_ZONE"  # Replace with your actual zone
-```
-
-```bash
-gcloud compute instances stop lab-vm --zone [YOUR_ZONE]
-```
-
-```bash
-gcloud compute instances set-machine-type $VM_NAME \
-  --machine-type e2-medium \
-  --zone $ZONE
-```
-
-```bash
-gcloud compute instances start lab-vm --zone YOUR_ZONE
-
+export PROJECT_ID=$(gcloud config get-value project)
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+gcloud config set compute/zone "$ZONE"
+gcloud compute instances stop lab-vm --zone $ZONE
+gcloud compute instances set-machine-type $VM_NAME --machine-type e2-medium --zone $ZONE
+gcloud compute instances start lab-vm --zone $ZONE
 ```
 
 </div>
