@@ -1,4 +1,4 @@
-# 🌐 Automating the Deployment of Infrastructure Using Terraform 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐  🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
 
 ## ⚠️ Disclaimer ⚠️
 
