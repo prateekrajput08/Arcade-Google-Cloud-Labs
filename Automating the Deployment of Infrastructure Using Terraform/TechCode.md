@@ -12,6 +12,10 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
+### Create File/Folder like this
+
+<img src="https://github.com/prateekrajput08/Arcade-Google-Cloud-Labs/blob/main/Images/Screenshot%202026-02-24%20163657.png?raw=true" >
+
 ## ☁️ Run in Cloud Shell:
 ### Create `mynetwork.tf`
 ```bash
@@ -50,7 +54,11 @@ module "mynet-eu-vm" {
   instance_network = google_compute_network.mynetwork.self_link
 }
 ```
-### Create `main.tf`
+### Create `provider.tf` 
+```bash
+provider "google" {}
+```
+### Create `instance` `main.tf`
 ```bash
 resource "google_compute_instance" "vm_instance" {
   name = "${var.instance_name}"
@@ -70,11 +78,8 @@ resource "google_compute_instance" "vm_instance" {
   }
 }
 ```
-### Create `provider.tf` 
-```bash
-provider "google" {}
-```
-### Create `variable.tf`
+
+### Create `instance` `variable.tf`
 ```bash
 variable "instance_name" {}
 variable "instance_zone" {}
