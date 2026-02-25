@@ -1,4 +1,4 @@
-# 🌐  🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
+# 🌐 Create VPC Peering Connection between VPCs 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)]()
 
 ## ⚠️ Disclaimer ⚠️
 
