@@ -1,5 +1,5 @@
 
-# 🌐 App Engine: Qwik Start - Kava || GSP068 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6551/labs/41066)
+# 🌐 App Engine: Qwik Start - Java || GSP068 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.cloudskillsboost.google/games/6551/labs/41066)
 
 ## ⚠️ Disclaimer ⚠️
 
