@@ -19,13 +19,21 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
-echo echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter required values:${RESET_FORMAT}"
 
-echo read -p "${YELLOW_TEXT}Enter User Email to Remove (USER_2): ${WHITE_TEXT}${BOLD_TEXT}" 
-USER_2 echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Zone (e.g. us-central1-a): ${WHITE_TEXT}${BOLD_TEXT}" 
-ZONE echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Pub/Sub Topic Name (TOPIC): ${WHITE_TEXT}${BOLD_TEXT}" 
-TOPIC echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Cloud Function Name (FUNCTION): ${WHITE_TEXT}${BOLD_TEXT}" 
-FUNCTION echo -e "${RESET_FORMAT}" 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter required values:${RESET_FORMAT}"
+echo
+
+read -p "${YELLOW_TEXT}Enter User Email to Remove (USER_2): ${WHITE_TEXT}${BOLD_TEXT}" USER_2
+echo -e "${RESET_FORMAT}"
+
+read -p "${YELLOW_TEXT}Enter Zone (e.g. europe-west4-a): ${WHITE_TEXT}${BOLD_TEXT}" ZONE
+echo -e "${RESET_FORMAT}"
+
+read -p "${YELLOW_TEXT}Enter Pub/Sub Topic Name (TOPIC): ${WHITE_TEXT}${BOLD_TEXT}" TOPIC
+echo -e "${RESET_FORMAT}"
+
+read -p "${YELLOW_TEXT}Enter Cloud Function Name (FUNCTION): ${WHITE_TEXT}${BOLD_TEXT}" FUNCTION
+echo -e "${RESET_FORMAT}"
 
 export USER_2 
 export ZONE 
