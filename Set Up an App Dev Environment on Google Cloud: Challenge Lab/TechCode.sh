@@ -186,14 +186,24 @@ gsutil cp map.jpg gs://$BUCKET
 
 echo "Task 3 Completed."
 
-VIEWER_USER=$(gcloud projects get-iam-policy $(gcloud config get-value project) \
---flatten="bindings[].members" \
---filter="bindings.role:roles/viewer" \
---format="value(bindings.members)")
+echo "Removing previous cloud engineer..."
 
-gcloud projects remove-iam-policy-binding $(gcloud config get-value project) \
---member="$VIEWER_USER" \
---role="roles/viewer"
+PROJECT_ID=$(gcloud config get-value project)
+
+VIEWER_USER=$(gcloud projects get-iam-policy $PROJECT_ID \
+--flatten="bindings[].members" \
+--filter="bindings.role=roles/viewer" \
+--format="value(bindings.members)" | grep student | head -n1)
+
+if [ -n "$VIEWER_USER" ]; then
+  gcloud projects remove-iam-policy-binding $PROJECT_ID \
+  --member="$VIEWER_USER" \
+  --role="roles/viewer" \
+  --quiet
+  echo "Removed viewer: $VIEWER_USER"
+else
+  echo "No viewer found."
+fi
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
