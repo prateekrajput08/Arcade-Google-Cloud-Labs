@@ -75,146 +75,118 @@ gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
 sleep 30
 
 # ===============================
-# CREATE BUCKET & TOPIC
-# ===============================
-
-gsutil mb -l $REGION gs://$DEVSHELL_PROJECT_ID-bucket
-
-gcloud pubsub topics create $TOPIC || true
-
-mkdir function
-cd function
-
-# ===============================
 # CREATE FUNCTION CODE
 # ===============================
 
+#!/bin/bash
+
+REGION="europe-west4"
+FUNCTION="memories-thumbnail-generator"
+
+echo "Getting project info..."
+
+PROJECT_ID=$(gcloud config get-value project)
+
+BUCKET=$(gsutil ls | head -n1 | sed 's/gs:\/\///' | sed 's/\///')
+
+TOPIC=$(gcloud pubsub topics list --format="value(name)" | head -n1 | awk -F'/' '{print $NF}')
+
+echo "Project: $PROJECT_ID"
+echo "Bucket: $BUCKET"
+echo "Topic: $TOPIC"
+
+mkdir task3
+cd task3
+
 cat > index.js <<EOF
 const functions = require('@google-cloud/functions-framework');
-const crc32 = require("fast-crc32c");
 const { Storage } = require('@google-cloud/storage');
-const gcs = new Storage();
 const { PubSub } = require('@google-cloud/pubsub');
-const imagemagick = require("imagemagick-stream");
+const sharp = require('sharp');
 
-functions.cloudEvent('${FUNCTION}', cloudEvent => {
+functions.cloudEvent('$FUNCTION', async cloudEvent => {
+
   const event = cloudEvent.data;
-
-  console.log(\`Hello \${event.bucket}\`);
 
   const fileName = event.name;
   const bucketName = event.bucket;
-  const size = "64x64"
-  const bucket = gcs.bucket(bucketName);
-  const topicName = "${TOPIC}";
+
+  const bucket = new Storage().bucket(bucketName);
+
+  const topicName = "$TOPIC";
   const pubsub = new PubSub();
 
-  if ( fileName.search("64x64_thumbnail") == -1 ){
+  if (fileName.search("64x64_thumbnail") === -1) {
 
-    var filename_split = fileName.split('.');
-    var filename_ext = filename_split[filename_split.length - 1];
-    var filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length );
+    const filename_split = fileName.split('.');
+    const filename_ext = filename_split[filename_split.length - 1].toLowerCase();
+    const filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length - 1);
 
-    if (filename_ext.toLowerCase() == 'png' || filename_ext.toLowerCase() == 'jpg'){
-
-      console.log(\`Processing Original: gs://\${bucketName}/\${fileName}\`);
+    if (filename_ext === 'png' || filename_ext === 'jpg' || filename_ext === 'jpeg') {
 
       const gcsObject = bucket.file(fileName);
-      let newFilename = filename_without_ext + size + '_thumbnail.' + filename_ext;
-      let gcsNewObject = bucket.file(newFilename);
+      const newFilename = \`\${filename_without_ext}_64x64_thumbnail.\${filename_ext}\`;
+      const gcsNewObject = bucket.file(newFilename);
 
-      let srcStream = gcsObject.createReadStream();
-      let dstStream = gcsNewObject.createWriteStream();
+      try {
 
-      let resize = imagemagick().resize(size).quality(90);
+        const [buffer] = await gcsObject.download();
 
-      srcStream.pipe(resize).pipe(dstStream);
+        const resizedBuffer = await sharp(buffer)
+          .resize(64,64,{fit:'inside',withoutEnlargement:true})
+          .toFormat(filename_ext)
+          .toBuffer();
 
-      return new Promise((resolve, reject) => {
+        await gcsNewObject.save(resizedBuffer);
 
-        dstStream
-          .on("error", (err) => {
-            console.log(\`Error: \${err}\`);
-            reject(err);
-          })
-          .on("finish", () => {
+        await pubsub.topic(topicName)
+          .publishMessage({data:Buffer.from(newFilename)});
 
-            console.log(\`Success: \${fileName} → \${newFilename}\`);
+      } catch(err){
+        console.error(err);
+      }
 
-            pubsub
-              .topic(topicName)
-              .publishMessage({data: Buffer.from(newFilename)});
-
-          });
-      });
     }
   }
 });
 EOF
 
-# ===============================
-# PACKAGE.JSON
-# ===============================
 
 cat > package.json <<EOF
 {
- "name": "thumbnails",
- "version": "1.0.0",
- "description": "Create Thumbnail of uploaded image",
- "scripts": {
-   "start": "node index.js"
- },
- "dependencies": {
-   "@google-cloud/functions-framework": "^3.0.0",
-   "@google-cloud/pubsub": "^2.0.0",
-   "@google-cloud/storage": "^6.11.0",
-   "sharp": "^0.32.1"
- },
- "devDependencies": {},
- "engines": {
-   "node": ">=4.3.2"
- }
+"name":"thumbnails",
+"version":"1.0.0",
+"description":"Create Thumbnail",
+"scripts":{"start":"node index.js"},
+"dependencies":{
+"@google-cloud/functions-framework":"^3.0.0",
+"@google-cloud/pubsub":"^2.0.0",
+"@google-cloud/storage":"^6.11.0",
+"sharp":"^0.32.1"
+}
 }
 EOF
 
-PROJECT_ID=$(gcloud config get-value project)
 
-gcloud projects add-iam-policy-binding $PROJECT_ID \
---member=serviceAccount:$PROJECT_ID@$PROJECT_ID.iam.gserviceaccount.com \
---role=roles/pubsub.publisher
-
-# ===============================
-# DEPLOY FUNCTION
-# ===============================
-
-deploy_function() {
+echo "Deploying Cloud Run Function..."
 
 gcloud functions deploy $FUNCTION \
 --gen2 \
 --runtime=nodejs22 \
 --region=$REGION \
 --entry-point=$FUNCTION \
---trigger-resource=$DEVSHELL_PROJECT_ID-bucket \
+--trigger-resource=$BUCKET \
 --trigger-event=google.storage.object.finalize \
---source=. \
---quiet
+--source=.
 
-}
 
-SERVICE_NAME="$FUNCTION"
+echo "Testing function..."
 
-while true
-do
-deploy_function
+curl -O https://storage.googleapis.com/cloud-training/gsp315/map.jpg
 
-if gcloud run services describe $SERVICE_NAME --region $REGION &> /dev/null
-then
-echo "Cloud Run service created"
-break
-else
-sleep 20
-fi
-done
+gsutil cp map.jpg gs://$BUCKET
+
+echo "Task 3 Completed."
 
 # ===============================
 # TEST FUNCTION
