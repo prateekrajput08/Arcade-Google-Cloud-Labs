@@ -15,9 +15,14 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Set%20Up%20an%20App%20Dev%20Environment%20on%20Google%20Cloud%3A%20Challenge%20Lab/TechCode.sh
-sudo chmod +x TechCode.sh 
-./TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Set%20Up%20an%20App%20Dev%20Environment%20on%20Google%20Cloud%3A%20Challenge%20Lab/TechCode1.sh
+sudo chmod +x TechCode1.sh 
+./TechCode1.sh
+```
+```bash
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Set%20Up%20an%20App%20Dev%20Environment%20on%20Google%20Cloud%3A%20Challenge%20Lab/TechCode2.sh
+sudo chmod +x TechCode2.sh 
+./TechCode2.sh
 ```
 
 </div>
