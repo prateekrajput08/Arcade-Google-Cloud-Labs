@@ -207,7 +207,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 deploy_function() {
     gcloud functions deploy $FUNCTION \
     --gen2 \
-    --runtime nodejs20 \
+    --runtime nodejs22 \
     --trigger-resource $DEVSHELL_PROJECT_ID-bucket \
     --trigger-event google.storage.object.finalize \
     --entry-point $FUNCTION \
