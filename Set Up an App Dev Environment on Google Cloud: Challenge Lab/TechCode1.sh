@@ -19,60 +19,56 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
+echo echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter required values:${RESET_FORMAT}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter required values:${RESET_FORMAT}"
-echo
+echo read -p "${YELLOW_TEXT}Enter User Email to Remove (USER_2): ${WHITE_TEXT}${BOLD_TEXT}" 
+USER_2 echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Zone (e.g. us-central1-a): ${WHITE_TEXT}${BOLD_TEXT}" 
+ZONE echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Pub/Sub Topic Name (TOPIC): ${WHITE_TEXT}${BOLD_TEXT}" 
+TOPIC echo -e "${RESET_FORMAT}" read -p "${YELLOW_TEXT}Enter Cloud Function Name (FUNCTION): ${WHITE_TEXT}${BOLD_TEXT}" 
+FUNCTION echo -e "${RESET_FORMAT}" 
 
-read -p "Enter User Email to Remove: " USER_2
-read -p "Enter Zone (example europe-west4-a): " ZONE
-read -p "Enter Pub/Sub Topic Name: " TOPIC
-read -p "Enter Cloud Function Name: " FUNCTION
+export USER_2 
+export ZONE 
+export TOPIC 
+export FUNCTION 
+# Compute region from zone 
+export REGION="${ZONE%-*}" 
 
-export REGION="${ZONE%-*}"
+# =============================== # SERVICES ENABLE # =============================== 
+gcloud services enable \ 
+  artifactregistry.googleapis.com \ 
+  cloudfunctions.googleapis.com \ 
+  cloudbuild.googleapis.com \ 
+  eventarc.googleapis.com \ 
+  run.googleapis.com \ 
+  logging.googleapis.com \ 
+  pubsub.googleapis.com 
+  
+  sleep 30 
+  
+PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)') 
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \ 
+  --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \ 
+  --role=roles/eventarc.eventReceiver 
+  
+sleep 20 
 
-# ===============================
-# ENABLE SERVICES
-# ===============================
+SERVICE_ACCOUNT="$(gsutil kms serviceaccount -p $DEVSHELL_PROJECT_ID)" 
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \ 
+  --member="serviceAccount:${SERVICE_ACCOUNT}" \ 
+  --role='roles/pubsub.publisher' 
 
-gcloud services enable \
-artifactregistry.googleapis.com \
-cloudfunctions.googleapis.com \
-cloudbuild.googleapis.com \
-eventarc.googleapis.com \
-run.googleapis.com \
-logging.googleapis.com \
-pubsub.googleapis.com
+sleep 20 
 
-sleep 90
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \ 
+  --member=serviceAccount:service-$PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com \ 
+  --role=roles/iam.serviceAccountTokenCreator 
+  
+sleep 20 
 
-PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)')
+gsutil mb -l $REGION gs://$DEVSHELL_PROJECT_ID-bucket 
+gcloud pubsub topics create $TOPIC
 
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
---member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
---role=roles/eventarc.eventReceiver
-
-sleep 30
-
-SERVICE_ACCOUNT="$(gsutil kms serviceaccount -p $DEVSHELL_PROJECT_ID)"
-
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
---member="serviceAccount:${SERVICE_ACCOUNT}" \
---role='roles/pubsub.publisher'
-
-sleep 30
-
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
---member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com" \
---role="roles/storage.admin"
-
-sleep 30
-
-# Eventarc bucket permission fix
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
---member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com" \
---role="roles/storage.admin"
-
-sleep 30
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
