@@ -43,7 +43,7 @@ run.googleapis.com \
 logging.googleapis.com \
 pubsub.googleapis.com
 
-sleep 60
+sleep 90
 
 PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)')
 
@@ -51,7 +51,7 @@ gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
 --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
 --role=roles/eventarc.eventReceiver
 
-sleep 10
+sleep 30
 
 SERVICE_ACCOUNT="$(gsutil kms serviceaccount -p $DEVSHELL_PROJECT_ID)"
 
@@ -59,20 +59,20 @@ gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
 --member="serviceAccount:${SERVICE_ACCOUNT}" \
 --role='roles/pubsub.publisher'
 
-sleep 10
+sleep 30
 
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
---member=serviceAccount:service-$PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com \
---role=roles/iam.serviceAccountTokenCreator
+--member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com" \
+--role="roles/storage.admin"
 
-sleep 10
+sleep 30
 
 # Eventarc bucket permission fix
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
 --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com" \
 --role="roles/storage.admin"
 
-sleep 10
+sleep 30
 
 # ===============================
 # CREATE BUCKET & TOPIC
