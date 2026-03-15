@@ -44,7 +44,7 @@ gcloud services enable \
   logging.googleapis.com \ 
   pubsub.googleapis.com 
   
-  sleep 30 
+sleep 90
   
 PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)') 
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \ 
