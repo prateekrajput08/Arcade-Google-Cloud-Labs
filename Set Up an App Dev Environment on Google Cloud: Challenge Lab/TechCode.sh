@@ -83,11 +83,7 @@ PROJECT_ID=$(gcloud config get-value project)
 
 echo "Getting project info..."
 
-PROJECT_ID=$(gcloud config get-value project)
-
-BUCKET=$(gsutil ls | head -n1 | sed 's/gs:\/\///' | sed 's/\///')
-
-TOPIC=$(gcloud pubsub topics list --format="value(name)" | head -n1 | awk -F'/' '{print $NF}')
+BUCKET="$DEVSHELL_PROJECT_ID-bucket"
 
 echo "Project: $PROJECT_ID"
 echo "Bucket: $BUCKET"
@@ -186,24 +182,15 @@ gsutil cp map.jpg gs://$BUCKET
 
 echo "Task 3 Completed."
 
-echo "Removing previous cloud engineer..."
+sleep 20
 
-PROJECT_ID=$(gcloud config get-value project)
+curl -o map.jpg https://storage.googleapis.com/cloud-training/gsp315/map.jpg
 
-VIEWER_USER=$(gcloud projects get-iam-policy $PROJECT_ID \
---flatten="bindings[].members" \
---filter="bindings.role=roles/viewer" \
---format="value(bindings.members)" | grep student | head -n1)
+gsutil cp map.jpg gs://$DEVSHELL_PROJECT_ID-bucket/map.jpg
 
-if [ -n "$VIEWER_USER" ]; then
-  gcloud projects remove-iam-policy-binding $PROJECT_ID \
-  --member="$VIEWER_USER" \
-  --role="roles/viewer" \
-  --quiet
-  echo "Removed viewer: $VIEWER_USER"
-else
-  echo "No viewer found."
-fi
+gcloud projects remove-iam-policy-binding $DEVSHELL_PROJECT_ID \
+--member=user:$USER_2 \
+--role=roles/viewer
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
