@@ -1,30 +1,26 @@
 #!/bin/bash
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
 
-REGION="europe-west4"
-FUNCTION="memories-thumbnail-generator"
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+RESET_FORMAT=$'\033[0m'
 
-echo "Getting project info..."
+clear
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Getting project info...${RESET_FORMAT}"
 
 PROJECT_ID=$(gcloud config get-value project)
 
 BUCKET=$(gsutil ls | head -n1 | sed 's/gs:\/\///' | sed 's/\///')
 
 TOPIC=$(gcloud pubsub topics list --format="value(name)" | head -n1 | awk -F'/' '{print $NF}')
-
-echo "Project: $PROJECT_ID"
-echo "Bucket: $BUCKET"
-echo "Topic: $TOPIC"
-
-echo "Enabling APIs..."
-
-gcloud services enable \
-cloudfunctions.googleapis.com \
-run.googleapis.com \
-eventarc.googleapis.com \
-pubsub.googleapis.com \
-cloudbuild.googleapis.com
-
-sleep 60
 
 mkdir task3
 cd task3
@@ -99,7 +95,7 @@ cat > package.json <<EOF
 EOF
 
 
-echo "Deploying Cloud Run Function..."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Deploying Cloud Run Function...${RESET_FORMAT}"
 
 gcloud functions deploy $FUNCTION \
 --gen2 \
@@ -111,15 +107,15 @@ gcloud functions deploy $FUNCTION \
 --source=.
 
 
-echo "Testing function..."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Testing function...${RESET_FORMAT}"
 
 curl -O https://storage.googleapis.com/cloud-training/gsp315/map.jpg
 
 gsutil cp map.jpg gs://$BUCKET
 
-echo "Task 3 Completed."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Task 3 Completed.${RESET_FORMAT}"
 
-echo "Removing previous cloud engineer..."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Removing previous cloud engineer...${RESET_FORMAT}"
 
 VIEWER_USER=$(gcloud projects get-iam-policy $(gcloud config get-value project) \
 --flatten="bindings[].members" \
@@ -130,7 +126,7 @@ gcloud projects remove-iam-policy-binding $(gcloud config get-value project) \
 --member="$VIEWER_USER" \
 --role="roles/viewer"
 
-echo "Previous engineer removed."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Previous engineer removed.${RESET_FORMAT}"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
