@@ -52,19 +52,31 @@ bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset exists"
 gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
 # Run Dataflow job
+# --- TASK 1: Dataflow ---
+echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
+
+REGION=${REGION:-us-central1}
+
+# Create dataset
+bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset exists"
+
+# Create bucket
+gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
+
+# Run Dataflow job
 gcloud dataflow jobs run batch-job-task1 \
-  --gcs-location gs://dataflow-templates-${REGION}/latest/GCS_Text_to_BigQuery \
+  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
   --region $REGION \
   --staging-location $TEMP_LOCATION \
+  --temp-location $TEMP_LOCATION \
+  --worker-machine-type e2-standard-2 \
   --parameters \
 inputFilePattern=gs://spls/gsp323/lab.csv,\
 JSONPath=gs://spls/gsp323/lab.schema,\
 outputTable=$PROJECT_ID:$DATASET.$TABLE,\
 javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
 javascriptTextTransformFunctionName=transform,\
-bigQueryLoadingTemporaryDirectory=$BQ_TEMP,\
-tempLocation=$TEMP_LOCATION,\
-workerMachineType=e2-standard-2
+bigQueryLoadingTemporaryDirectory=$BQ_TEMP
 
 # --- TASK 2: Dataproc ---
 echo -e "\n${MAGENTA_TEXT}${BOLD_TEXT}Starting Task 2: Dataproc Cluster Creation...${RESET_FORMAT}"
