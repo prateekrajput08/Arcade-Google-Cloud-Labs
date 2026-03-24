@@ -31,6 +31,8 @@ read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery TABLE Name: "${RESET_FORMAT})" 
 read -p "$(echo -e ${YELLOW_TEXT}"Enter Cloud Storage BUCKET Name (Project ID): "${RESET_FORMAT})" BUCKET
 read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUT
 read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 4 Output URI: "${RESET_FORMAT})" TASK4_OUTPUT
+read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary BigQuery Directory (e.g. gs://bucket/bq-temp): "${RESET_FORMAT})" BQ_TEMP
+read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary Location (e.g. gs://bucket/temp): "${RESET_FORMAT})" TEMP_LOCATION
 
 echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Configuration complete. Starting tasks...${RESET_FORMAT}\n"
 
@@ -38,12 +40,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
 # --- TASK 1: Dataflow ---
-# --- TASK 1: Dataflow ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
-
-# Ask missing required inputs
-read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary BigQuery Directory (e.g. gs://bucket/bq-temp): "${RESET_FORMAT})" BQ_TEMP
-read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary Location (e.g. gs://bucket/temp): "${RESET_FORMAT})" TEMP_LOCATION
 
 # Create dataset (safe create)
 bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset already exists"
