@@ -100,15 +100,26 @@ gcloud dataproc jobs submit spark \
 # --- TASK 3: Speech-to-Text API ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 3: Speech-to-Text...${RESET_FORMAT}"
 
+# Enable required APIs
 gcloud services enable apikeys.googleapis.com
+gcloud services enable speech.googleapis.com
+
+# Create API key
 gcloud alpha services api-keys create --display-name="ml-api-key"
 
 echo -e "${CYAN_TEXT}Waiting for API Key propagation...${RESET_FORMAT}"
-sleep 20 
+sleep 30
 
-KEY_NAME=$(gcloud alpha services api-keys list --format="value(name)" --filter "displayName=ml-api-key")
-export API_KEY=$(gcloud alpha services api-keys get-key-string $KEY_NAME --format="value(keyString)")
+# Get only ONE API key (fix for multiple keys issue)
+KEY_NAME=$(gcloud alpha services api-keys list \
+--format="value(name)" \
+--filter="displayName=ml-api-key" \
+--limit=1)
 
+API_KEY=$(gcloud alpha services api-keys get-key-string "$KEY_NAME" \
+--format="value(keyString)")
+
+# Create request
 cat > request.json <<EOF
 {
   "config": {
@@ -121,9 +132,13 @@ cat > request.json <<EOF
 }
 EOF
 
-curl -s -X POST -H "Content-Type: application/json" --data-binary @request.json \
-"https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}" > result_task3.json
+# Call Speech-to-Text API
+curl -s -X POST -H "Content-Type: application/json" \
+--data-binary @request.json \
+"https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}" \
+> result_task3.json
 
+# Upload result with correct content-type
 gsutil -h "Content-Type: application/json" cp result_task3.json $TASK3_OUTPUT
 
 # --- TASK 4: Natural Language API ---
