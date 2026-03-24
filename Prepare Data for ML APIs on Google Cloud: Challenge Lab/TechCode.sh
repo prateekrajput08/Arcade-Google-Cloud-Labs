@@ -26,18 +26,18 @@ echo
 
 echo -e "${CYAN_TEXT}${BOLD_TEXT}--- GCP LAB CONFIGURATION ---${RESET_FORMAT}"
 
-read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery DATASET Name: "${RESET_FORMAT})" DATASET
-read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery TABLE Name: "${RESET_FORMAT})" TABLE
-read -p "$(echo -e ${YELLOW_TEXT}"Enter Cloud Storage BUCKET Name (Project ID): "${RESET_FORMAT})" BUCKET
-read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary BigQuery Directory (e.g. gs://bucket/bq-temp): "${RESET_FORMAT})" BQ_TEMP
-read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary Location (e.g. gs://bucket/temp): "${RESET_FORMAT})" TEMP_LOCATION
-read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUT
-read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 4 Output URI: "${RESET_FORMAT})" TASK4_OUTPUT
-
-echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Configuration complete. Starting tasks...${RESET_FORMAT}\n"
-
 export PROJECT_ID=$(gcloud config get-value project)
 export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
+
+read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery DATASET Name: "${RESET_FORMAT})" DATASET
+read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery TABLE Name: "${RESET_FORMAT})" TABLE
+read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUTc
+read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 4 Output URI: "${RESET_FORMAT})" TASK4_OUTPUT
+BUCKET="${PROJECT_ID}-marking"
+BQ_TEMP="gs://${BUCKET}/bigquery_temp"
+TEMP_LOCATION="gs://${BUCKET}/temp"
+
+echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Configuration complete. Starting tasks...${RESET_FORMAT}\n"
 
 # --- TASK 1: Dataflow ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
