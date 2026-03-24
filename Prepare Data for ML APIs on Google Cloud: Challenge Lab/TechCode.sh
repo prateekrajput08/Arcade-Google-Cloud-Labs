@@ -116,7 +116,7 @@ cat > request.json <<EOF
     "languageCode": "en-US"
   },
   "audio": {
-    "uri": "gs://cloud-training/gsp323/task3.flac"
+    "uri": "gs://spls/gsp323/task3.flac"
   }
 }
 EOF
