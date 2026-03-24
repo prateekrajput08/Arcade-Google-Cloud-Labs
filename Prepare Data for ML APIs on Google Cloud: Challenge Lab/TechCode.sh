@@ -53,10 +53,9 @@ gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
 # Run Dataflow job
 gcloud dataflow jobs run batch-job-task1 \
-  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
+  --gcs-location gs://dataflow-templates-us-east1/latest/GCS_Text_to_BigQuery \
   --region $REGION \
   --staging-location $TEMP_LOCATION \
-  --temp-location $TEMP_LOCATION \
   --parameters \
 inputFilePattern=gs://spls/gsp323/lab.csv,\
 JSONPath=gs://spls/gsp323/lab.schema,\
@@ -64,6 +63,7 @@ outputTable=$PROJECT_ID:$DATASET.$TABLE,\
 javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
 javascriptTextTransformFunctionName=transform,\
 bigQueryLoadingTemporaryDirectory=$BQ_TEMP,\
+tempLocation=$TEMP_LOCATION,\
 workerMachineType=e2-standard-2
 
 # --- TASK 2: Dataproc ---
