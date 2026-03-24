@@ -42,24 +42,29 @@ echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Configuration complete. Starting tasks...${R
 # --- TASK 1: Dataflow ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
 
-# Create dataset (safe create)
-bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset already exists"
+# Fix region (safe fallback)
+REGION=${REGION:-us-central1}
 
-# Create bucket (safe create)
-gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket already exists"
+# Create dataset
+bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset exists"
+
+# Create bucket
+gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
 # Run Dataflow job
 gcloud dataflow jobs run batch-job-task1 \
   --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
   --region $REGION \
   --staging-location $TEMP_LOCATION \
+  --temp-location $TEMP_LOCATION \
   --parameters \
 inputFilePattern=gs://spls/gsp323/lab.csv,\
 JSONPath=gs://spls/gsp323/lab.schema,\
 outputTable=$PROJECT_ID:$DATASET.$TABLE,\
 javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
 javascriptTextTransformFunctionName=transform,\
-bigQueryLoadingTemporaryDirectory=$BQ_TEMP
+bigQueryLoadingTemporaryDirectory=$BQ_TEMP,\
+workerMachineType=e2-standard-2
 
 # --- TASK 2: Dataproc ---
 echo -e "\n${MAGENTA_TEXT}${BOLD_TEXT}Starting Task 2: Dataproc Cluster Creation...${RESET_FORMAT}"
