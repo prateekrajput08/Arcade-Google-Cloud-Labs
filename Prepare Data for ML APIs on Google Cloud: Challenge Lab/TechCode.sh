@@ -38,16 +38,31 @@ export PROJECT_ID=$(gcloud config get-value project)
 export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
 # --- TASK 1: Dataflow ---
+# --- TASK 1: Dataflow ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
-bq mk $DATASET
-gsutil mb gs://$BUCKET
 
+# Ask missing required inputs
+read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary BigQuery Directory (e.g. gs://bucket/bq-temp): "${RESET_FORMAT})" BQ_TEMP
+read -p "$(echo -e ${YELLOW_TEXT}"Enter Temporary Location (e.g. gs://bucket/temp): "${RESET_FORMAT})" TEMP_LOCATION
+
+# Create dataset (safe create)
+bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset already exists"
+
+# Create bucket (safe create)
+gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket already exists"
+
+# Run Dataflow job
 gcloud dataflow jobs run batch-job-task1 \
-    --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
-    --region $REGION \
-    --staging-location gs://$BUCKET/temp \
-    --parameters \
-javascriptTextTransformGcsPath=gs://cloud-training/gsp323/lab.js,JSONPath=gs://cloud-training/gsp323/lab.schema,javascriptTextTransformFunctionName=transform,inputFilePattern=gs://cloud-training/gsp323/lab.csv,outputTable=$PROJECT_ID:$DATASET.$TABLE,bigQueryLoadingTemporaryDirectory=gs://$BUCKET/tmp
+  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
+  --region $REGION \
+  --staging-location $TEMP_LOCATION \
+  --parameters \
+inputFilePattern=gs://spls/gsp323/lab.csv,\
+JSONPath=gs://spls/gsp323/lab.schema,\
+outputTable=$PROJECT_ID:$DATASET.$TABLE,\
+javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
+javascriptTextTransformFunctionName=transform,\
+bigQueryLoadingTemporaryDirectory=$BQ_TEMP
 
 # --- TASK 2: Dataproc ---
 echo -e "\n${MAGENTA_TEXT}${BOLD_TEXT}Starting Task 2: Dataproc Cluster Creation...${RESET_FORMAT}"
