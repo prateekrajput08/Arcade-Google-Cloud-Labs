@@ -48,16 +48,17 @@ gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
 # Run Dataflow job (FINAL FIX)
 gcloud dataflow jobs run batch-job-task1 \
-  --gcs-location gs://dataflow-templates-us-east1/latest/GCS_Text_to_BigQuery \
+  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
   --region $REGION \
+  --worker-machine-type e2-standard-2 \
   --staging-location $TEMP_LOCATION \
   --parameters \
-inputFilePattern=gs://spls/gsp323/lab.csv,\
+javascriptTextTransformFunctionName=transform,\
 JSONPath=gs://spls/gsp323/lab.schema,\
-outputTable=$PROJECT_ID:$DATASET.$TABLE,\
-bigQueryLoadingTemporaryDirectory=$BQ_TEMP,\
 javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
-javascriptTextTransformFunctionName=transform
+inputFilePattern=gs://spls/gsp323/lab.csv,\
+outputTable=$PROJECT_ID:$DATASET.$TABLE,\
+bigQueryLoadingTemporaryDirectory=$BQ_TEMP
 
 # --- TASK 2: Dataproc ---
 echo -e "\n${MAGENTA_TEXT}${BOLD_TEXT}Starting Task 2: Dataproc Cluster Creation...${RESET_FORMAT}"
