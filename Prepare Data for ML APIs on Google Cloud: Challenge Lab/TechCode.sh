@@ -27,56 +27,37 @@ echo
 echo -e "${CYAN_TEXT}${BOLD_TEXT}--- GCP LAB CONFIGURATION ---${RESET_FORMAT}"
 
 export PROJECT_ID=$(gcloud config get-value project)
-export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
+read -p "$(echo -e ${YELLOW_TEXT}"Enter REGION Name: "${RESET_FORMAT})" REGION
 read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery DATASET Name: "${RESET_FORMAT})" DATASET
 read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery TABLE Name: "${RESET_FORMAT})" TABLE
 read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUTc
 read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 4 Output URI: "${RESET_FORMAT})" TASK4_OUTPUT
-BUCKET="${PROJECT_ID}-marking"
-BQ_TEMP="gs://${BUCKET}/bigquery_temp"
-TEMP_LOCATION="gs://${BUCKET}/temp"
+export BUCKET="${PROJECT_ID}-marking"
+export TEMP_LOCATION="gs://${BUCKET}/temp"
+export BQ_TEMP="gs://${BUCKET}/bigquery_temp"
 
 echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Configuration complete. Starting tasks...${RESET_FORMAT}\n"
 
 # --- TASK 1: Dataflow ---
 echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
 
-# Fix region (safe fallback)
-REGION=${REGION:-us-central1}
-
-# Create dataset
-bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset exists"
-
-# Create bucket
+# Create resources
+bq mk $DATASET 2>/dev/null || echo "Dataset exists"
 gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
-# Run Dataflow job
-# --- TASK 1: Dataflow ---
-echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}Starting Task 1: Dataflow...${RESET_FORMAT}"
-
-REGION=${REGION:-us-central1}
-
-# Create dataset
-bq --location=$REGION mk -d $DATASET 2>/dev/null || echo "Dataset exists"
-
-# Create bucket
-gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
-
-# Run Dataflow job
+# Run Dataflow job (FINAL FIX)
 gcloud dataflow jobs run batch-job-task1 \
-  --gcs-location gs://dataflow-templates-$REGION/latest/GCS_Text_to_BigQuery \
+  --gcs-location gs://dataflow-templates-us-east1/latest/GCS_Text_to_BigQuery \
   --region $REGION \
   --staging-location $TEMP_LOCATION \
-  --temp-location $TEMP_LOCATION \
-  --worker-machine-type e2-standard-2 \
   --parameters \
 inputFilePattern=gs://spls/gsp323/lab.csv,\
 JSONPath=gs://spls/gsp323/lab.schema,\
 outputTable=$PROJECT_ID:$DATASET.$TABLE,\
+bigQueryLoadingTemporaryDirectory=$BQ_TEMP,\
 javascriptTextTransformGcsPath=gs://spls/gsp323/lab.js,\
-javascriptTextTransformFunctionName=transform,\
-bigQueryLoadingTemporaryDirectory=$BQ_TEMP
+javascriptTextTransformFunctionName=transform
 
 # --- TASK 2: Dataproc ---
 echo -e "\n${MAGENTA_TEXT}${BOLD_TEXT}Starting Task 2: Dataproc Cluster Creation...${RESET_FORMAT}"
