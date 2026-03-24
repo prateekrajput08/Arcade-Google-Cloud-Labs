@@ -31,7 +31,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 read -p "$(echo -e ${YELLOW_TEXT}"Enter REGION Name: "${RESET_FORMAT})" REGION
 read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery DATASET Name: "${RESET_FORMAT})" DATASET
 read -p "$(echo -e ${YELLOW_TEXT}"Enter BigQuery TABLE Name: "${RESET_FORMAT})" TABLE
-read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUTc
+read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 3 Output URI: "${RESET_FORMAT})" TASK3_OUTPUT
 read -p "$(echo -e ${MAGENTA_TEXT}"Enter Task 4 Output URI: "${RESET_FORMAT})" TASK4_OUTPUT
 export BUCKET="${PROJECT_ID}-marking"
 export TEMP_LOCATION="gs://${BUCKET}/temp"
