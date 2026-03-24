@@ -53,7 +53,7 @@ gsutil mb -l $REGION gs://$BUCKET 2>/dev/null || echo "Bucket exists"
 
 # Run Dataflow job
 gcloud dataflow jobs run batch-job-task1 \
-  --gcs-location gs://dataflow-templates-us-east1/latest/GCS_Text_to_BigQuery \
+  --gcs-location gs://dataflow-templates-${REGION}/latest/GCS_Text_to_BigQuery \
   --region $REGION \
   --staging-location $TEMP_LOCATION \
   --parameters \
