@@ -1,126 +1,223 @@
 #!/bin/bash
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL_TEXT=$'\033[38;5;50m'
+PURPLE_TEXT=$'\033[0;35m'
+GOLD_TEXT=$'\033[0;33m'
+LIME_TEXT=$'\033[0;92m'
+MAROON_TEXT=$'\033[0;91m'
+NAVY_TEXT=$'\033[0;94m'
 
-echo "Enter required values:"
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
 
-read -p "Bucket Name: " BUCKET
-read -p "Topic Name: " TOPIC
-read -p "Function Name: " FUNCTION
-read -p "User Email to Remove: " USER_2
-read -p "Zone (e.g. us-central1-c): " ZONE
+clear
+# Welcome message
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo
 
-REGION="${ZONE%-*}"
-PROJECT_ID=$(gcloud config get-value project)
 
-echo "Project: $PROJECT_ID"
-echo "Region: $REGION"
+export REGION="${ZONE%-*}"
 
-# Enable APIs
 gcloud services enable \
+  artifactregistry.googleapis.com \
   cloudfunctions.googleapis.com \
   cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com \
-  run.googleapis.com \
   eventarc.googleapis.com \
+  run.googleapis.com \
+  logging.googleapis.com \
   pubsub.googleapis.com
 
-sleep 60
+sleep 30
 
-# Create bucket (CORRECT NAME)
-gsutil mb -l $REGION gs://$BUCKET
+PROJECT_NUMBER=$(gcloud projects describe $DEVSHELL_PROJECT_ID --format='value(projectNumber)')
 
-# Create Pub/Sub topic
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+    --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+    --role=roles/eventarc.eventReceiver
+
+sleep 20
+
+SERVICE_ACCOUNT="$(gsutil kms serviceaccount -p $DEVSHELL_PROJECT_ID)"
+
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+    --member="serviceAccount:${SERVICE_ACCOUNT}" \
+    --role='roles/pubsub.publisher'
+
+sleep 20
+
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
+    --member=serviceAccount:service-$PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com \
+    --role=roles/iam.serviceAccountTokenCreator
+
+sleep 20
+
+gsutil mb -l $REGION gs://$DEVSHELL_PROJECT_ID-bucket
+
 gcloud pubsub topics create $TOPIC
 
-# Create function source
-mkdir function && cd function
+mkdir lol
+cd lol
 
-cat > index.js <<EOF
+cat > index.js <<'EOF_END'
 const functions = require('@google-cloud/functions-framework');
+const crc32 = require("fast-crc32c");
 const { Storage } = require('@google-cloud/storage');
+const gcs = new Storage();
 const { PubSub } = require('@google-cloud/pubsub');
-const sharp = require('sharp');
+const imagemagick = require("imagemagick-stream");
 
-functions.cloudEvent('$FUNCTION', async cloudEvent => {
+functions.cloudEvent('$FUNCTION_NAME', cloudEvent => {
   const event = cloudEvent.data;
+
+  console.log(`Event: ${event}`);
+  console.log(`Hello ${event.bucket}`);
 
   const fileName = event.name;
   const bucketName = event.bucket;
-
-  const bucket = new Storage().bucket(bucketName);
+  const size = "64x64"
+  const bucket = gcs.bucket(bucketName);
+  const topicName = "$TOPIC_NAME";
   const pubsub = new PubSub();
-
-  if (!fileName.includes("64x64_thumbnail")) {
-
-    const ext = fileName.split('.').pop().toLowerCase();
-    const name = fileName.substring(0, fileName.length - ext.length - 1);
-
-    if (['png','jpg','jpeg'].includes(ext)) {
-
-      const file = bucket.file(fileName);
-      const newFile = bucket.file(\`\${name}_64x64_thumbnail.\${ext}\`);
-
-      const [buffer] = await file.download();
-
-      const resized = await sharp(buffer)
-        .resize(64,64,{fit:'inside',withoutEnlargement:true})
-        .toBuffer();
-
-      await newFile.save(resized);
-
-      await pubsub.topic("$TOPIC")
-        .publishMessage({data:Buffer.from(newFile.name)});
+  if ( fileName.search("64x64_thumbnail") == -1 ){
+    // doesn't have a thumbnail, get the filename extension
+    var filename_split = fileName.split('.');
+    var filename_ext = filename_split[filename_split.length - 1];
+    var filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length );
+    if (filename_ext.toLowerCase() == 'png' || filename_ext.toLowerCase() == 'jpg'){
+      // only support png and jpg at this point
+      console.log(`Processing Original: gs://${bucketName}/${fileName}`);
+      const gcsObject = bucket.file(fileName);
+      let newFilename = filename_without_ext + size + '_thumbnail.' + filename_ext;
+      let gcsNewObject = bucket.file(newFilename);
+      let srcStream = gcsObject.createReadStream();
+      let dstStream = gcsNewObject.createWriteStream();
+      let resize = imagemagick().resize(size).quality(90);
+      srcStream.pipe(resize).pipe(dstStream);
+      return new Promise((resolve, reject) => {
+        dstStream
+          .on("error", (err) => {
+            console.log(`Error: ${err}`);
+            reject(err);
+          })
+          .on("finish", () => {
+            console.log(`Success: ${fileName} → ${newFilename}`);
+              // set the content-type
+              gcsNewObject.setMetadata(
+              {
+                contentType: 'image/'+ filename_ext.toLowerCase()
+              }, function(err, apiResponse) {});
+              pubsub
+                .topic(topicName)
+                .publisher()
+                .publish(Buffer.from(newFilename))
+                .then(messageId => {
+                  console.log(`Message ${messageId} published.`);
+                })
+                .catch(err => {
+                  console.error('ERROR:', err);
+                });
+          });
+      });
+    }
+    else {
+      console.log(`gs://${bucketName}/${fileName} is not an image I can handle`);
     }
   }
-});
-EOF
-
-cat > package.json <<EOF
-{
-  "name": "thumbnails",
-  "dependencies": {
-    "@google-cloud/functions-framework": "^3.0.0",
-    "@google-cloud/pubsub": "^2.0.0",
-    "@google-cloud/storage": "^6.11.0",
-    "sharp": "^0.32.1"
+  else {
+    console.log(`gs://${bucketName}/${fileName} already has a thumbnail`);
   }
-}
-EOF
+});
+EOF_END
+
+sed -i "8c\functions.cloudEvent('$FUNCTION', cloudEvent => { " index.js
+
+sed -i "18c\  const topicName = '$TOPIC';" index.js
+
+cat > package.json <<EOF_END
+{
+    "name": "thumbnails",
+    "version": "1.0.0",
+    "description": "Create Thumbnail of uploaded image",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "dependencies": {
+      "@google-cloud/functions-framework": "^3.0.0",
+      "@google-cloud/pubsub": "^2.0.0",
+      "@google-cloud/storage": "^5.0.0",
+      "fast-crc32c": "1.0.4",
+      "imagemagick-stream": "4.1.1"
+    },
+    "devDependencies": {},
+    "engines": {
+      "node": ">=4.3.2"
+    }
+  }
+EOF_END
 
 PROJECT_ID=$(gcloud config get-value project)
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+BUCKET_SERVICE_ACCOUNT="${PROJECT_ID}@${PROJECT_ID}.iam.gserviceaccount.com"
 
-# Eventarc service agent
 gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-eventarc.iam.gserviceaccount.com" \
-  --role="roles/eventarc.serviceAgent"
+  --member=serviceAccount:$BUCKET_SERVICE_ACCOUNT \
+  --role=roles/pubsub.publisher
 
-# Pub/Sub service agent
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-pubsub.iam.gserviceaccount.com" \
-  --role="roles/iam.serviceAccountTokenCreator"
+# Your existing deployment command
+deploy_function() {
+    gcloud functions deploy $FUNCTION \
+    --gen2 \
+    --runtime nodejs20 \
+    --trigger-resource $DEVSHELL_PROJECT_ID-bucket \
+    --trigger-event google.storage.object.finalize \
+    --entry-point $FUNCTION \
+    --region=$REGION \
+    --source . \
+    --quiet
+}
 
-# Storage service agent → Pub/Sub publisher
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:service-$PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com" \
-  --role="roles/pubsub.publisher"
+# Variables
+SERVICE_NAME="$FUNCTION"
 
-gcloud functions deploy $FUNCTION \
-  --gen2 \
-  --runtime=nodejs22 \
-  --region=$REGION \
-  --entry-point=$FUNCTION \
-  --source=. \
-  --trigger-bucket=$BUCKET \
-  --trigger-location=$REGION
+# Loop until the Cloud Run service is created
+while true; do
+  # Run the deployment command
+  deploy_function
 
-sleep 120
+  # Check if Cloud Run service is created
+  if gcloud run services describe $SERVICE_NAME --region $REGION &> /dev/null; then
+    echo "Cloud Run service is created. Exiting the loop."
+    break
+  else
+    echo "Waiting for Cloud Run service to be created..."
+    sleep 20
+  fi
+done
 
-curl -O https://storage.googleapis.com/cloud-training/gsp315/map.jpg
-gsutil cp map.jpg gs://$BUCKET
+curl -o map.jpg https://storage.googleapis.com/cloud-training/gsp315/map.jpg
 
-# Remove user
-gcloud projects remove-iam-policy-binding $PROJECT_ID \
-  --member="user:$USER_2" \
-  --role="roles/viewer"
+gsutil cp map.jpg gs://$DEVSHELL_PROJECT_ID-bucket/map.jpg
 
-echo "✅ LAB COMPLETED"
+gcloud projects remove-iam-policy-binding $DEVSHELL_PROJECT_ID \
+--member=user:$USER_2 \
+--role=roles/viewer
+
+echo
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
