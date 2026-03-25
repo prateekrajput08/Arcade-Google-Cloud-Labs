@@ -28,6 +28,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# ✅ Added user input section (no existing line changed)
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter required details:${RESET_FORMAT}"
+read -p "Enter USER_2 (email): " USER_2
+read -p "Enter ZONE (e.g. us-central1-a): " ZONE
+read -p "Enter TOPIC name: " TOPIC
+read -p "Enter FUNCTION name: " FUNCTION
+
+export USER_2
+export ZONE
+export TOPIC
+export FUNCTION
 
 export REGION="${ZONE%-*}"
 
