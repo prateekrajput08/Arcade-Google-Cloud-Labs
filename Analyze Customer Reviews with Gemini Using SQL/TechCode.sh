@@ -72,10 +72,9 @@ OPTIONS (
   );
 "
 
-bq query --use_legacy_sql=false \
-"
-CREATE OR REPLACE MODEL `gemini_demo.gemini_model`
-REMOTE WITH CONNECTION `us.gemini_conn`
+bq query --use_legacy_sql=false "
+CREATE OR REPLACE MODEL \`gemini_demo.gemini_flash\`
+REMOTE WITH CONNECTION \`us.gemini_conn\`
 OPTIONS (endpoint = '${GEMINI_MODEL}')
 "
 
@@ -87,7 +86,7 @@ CREATE OR REPLACE TABLE
     ml_generate_text_llm_result
   FROM
     ML.GENERATE_TEXT(
-      MODEL `gemini_demo.gemini_model`,
+      MODEL \`gemini_demo.gemini_model\`,
       TABLE `gemini_demo.review_images`,
       STRUCT(
         "For each image, provide a summary of what is happening in the image and keywords from the summary. Answer in JSON format with two keys: summary, keywords. Summary should be a string, keywords should be a list." AS prompt,
