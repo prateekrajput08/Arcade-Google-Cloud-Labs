@@ -28,8 +28,8 @@ echo "${GREEN_TEXT}${BOLD_TEXT}=======================================${RESET_FO
 echo
 
 
-gcloud auth list
-
+echo "Enter Gemini model: "
+read GEMINI_MODEL
 
 bq mk \
   --connection \
@@ -38,9 +38,7 @@ bq mk \
   --connection_type=CLOUD_RESOURCE \
   gemini_conn
 
-
 SERVICE_ACCOUNT=$(bq show --location=US --connection gemini_conn | grep "serviceAccountId" | awk -F'"' '{print $4}')
-
 
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
   --member="serviceAccount:${SERVICE_ACCOUNT}" \
@@ -50,15 +48,9 @@ gcloud storage buckets add-iam-policy-binding gs://$DEVSHELL_PROJECT_ID-bucket \
   --member="serviceAccount:${SERVICE_ACCOUNT}" \
   --role="roles/storage.objectAdmin"
 
-
-
-
 bq --location=US mk gemini_demo
 
-
-
 sleep 30
-
 
 bq query --use_legacy_sql=false \
 "
@@ -68,8 +60,6 @@ FROM FILES (
   format = 'CSV',
   uris = ['gs://$DEVSHELL_PROJECT_ID-bucket/gsp1246/customer_reviews.csv']);
 "
-
-
 
 bq query --use_legacy_sql=false \
 "
@@ -84,11 +74,10 @@ OPTIONS (
 
 bq query --use_legacy_sql=false \
 "
-CREATE OR REPLACE MODEL \`gemini_demo.gemini_2_0_flash\`
-REMOTE WITH CONNECTION \`us.gemini_conn\`
-OPTIONS (endpoint = 'gemini-2.0-flash')
+CREATE OR REPLACE MODEL `gemini_demo.gemini_model`
+REMOTE WITH CONNECTION `us.gemini_conn`
+OPTIONS (endpoint = '${GEMINI_MODEL}')
 "
-
 
 bq query --use_legacy_sql=false '
 CREATE OR REPLACE TABLE
@@ -98,7 +87,7 @@ CREATE OR REPLACE TABLE
     ml_generate_text_llm_result
   FROM
     ML.GENERATE_TEXT(
-      MODEL `gemini_demo.gemini_2_0_flash`,
+      MODEL `gemini_demo.gemini_model`,
       TABLE `gemini_demo.review_images`,
       STRUCT(
         "For each image, provide a summary of what is happening in the image and keywords from the summary. Answer in JSON format with two keys: summary, keywords. Summary should be a string, keywords should be a list." AS prompt,
@@ -108,7 +97,6 @@ CREATE OR REPLACE TABLE
     )
 );
 '
-
 
 bq query --use_legacy_sql=false \
 "
@@ -157,14 +145,10 @@ ML.GENERATE_TEXT(
 ));
 "
 
-
-
 bq query --use_legacy_sql=false \
 "
 SELECT * FROM \`gemini_demo.customer_reviews_keywords\`
 "
-
-
 
 bq query --use_legacy_sql=false "
 CREATE OR REPLACE TABLE \`gemini_demo.customer_reviews_analysis\` AS (
@@ -200,13 +184,11 @@ CREATE OR REPLACE TABLE \`gemini_demo.customer_reviews_analysis\` AS (
 );
 "
 
-
 bq query --use_legacy_sql=false \
 "
 SELECT * FROM \`gemini_demo.customer_reviews_analysis\`
 ORDER BY review_datetime
 "
-
 
 bq query --use_legacy_sql=false \
 "
@@ -242,9 +224,6 @@ WHERE sentiment IN ('positive', 'negative')
 GROUP BY sentiment; 
 "
 
-
-
-
 bq query --use_legacy_sql=false \
 "
 SELECT sentiment, social_media_source, COUNT(*) AS count
@@ -253,7 +232,6 @@ WHERE sentiment IN ('positive') OR sentiment IN ('negative')
 GROUP BY sentiment, social_media_source
 ORDER BY sentiment, count;    
 "
-
 
 bq query --use_legacy_sql=false \
 "
@@ -280,10 +258,6 @@ bq query --use_legacy_sql=false \
 SELECT * FROM \`gemini_demo.customer_reviews_marketing\`
 "
 
-
-
-
-
 bq query --use_legacy_sql=false \
 '
 CREATE OR REPLACE TABLE
@@ -296,15 +270,10 @@ FROM
    `gemini_demo.customer_reviews_marketing` results )
 '
 
-
-
-
 bq query --use_legacy_sql=false \
 "
 SELECT * FROM \`gemini_demo.customer_reviews_marketing_formatted\`
 "
-
-
 
 bq query --use_legacy_sql=false \
 "
@@ -372,14 +341,10 @@ CREATE OR REPLACE TABLE
 );
 '
 
-
-
 bq query --use_legacy_sql=false \
 "
 SELECT * FROM \`gemini_demo.review_images_results\`
 "
-
-
 
 bq query --use_legacy_sql=false \
 '
@@ -393,16 +358,12 @@ CREATE OR REPLACE TABLE
     `gemini_demo.review_images_results` results )
 '
 
-
-
 bq query --use_legacy_sql=false \
 "
 SELECT * FROM \`gemini_demo.review_images_results_formatted\`
 "
 
-
 # Final message
-
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
