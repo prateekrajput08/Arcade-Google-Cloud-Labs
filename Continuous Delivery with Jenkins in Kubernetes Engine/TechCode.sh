@@ -95,9 +95,21 @@ kubectl get pods -n production -l app=gceme -l role=backend
 
 kubectl get service gceme-frontend -n production
 
-export FRONTEND_SERVICE_IP=$(kubectl get \
--o jsonpath="{.status.loadBalancer.ingress[0].ip}" \
---namespace=production services gceme-frontend)
+echo "${YELLOW_TEXT}Waiting for external IP...${RESET_FORMAT}"
+
+while true; do
+  FRONTEND_SERVICE_IP=$(kubectl get svc gceme-frontend \
+    -n production \
+    -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
+  if [[ -n "$FRONTEND_SERVICE_IP" ]]; then
+    echo "${GREEN_TEXT}External IP found: $FRONTEND_SERVICE_IP${RESET_FORMAT}"
+    break
+  fi
+
+  echo "${RED_TEXT}Still waiting...${RESET_FORMAT}"
+  sleep 10
+done
 
 echo "${TEAL}Testing frontend service...${RESET_FORMAT}"
 curl http://$FRONTEND_SERVICE_IP/version
