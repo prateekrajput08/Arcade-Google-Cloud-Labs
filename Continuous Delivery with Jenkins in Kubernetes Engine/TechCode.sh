@@ -24,11 +24,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
-
-if [ -z "$ZONE" ]; then
-  ZONE="us-west1-b"
-fi
+# Ask user for zone
+echo "${YELLOW_TEXT}Enter your compute zone (e.g., us-west1-b): ${RESET_FORMAT}"
+read ZONE
 
 echo "${YELLOW_TEXT}Using zone: ${ZONE}${RESET_FORMAT}"
 gcloud config set compute/zone $ZONE
