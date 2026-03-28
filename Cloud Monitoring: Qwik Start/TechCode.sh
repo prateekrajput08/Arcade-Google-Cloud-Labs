@@ -20,13 +20,14 @@ UNDERLINE_TEXT=$'\033[4m'
 clear
 
 # Welcome message
-echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+
 # Prompt user for Zone
-echo "${YELLOW_TEXT}${BOLD_TEXT}Please enter your GCP Zone:${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Please Enter Your Zone:${RESET_FORMAT}"
 read -r ZONE
 export ZONE
 
@@ -36,9 +37,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}Creating a new VM instance... Please wait.${RESET_
 gcloud compute instances create lamp-1-vm \
     --project=$DEVSHELL_PROJECT_ID \
     --zone=$ZONE \
-    --machine-type=e2-small \
+    --machine-type=e2-medium \
     --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
-    --metadata=enable-oslogin=true \
     --maintenance-policy=MIGRATE \
     --provisioning-model=STANDARD \
     --tags=http-server \
@@ -67,10 +67,14 @@ sleep 10
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Generating SSH keys...${RESET_FORMAT}"
 
 # Generate SSH keys
-gcloud compute config-ssh --project "$DEVSHELL_PROJECT_ID" --quiet
+
 echo "${CYAN_TEXT}${BOLD_TEXT}Installing Apache and PHP on the VM...${RESET_FORMAT}"
 
-gcloud compute ssh lamp-1-vm --project "$DEVSHELL_PROJECT_ID" --zone $ZONE --command "sudo sed -i '/buster-backports/d' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install apache2 php7.3 -y && sudo service apache2 restart"
+gcloud compute ssh lamp-1-vm --zone=$ZONE --command "
+sudo apt-get update &&
+sudo apt-get install apache2 php7.0 -y &&
+sudo service apache2 restart
+"
 
 sleep 10
 
@@ -154,15 +158,12 @@ gcloud alpha monitoring policies create --policy-from-file="app-engine-error-per
 
 INSTANCE_ID=$(gcloud compute instances describe lamp-1-vm --zone=$ZONE --format='value(id)')
 
-gcloud monitoring uptime create lamp-uptime-check \
-  --resource-type="gce-instance" \
-  --resource-labels=project_id=$DEVSHELL_PROJECT_ID,instance_id=$INSTANCE_ID,zone=$ZONE
-
+# Final message
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
