@@ -48,6 +48,8 @@ gcloud services enable \
   logging.googleapis.com \
   pubsub.googleapis.com
 
+sleep 30
+
 echo "${BLUE_TEXT}Fetching project details...${RESET_FORMAT}"
 PROJECT_NUMBER=$(gcloud projects list --filter="project_id:$DEVSHELL_PROJECT_ID" --format='value(project_number)')
 SERVICE_ACCOUNT=$(gsutil kms serviceaccount -p $PROJECT_NUMBER)
