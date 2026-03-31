@@ -20,12 +20,12 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+echo "${YELLOW_TEXT}Enter HTTP Function Name:${RESET_FORMAT}"
+read HTTP_FUNCTION
+
 # Ask user for inputs
 echo "${YELLOW_TEXT}Enter Event Function Name:${RESET_FORMAT}"
 read FUNCTION_NAME
-
-echo "${YELLOW_TEXT}Enter HTTP Function Name:${RESET_FORMAT}"
-read HTTP_FUNCTION
 
 DEFAULT_REGION=$(gcloud functions regions list --format="value(name)" 2>/dev/null | head -n 1)
 DEFAULT_REGION=${DEFAULT_REGION:-us-central1}
