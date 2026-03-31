@@ -52,7 +52,7 @@ echo "${BLUE_TEXT}Fetching project details...${RESET_FORMAT}"
 PROJECT_NUMBER=$(gcloud projects list --filter="project_id:$DEVSHELL_PROJECT_ID" --format='value(project_number)')
 SERVICE_ACCOUNT=$(gsutil kms serviceaccount -p $PROJECT_NUMBER)
 
-echo "${YELLOW_TEXT}Assigning IAM roles...${NO_COLOR}"
+echo "${YELLOW_TEXT}Assigning IAM roles...${RESET_FORMAT}"
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
   --member serviceAccount:$SERVICE_ACCOUNT \
   --role roles/pubsub.publisher
@@ -63,7 +63,9 @@ export BUCKET="gs://$DEVSHELL_PROJECT_ID"
 
 echo "${MAGENTA_TEXT}Setting up Event-driven function...${RESET_FORMAT}"
 
-mkdir ~/$FUNCTION_NAME && cd $_
+mkdir -p ~/$FUNCTION_NAME
+cd ~/$FUNCTION_NAME
+
 touch index.js package.json
 
 cat > index.js <<EOF
@@ -86,7 +88,8 @@ cat > package.json <<EOF
 EOF
 
 echo "${YELLOW_TEXT}Waiting before deployment...${RESET_FORMAT}"
-sleep 30
+
+sleep 60
 
 echo "${GREEN_TEXT}Deploying Event-driven function...${RESET_FORMAT}"
 gcloud functions deploy $FUNCTION_NAME \
@@ -103,7 +106,9 @@ cd ..
 
 echo "${MAGENTA_TEXT}Setting up HTTP function...${RESET_FORMAT}"
 
-mkdir ~/HTTP_FUNCTION && cd $_
+mkdir -p ~/$FUNCTION_NAME
+cd ~/$FUNCTION_NAME
+
 touch index.js package.json
 
 cat > index.js <<EOF
@@ -145,5 +150,3 @@ echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
-
-echo "${CYAN_TEXT}${BOLD_TEXT}✅ All functions deployed successfully!${NO_COLOR}"
