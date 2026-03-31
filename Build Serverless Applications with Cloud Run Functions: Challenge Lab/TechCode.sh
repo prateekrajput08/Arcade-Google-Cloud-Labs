@@ -20,8 +20,25 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# Ask user for inputs
+echo "${YELLOW_TEXT}Enter Event Function Name:${RESET_FORMAT}"
+read FUNCTION_NAME
+
+echo "${YELLOW_TEXT}Enter HTTP Function Name:${RESET_FORMAT}"
+read HTTP_FUNCTION
+
+DEFAULT_REGION=$(gcloud functions regions list --format="value(name)" 2>/dev/null | head -n 1)
+DEFAULT_REGION=${DEFAULT_REGION:-us-central1}
+
+echo "${CYAN_TEXT}Enter region [default: $DEFAULT_REGION]:${RESET_FORMAT}"
+read REGION
+
+REGION=${REGION:-$DEFAULT_REGION}
+
+echo "${GREEN_TEXT}Using region: $REGION${RESET_FORMAT}"
+
 # Enable APIs
-echo "${YELLOW_TEXT}🔧 Enabling required services...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}Enabling required services...${RESET_FORMAT}"
 gcloud services enable \
   artifactregistry.googleapis.com \
   cloudfunctions.googleapis.com \
@@ -30,24 +47,6 @@ gcloud services enable \
   run.googleapis.com \
   logging.googleapis.com \
   pubsub.googleapis.com
-
-# Ask user for inputs
-echo "${YELLOW_TEXT}Enter Event Function Name:${RESET_FORMAT}"
-read FUNCTION_NAME
-
-echo "${YELLOW_TEXT}Enter HTTP Function Name:${RESET_FORMAT}"
-read HTTP_FUNCTION
-
-# Auto-fetch region (default from gcloud config)
-REGION=$(gcloud config get-value compute/region 2>/dev/null)
-
-# If region not set, fallback
-if [ -z "$REGION" ]; then
-  echo "${YELLOW_TEXT}No default region found. Setting to us-central1${RESET_FORMAT}"
-  REGION="us-central1"
-else
-  echo "${GREEN_TEXT}Using region: $REGION${RESET_FORMAT}"
-fi
 
 echo "${BLUE_TEXT}Fetching project details...${RESET_FORMAT}"
 PROJECT_NUMBER=$(gcloud projects list --filter="project_id:$DEVSHELL_PROJECT_ID" --format='value(project_number)')
