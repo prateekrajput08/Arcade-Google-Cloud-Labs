@@ -1,5 +1,5 @@
 
-# 🌐 Conversational Agents: Bot Building Basics || GSP928 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6880/labs/42753)
+# 🌐 Conversational Agents: Managing Environments || GSP929 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/6880/labs/42753)
 
 ## ⚠️ Disclaimer ⚠️
 
