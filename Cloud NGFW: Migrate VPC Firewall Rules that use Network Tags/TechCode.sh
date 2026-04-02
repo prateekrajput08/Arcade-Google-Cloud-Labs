@@ -25,7 +25,7 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo -e "${CYAN_TEXT}${BOLD_TEXT}Starting NGFW migration and automated firewall testing...${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Starting NGFW migration and firewall policy setup${RESET_FORMAT}"
 
 echo -ne "${CYAN_TEXT}${BOLD_TEXT}Enter Zone (e.g., us-central1-a): ${RESET_FORMAT}"
 read ZONE
@@ -129,31 +129,61 @@ gcloud compute network-firewall-policies rules update 1000 \
   --enable-logging \
   --global-firewall-policy
 
-echo -e "${YELLOW_TEXT}Waiting for external server IP${RESET_FORMAT}"
-for i in {1..20}; do
-  EXTERNAL_IP=$(gcloud compute instances list \
-    --filter="name:external-server" \
-    --format="value(EXTERNAL_IP)")
-  if [ ! -z "$EXTERNAL_IP" ]; then
-    break
-  fi
-  sleep 5
-done
+# ================================
+# FETCH DYNAMIC IPS
+# ================================
+echo -e "${YELLOW_TEXT}Fetching VM IP addresses${RESET_FORMAT}"
 
-if [ -z "$EXTERNAL_IP" ]; then
-  echo -e "${RED_TEXT}Failed to get external IP${RESET_FORMAT}"
-  exit 1
-fi
+EXTERNAL_IP=$(gcloud compute instances list \
+  --filter="name:external-server" \
+  --format="value(EXTERNAL_IP)")
 
-echo -e "${YELLOW_TEXT}Sending traffic to generate firewall logs${RESET_FORMAT}"
-ping -c 20 $EXTERNAL_IP
+INTERNAL_IP=$(gcloud compute instances list \
+  --filter="name:internal-server-1" \
+  --format="value(INTERNAL_IP)")
 
-echo -e "${YELLOW_TEXT}Waiting for logs to propagate${RESET_FORMAT}"
-sleep 25
+echo -e "${TEAL}---------------------------------${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}External Server IP: $EXTERNAL_IP${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Internal Server IP: $INTERNAL_IP${RESET_FORMAT}"
+echo -e "${TEAL}---------------------------------${RESET_FORMAT}"
 
+# ================================
+# TASK 11
+# ================================
+echo ""
+echo -e "${CYAN_TEXT}${BOLD_TEXT}Manual Step Required: Connectivity Test (Task 11)${RESET_FORMAT}"
+
+echo -e "${YELLOW_TEXT}Open Connectivity Test:${RESET_FORMAT}"
+echo -e "${BLUE_TEXT}https://console.cloud.google.com/net-intelligence/connectivity/tests${RESET_FORMAT}"
+
+echo ""
+echo -e "${YELLOW_TEXT}Create Test 1 (External → Internal):${RESET_FORMAT}"
+echo -e "Source IP: $EXTERNAL_IP"
+echo -e "Type: External IP"
+echo -e "Destination IP: $INTERNAL_IP"
+echo -e "Port: 80"
+
+echo ""
+echo -e "${YELLOW_TEXT}Create Test 2 (Internal → External):${RESET_FORMAT}"
+echo -e "Source IP: $INTERNAL_IP"
+echo -e "Type: Internal IP"
+echo -e "Source network: internal-network"
+echo -e "Destination IP: $EXTERNAL_IP"
+
+echo ""
+echo -e "${YELLOW_TEXT}Wait for results, then click 'Check my progress'${RESET_FORMAT}"
+
+echo ""
+read -p "Press Enter after completing Task 11..." USER_CONFIRM
+
+# ================================
+# CLEANUP
+# ================================
 echo -e "${YELLOW_TEXT}Deleting old firewall rules${RESET_FORMAT}"
 gcloud compute firewall-rules delete allow-ssh -q
 gcloud compute firewall-rules delete allow-web -q
+
+echo -e "${GREEN_TEXT}Execution completed. Lab should be fully completed.${RESET_FORMAT}"
 
 # Final message
 echo
