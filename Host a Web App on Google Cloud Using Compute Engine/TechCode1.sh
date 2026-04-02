@@ -27,33 +27,30 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Starting Execution...${RESET_FORMAT}"
+echo -e "${BLUE_TEXT}${BOLD_TEXT}Enter your GCP Zone (e.g., us-central1-a):${RESET_FORMAT}"
+read ZONE
 
-read -p "Enter Zone (e.g., us-central1-a): " ZONE
-read -p "Enter Project ID: " DEVSHELL_PROJECT_ID
+# Validate input
+if [ -z "$ZONE" ]; then
+  echo -e "${RED_TEXT}${BOLD_TEXT}Error: Zone cannot be empty!${RESET_FORMAT}"
+  exit 1
+fi
 
 export REGION="${ZONE%-*}"
-
-echo "Zone set to: $ZONE"
-echo "Region set to: $REGION"
-echo "Project ID: $DEVSHELL_PROJECT_ID"
 
 gcloud config set compute/zone $ZONE
 gcloud config set compute/region $REGION
 
-echo "${CYAN_TEXT}Enabling required services...${RESET_FORMAT}"
 gcloud services enable compute.googleapis.com
 
-echo "${CYAN_TEXT}Creating storage bucket...${RESET_FORMAT}"
 gsutil mb gs://fancy-store-$DEVSHELL_PROJECT_ID
 
-echo "${CYAN_TEXT}Cloning repository...${RESET_FORMAT}"
 git clone https://github.com/googlecodelabs/monolith-to-microservices.git
 
 cd ~/monolith-to-microservices
+
 ./setup.sh
 
-echo "${CYAN_TEXT}Installing Node.js...${RESET_FORMAT}"
 nvm install --lts
 
 cd monolith-to-microservices/
@@ -62,13 +59,11 @@ cat > startup-script.sh <<EOF_START
 #!/bin/bash
 curl -s "https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh" | bash
 service google-fluentd restart &
-
 apt-get update
 apt-get install -yq ca-certificates git build-essential supervisor psmisc
 
 mkdir /opt/nodejs
 curl https://nodejs.org/dist/v16.14.0/node-v16.14.0-linux-x64.tar.gz | tar xvzf - -C /opt/nodejs --strip-components=1
-
 ln -s /opt/nodejs/bin/node /usr/bin/node
 ln -s /opt/nodejs/bin/npm /usr/bin/npm
 
@@ -99,13 +94,12 @@ EOF_START
 
 cd ~
 
-echo "${CYAN_TEXT}Uploading startup script...${RESET_FORMAT}"
 gsutil cp ~/monolith-to-microservices/startup-script.sh gs://fancy-store-$DEVSHELL_PROJECT_ID
 
+cd ~
 rm -rf monolith-to-microservices/*/node_modules
 gsutil -m cp -r monolith-to-microservices gs://fancy-store-$DEVSHELL_PROJECT_ID/
 
-echo "${CYAN_TEXT}Creating backend instance...${RESET_FORMAT}"
 gcloud compute instances create backend \
     --zone=$ZONE \
     --machine-type=e2-standard-2 \
@@ -123,41 +117,47 @@ REACT_APP_ORDERS_URL=http://$EXTERNAL_IP_BACKEND:8081/api/orders
 REACT_APP_PRODUCTS_URL=http://$EXTERNAL_IP_BACKEND:8082/api/products
 EOF
 
-echo "${CYAN_TEXT}Building frontend...${RESET_FORMAT}"
+cd ~
+
+cd ~/monolith-to-microservices/react-app
 npm install && npm run-script build
 
 cd ~
-
 rm -rf monolith-to-microservices/*/node_modules
+
 gsutil -m cp -r monolith-to-microservices gs://fancy-store-$DEVSHELL_PROJECT_ID/
 
-echo "${CYAN_TEXT}Creating frontend instance...${RESET_FORMAT}"
 gcloud compute instances create frontend \
     --zone=$ZONE \
     --machine-type=e2-standard-2 \
     --tags=frontend \
     --metadata=startup-script-url=https://storage.googleapis.com/fancy-store-$DEVSHELL_PROJECT_ID/startup-script.sh
 
-echo "${CYAN_TEXT}Configuring firewall rules...${RESET_FORMAT}"
-gcloud compute firewall-rules create fw-fe --allow tcp:8080 --target-tags=frontend
-gcloud compute firewall-rules create fw-be --allow tcp:8081-8082 --target-tags=backend
+gcloud compute firewall-rules create fw-fe \
+    --allow tcp:8080 \
+    --target-tags=frontend
+
+gcloud compute firewall-rules create fw-be \
+    --allow tcp:8081-8082 \
+    --target-tags=backend
 
 gcloud compute instances list
 
-echo "${YELLOW_TEXT}Stopping instances...${RESET_FORMAT}"
 gcloud compute instances stop frontend --zone=$ZONE
 gcloud compute instances stop backend --zone=$ZONE
 
-echo "${CYAN_TEXT}Creating instance templates...${RESET_FORMAT}"
-gcloud compute instance-templates create fancy-fe --source-instance-zone=$ZONE --source-instance=frontend
-gcloud compute instance-templates create fancy-be --source-instance-zone=$ZONE --source-instance=backend
+gcloud compute instance-templates create fancy-fe \
+    --source-instance-zone=$ZONE \
+    --source-instance=frontend
+
+gcloud compute instance-templates create fancy-be \
+    --source-instance-zone=$ZONE \
+    --source-instance=backend
 
 gcloud compute instance-templates list
 
-echo "${RED_TEXT}Deleting backend instance...${RESET_FORMAT}"
 gcloud compute instances delete --quiet backend --zone=$ZONE
 
-echo "${CYAN_TEXT}Creating managed instance groups...${RESET_FORMAT}"
 gcloud compute instance-groups managed create fancy-fe-mig \
     --zone=$ZONE \
     --base-instance-name fancy-fe \
@@ -170,8 +170,101 @@ gcloud compute instance-groups managed create fancy-be-mig \
     --size 2 \
     --template fancy-be
 
-gcloud compute instance-groups set-named-ports fancy-fe-mig --zone=$ZONE --named-ports frontend:8080
-gcloud compute instance-groups set-named-ports fancy-be-mig --zone=$ZONE --named-ports orders:8081,products:8082
+gcloud compute instance-groups set-named-ports fancy-fe-mig \
+    --zone=$ZONE \
+    --named-ports frontend:8080
+
+gcloud compute instance-groups set-named-ports fancy-be-mig \
+    --zone=$ZONE \
+    --named-ports orders:8081,products:8082
+
+gcloud compute health-checks create http fancy-fe-hc \
+    --port 8080 \
+    --check-interval 30s \
+    --healthy-threshold 1 \
+    --timeout 10s \
+    --unhealthy-threshold 3
+
+gcloud compute health-checks create http fancy-be-hc \
+    --port 8081 \
+    --request-path=/api/orders \
+    --check-interval 30s \
+    --healthy-threshold 1 \
+    --timeout 10s \
+    --unhealthy-threshold 3
+
+gcloud compute firewall-rules create allow-health-check \
+    --allow tcp:8080-8081 \
+    --source-ranges 130.211.0.0/22,35.191.0.0/16 \
+    --network default
+
+gcloud compute instance-groups managed update fancy-fe-mig \
+    --zone=$ZONE \
+    --health-check fancy-fe-hc \
+    --initial-delay 300
+
+gcloud compute instance-groups managed update fancy-be-mig \
+    --zone=$ZONE \
+    --health-check fancy-be-hc \
+    --initial-delay 300
+
+gcloud compute http-health-checks create fancy-fe-frontend-hc \
+  --request-path / \
+  --port 8080
+
+gcloud compute http-health-checks create fancy-be-orders-hc \
+  --request-path /api/orders \
+  --port 8081
+
+gcloud compute http-health-checks create fancy-be-products-hc \
+  --request-path /api/products \
+  --port 8082
+
+gcloud compute backend-services create fancy-fe-frontend \
+  --http-health-checks fancy-fe-frontend-hc \
+  --port-name frontend \
+  --global
+
+gcloud compute backend-services create fancy-be-orders \
+  --http-health-checks fancy-be-orders-hc \
+  --port-name orders \
+  --global
+
+gcloud compute backend-services create fancy-be-products \
+  --http-health-checks fancy-be-products-hc \
+  --port-name products \
+  --global
+
+gcloud compute backend-services add-backend fancy-fe-frontend \
+  --instance-group-zone=$ZONE \
+  --instance-group fancy-fe-mig \
+  --global
+
+gcloud compute backend-services add-backend fancy-be-orders \
+  --instance-group-zone=$ZONE \
+  --instance-group fancy-be-mig \
+  --global
+
+gcloud compute backend-services add-backend fancy-be-products \
+  --instance-group-zone=$ZONE \
+  --instance-group fancy-be-mig \
+  --global
+
+gcloud compute url-maps create fancy-map \
+  --default-service fancy-fe-frontend
+
+gcloud compute url-maps add-path-matcher fancy-map \
+   --default-service fancy-fe-frontend \
+   --path-matcher-name orders \
+   --path-rules "/api/orders=fancy-be-orders,/api/products=fancy-be-products"
+
+gcloud compute target-http-proxies create fancy-proxy \
+  --url-map fancy-map
+
+gcloud compute forwarding-rules create fancy-http-rule \
+  --global \
+  --target-http-proxy fancy-proxy \
+  --ports 80
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
