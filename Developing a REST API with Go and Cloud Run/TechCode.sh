@@ -15,9 +15,9 @@ RESET_FORMAT=$'\033[0m'
 
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
+
 clear
 
-# Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
@@ -36,13 +36,12 @@ gcloud config set project ProjectID
 echo "${BLUE_TEXT}${BOLD_TEXT}Step 1: Enabling required Google Cloud services...${RESET_FORMAT}"
 gcloud services enable run.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
-echo "${GREEN_TEXT}  Services enabled successfully${RESET_FORMAT}
+echo "${GREEN_TEXT}Services enabled successfully${RESET_FORMAT}"
 
 echo "${YELLOW_TEXT}Cloning repository${RESET_FORMAT}"
 git clone https://github.com/rosera/pet-theory.git && cd pet-theory/lab08
 
 echo "${YELLOW_TEXT}Creating main.go file${RESET_FORMAT}"
-
 cat > main.go <<EOF
 package main
 
@@ -71,19 +70,17 @@ EOF
 echo "${GREEN_TEXT}main.go created${RESET_FORMAT}"
 
 echo "${YELLOW_TEXT}Creating Dockerfile${RESET_FORMAT}"
-
-cat > Dockerfile <<EOF_END
+cat > Dockerfile <<EOF
 FROM gcr.io/distroless/base-debian12
 WORKDIR /usr/src/app
 COPY server .
 CMD [ "/usr/src/app/server" ]
-EOF_END
+EOF
 
 echo "${GREEN_TEXT}Dockerfile created${RESET_FORMAT}"
 
 echo "${YELLOW_TEXT}Building Go binary${RESET_FORMAT}"
 go build -o server
-
 echo "${GREEN_TEXT}Build completed${RESET_FORMAT}"
 
 ls -la
@@ -98,50 +95,36 @@ echo "${YELLOW_TEXT}Deploying to Cloud Run${RESET_FORMAT}"
 gcloud run deploy rest-api \
   --image gcr.io/$GOOGLE_CLOUD_PROJECT/rest-api:0.1 \
   --platform managed \
-  --region REGION \
+  --region $REGION \
   --allow-unauthenticated \
   --max-instances=2
 
 echo "${GREEN_TEXT}Deployment completed${RESET_FORMAT}"
 
-# Create a Firestore database
 echo "${BLUE_TEXT}${BOLD_TEXT}Creating a Firestore database...${RESET_FORMAT}"
-gcloud firestore databases create --location nam5
+gcloud firestore databases create --location=$REGION
 echo "${GREEN_TEXT}Firestore database created${RESET_FORMAT}"
 
-# Update the main.go file with Firestore integration
-echo "${BLUE_TEXT}${BOLD_TEXT}Updating the main.go file with Firestore integration...${RESET_FORMAT}"
-cat > main.go <<'EOF_END'
-[Previous main.go content remains exactly the same]
-EOF_END
-echo "${GREEN_TEXT}main.go updated with Firestore integration${RESET_FORMAT}"
-
-# Rebuild the Go server
-echo "${BLUE_TEXT}${BOLD_TEXT}Rebuilding the Go server with Firestore integration...${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Rebuilding for next version...${RESET_FORMAT}"
 go build -o server
-echo "${GREEN_TEXT}Server rebuilt successfully${RESET_FORMAT}"
 
-# Submit the updated build to Google Cloud Build
-echo "${BLUE_TEXT}${BOLD_TEXT}Submitting the updated build to Google Cloud Build...${RESET_FORMAT}"
 gcloud builds submit \
   --tag gcr.io/$GOOGLE_CLOUD_PROJECT/rest-api:0.2
+
 echo "${GREEN_TEXT}Updated build submitted${RESET_FORMAT}"
 
 echo
-# Safely delete the script if it exists
 SCRIPT_NAME="techcode.sh"
 if [ -f "$SCRIPT_NAME" ]; then
-    echo -e "${BOLD_TEXT}${RED_TEXT}Deleting the temporary script for security...${RESET_FORMAT}${NO_COLOR}"
+    echo "${RED_TEXT}${BOLD_TEXT}Deleting the temporary script...${RESET_FORMAT}"
     rm -- "$SCRIPT_NAME"
 fi
 
 echo
-# Final message
-echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY              ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Do not forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
-echo
+echo "${GREEN_TEXT}${BOLD_TEXT}Like | Share | Subscribe${RESET_FORMAT}"
