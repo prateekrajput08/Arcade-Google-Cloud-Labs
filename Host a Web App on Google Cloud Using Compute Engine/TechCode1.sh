@@ -29,7 +29,14 @@ echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Starting Execution...${RESET_FORMAT}"
 
+read -p "Enter Zone (e.g., us-central1-a): " ZONE
+read -p "Enter Project ID: " DEVSHELL_PROJECT_ID
+
 export REGION="${ZONE%-*}"
+
+echo "Zone set to: $ZONE"
+echo "Region set to: $REGION"
+echo "Project ID: $DEVSHELL_PROJECT_ID"
 
 gcloud config set compute/zone $ZONE
 gcloud config set compute/region $REGION
