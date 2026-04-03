@@ -25,6 +25,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+export REGION=$(gcloud config get-value compute/region 2>/dev/null || echo us-central1)
+
 gcloud config set project $DEVSHELL_PROJECT_ID
 git clone https://github.com/GoogleCloudPlatform/training-data-analyst
 cd ~/training-data-analyst/courses/developingapps/python/cloudstorage/start
