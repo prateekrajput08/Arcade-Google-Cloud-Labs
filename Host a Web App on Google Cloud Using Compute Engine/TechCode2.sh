@@ -104,7 +104,7 @@ gcloud compute instance-groups managed rolling-action replace fancy-fe-mig \
   --zone=$ZONE \
   --max-unavailable=100%
 
-FILE="techcode1.sh"
+FILE="TechCode1.sh"
 
 if [ -f "$FILE" ]; then
 rm "$FILE"
@@ -113,7 +113,7 @@ else
 echo "${RED_TEXT}$FILE not found.${RESET_FORMAT}"
 fi
 
-FILE="techcode2.sh"
+FILE="TechCode2.sh"
 
 if [ -f "$FILE" ]; then
 rm "$FILE"
