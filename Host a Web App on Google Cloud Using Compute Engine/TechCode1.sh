@@ -27,21 +27,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}Enter your GCP Zone:${RESET_FORMAT}"
-read ZONE
-
-# Validate input
-if [ -z "$ZONE" ]; then
-  echo -e "${RED_TEXT}${BOLD_TEXT}Error: Zone cannot be empty!${RESET_FORMAT}"
-  exit 1
-fi
-
-export REGION="${ZONE%-*}"
-echo "${YELLOW}${BOLD}Starting${RESET}" "${GREEN}${BOLD}Execution${RESET}"
-export REGION="${ZONE%-*}"
-
-gcloud config set compute/zone $ZONE
-gcloud config set compute/region $REGION
 gcloud services enable compute.googleapis.com
 
 gsutil mb gs://fancy-store-$DEVSHELL_PROJECT_ID
