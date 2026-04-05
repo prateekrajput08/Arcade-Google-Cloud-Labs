@@ -105,6 +105,20 @@ EOF
 
 kubectl apply -f pod-2.yaml
 
+echo "Waiting for Pod-2 IP..."
+
+while true; do
+  POD2_IP=$(kubectl get pod pod-2 -o jsonpath='{.status.podIP}' 2>/dev/null)
+
+  if [[ -n "$POD2_IP" ]]; then
+    echo "Pod-2 IP acquired: $POD2_IP"
+    break
+  fi
+
+  echo "Still waiting for IP..."
+  sleep 2
+done
+
 
 # Final message
 echo
