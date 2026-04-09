@@ -27,9 +27,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Ask user for ZONE (with color)
-echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter your GCP Zone: ${RESET_FORMAT}"
-read ZONE
+# Ask user for ZONE (with validation + color)
+while true; do
+  echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter your GCP Zone (e.g. us-central1-a): ${RESET_FORMAT}"
+  read ZONE
+
+  if [[ -n "$ZONE" ]]; then
+    break
+  else
+    echo "${RED_TEXT}ZONE cannot be empty. Please enter a valid zone.${RESET_FORMAT}"
+  fi
+done
 
 gcloud config set compute/zone $ZONE
 
