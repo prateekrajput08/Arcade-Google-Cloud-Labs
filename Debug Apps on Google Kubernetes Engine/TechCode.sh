@@ -27,6 +27,10 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# Ask user for ZONE (with color)
+echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter your GCP Zone: ${RESET_FORMAT}"
+read ZONE
+
 gcloud config set compute/zone $ZONE
 
 export PROJECT_ID=$(gcloud info --format='value(config.project)')
