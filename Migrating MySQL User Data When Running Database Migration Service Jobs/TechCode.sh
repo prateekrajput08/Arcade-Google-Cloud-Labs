@@ -25,17 +25,35 @@ echo "${CYAN_TEXT}${BOLD_TEXT}            SUBSCRIBE TECH & CODE- INITIATING EXEC
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# User prompts with bold formatting
+echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${RESET_FORMAT}"
+
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")" REGION
+read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${RESET_FORMAT}")" HOST_OR_IP
+
+
 # Enable required APIs with color output
 echo -e "${YELLOW_TEXT}Enabling Database Migration API...${RESET_FORMAT}"
 gcloud services enable datamigration.googleapis.com --quiet
 echo -e "${YELLOW_TEXT}Enabling Service Networking API...${RESET_FORMAT}"
 gcloud services enable servicenetworking.googleapis.com --quiet
 
-# User prompts with bold formatting
-echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${RESET_FORMAT}"
+sleep 10
 
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")" REGION
-read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${RESET_FORMAT}")" HOST_OR_IP
+mysql -u admin -pchangeme! <<'EOF'
+USE sales_data;
+
+DROP VIEW IF EXISTS invoices_storenum_3656;
+
+CREATE SQL SECURITY INVOKER VIEW invoices_storenum_3656 AS
+SELECT * FROM invoices WHERE storeNum = 3656;
+
+SELECT definer, security_type, table_schema, table_name 
+FROM information_schema.views
+WHERE definer NOT LIKE '%mysql%' 
+  AND definer NOT LIKE '%debian%'
+ORDER BY definer;
+EOF
 
 # Variables
 CONNECTION_PROFILE_NAME="techcode"
