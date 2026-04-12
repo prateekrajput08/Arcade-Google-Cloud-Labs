@@ -1,105 +1,90 @@
 #!/bin/bash
 
-# Define color variables
-YELLOW_TEXT=$'\033[0;33m'
-MAGENTA_TEXT=$'\033[0;35m'
-NO_COLOR=$'\033[0m'
-GREEN_TEXT=$'\033[0;32m'
-RED_TEXT=$'\033[0;31m'
-CYAN_TEXT=$'\033[0;36m'
+# Color Configuration
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL_TEXT=$'\033[38;5;50m'
+PURPLE_TEXT=$'\033[0;35m'
+GOLD_TEXT=$'\033[0;33m'
+LIME_TEXT=$'\033[0;92m'
+MAROON_TEXT=$'\033[0;91m'
+NAVY_TEXT=$'\033[0;94m'
+
 BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
 RESET_FORMAT=$'\033[0m'
-BLUE_TEXT=$'\033[0;34m'
+REVERSE_TEXT=$'\033[7m'
 
-echo
-echo "${CYAN_TEXT}${BOLD_TEXT}Starting the process...${RESET_FORMAT}"
-echo
+clear
 
-# Instruction for setting the zone
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 1: Set the zone for your GCP resources.${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}Please enter ZONE:${RESET_FORMAT}"
-read -p "Zone: " ZONE
-export ZONE=$ZONE
-
-echo
-echo "${GREEN_TEXT}Zone set to: ${ZONE}${RESET_FORMAT}"
+# Welcome message
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# Set the compute zone
-gcloud config set compute/zone $ZONE
 
-# Derive the region from the zone
-export REGION=${ZONE%-*}
+# Get Zone and determine Region
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Please enter the Zone (e.g., us-central1-a):${RESET_FORMAT}"
+read ZONE
+REGION="${ZONE%-*}"
 
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 2: Creating a private GKE cluster...${RESET_FORMAT}"
-echo "${CYAN_TEXT}This may take a few minutes.${RESET_FORMAT}"
-echo
+echo -e "${CYAN_TEXT}Setting zone to $ZONE and region to $REGION...${RESET_FORMAT}"
+gcloud config set compute/zone "$ZONE" --quiet
 
-# Create a private GKE cluster
+# Task 2: Create a private cluster
+echo -e "${GREEN_TEXT}${BOLD_TEXT}Task 2: Creating the first private cluster (private-cluster)...${RESET_FORMAT}"
 gcloud beta container clusters create private-cluster \
     --enable-private-nodes \
     --master-ipv4-cidr 172.16.0.16/28 \
     --enable-ip-alias \
-    --create-subnetwork ""
+    --create-subnetwork "" \
+    --zone "$ZONE" \
+    --quiet
 
-echo
-echo "${GREEN_TEXT}Private cluster created successfully!${RESET_FORMAT}"
-echo
+# Task 4: Enable master authorized networks
+echo -e "${TEAL_TEXT}${BOLD_TEXT}Task 4: Creating source-instance VM to test connectivity...${RESET_FORMAT}"
+gcloud compute instances create source-instance \
+    --zone="$ZONE" \
+    --machine-type=e2-medium \
+    --scopes 'https://www.googleapis.com/auth/cloud-platform' \
+    --quiet
 
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 3: Creating a source instance...${RESET_FORMAT}"
-echo
+echo -e "${MAGENTA_TEXT}Fetching the NAT IP of source-instance...${RESET_FORMAT}"
+NAT_IP=$(gcloud compute instances describe source-instance \
+    --zone="$ZONE" \
+    --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+echo -e "${BLUE_TEXT}Source Instance NAT IP: ${NAT_IP}${RESET_FORMAT}"
 
-# Create a source instance
-gcloud compute instances create source-instance --zone=$ZONE --scopes 'https://www.googleapis.com/auth/cloud-platform'
-
-# Get the NAT IP of the source instance
-NAT_IAP=$(gcloud compute instances describe source-instance --zone=$ZONE | grep natIP | awk '{print $2}')
-
-echo
-echo "${GREEN_TEXT}Source instance created with NAT IP: ${NAT_IAP}${RESET_FORMAT}"
-echo
-
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 4: Updating the private cluster to allow master-authorized networks...${RESET_FORMAT}"
-echo
-
-# Update the private cluster to allow master-authorized networks
+echo -e "${PURPLE_TEXT}Authorizing external address range for private-cluster...${RESET_FORMAT}"
 gcloud container clusters update private-cluster \
     --enable-master-authorized-networks \
-    --master-authorized-networks $NAT_IAP/32
+    --master-authorized-networks "${NAT_IP}/32" \
+    --zone "$ZONE" \
+    --quiet
 
-echo
-echo "${GREEN_TEXT}Master-authorized networks updated successfully!${RESET_FORMAT}"
-echo
+# Task 5: Clean Up
+echo -e "${RED_TEXT}${BOLD_TEXT}Task 5: Deleting the private-cluster...${RESET_FORMAT}"
+gcloud container clusters delete private-cluster --zone="$ZONE" --quiet
 
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 5: Deleting the private cluster...${RESET_FORMAT}"
-echo
-
-# Delete the private cluster
-gcloud container clusters delete private-cluster --zone=$ZONE --quiet
-
-echo
-echo "${GREEN_TEXT}Private cluster deleted successfully!${RESET_FORMAT}"
-echo
-
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 6: Creating a custom subnet...${RESET_FORMAT}"
-echo
-
-# Create a custom subnet
+# Task 6: Create a private cluster that uses a custom subnetwork
+echo -e "${GOLD_TEXT}${BOLD_TEXT}Task 6: Creating custom subnetwork (my-subnet)...${RESET_FORMAT}"
 gcloud compute networks subnets create my-subnet \
     --network default \
     --range 10.0.4.0/22 \
     --enable-private-ip-google-access \
-    --region=$REGION \
-    --secondary-range my-svc-range=10.0.32.0/20,my-pod-range=10.4.0.0/14
+    --region="$REGION" \
+    --secondary-range my-svc-range=10.0.32.0/20,my-pod-range=10.4.0.0/14 \
+    --quiet
 
-echo
-echo "${GREEN_TEXT}Custom subnet created successfully!${RESET_FORMAT}"
-echo
-
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 7: Creating a second private GKE cluster...${RESET_FORMAT}"
-echo
-
-# Create a second private GKE cluster
+echo -e "${GREEN_TEXT}${BOLD_TEXT}Creating private-cluster2 using the custom subnetwork...${RESET_FORMAT}"
 gcloud beta container clusters create private-cluster2 \
     --enable-private-nodes \
     --enable-ip-alias \
@@ -107,43 +92,20 @@ gcloud beta container clusters create private-cluster2 \
     --subnetwork my-subnet \
     --services-secondary-range-name my-svc-range \
     --cluster-secondary-range-name my-pod-range \
-    --zone=$ZONE
+    --zone="$ZONE" \
+    --quiet
 
-echo
-echo "${GREEN_TEXT}Second private cluster created successfully!${RESET_FORMAT}"
-echo
-
-# Get the NAT IP of the source instance again
-NAT_IAP_Cloud=$(gcloud compute instances describe source-instance --zone=$ZONE | grep natIP | awk '{print $2}')
-
-echo "${BLUE_TEXT}${BOLD_TEXT}Step 8: Updating the second private cluster to allow master-authorized networks...${RESET_FORMAT}"
-echo
-
-# Update the second private cluster to allow master-authorized networks
+echo -e "${PURPLE_TEXT}Authorizing external address range for private-cluster2...${RESET_FORMAT}"
 gcloud container clusters update private-cluster2 \
     --enable-master-authorized-networks \
-    --zone=$ZONE \
-    --master-authorized-networks $NAT_IAP_Cloud/32
+    --master-authorized-networks "${NAT_IP}/32" \
+    --zone="$ZONE" \
+    --quiet
 
 echo
-echo "${GREEN_TEXT}Master-authorized networks updated for the second cluster!${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-
-
-# Safely delete the script if it exists
-SCRIPT_NAME="arcadecrew.sh"
-if [ -f "$SCRIPT_NAME" ]; then
-    echo -e "${BOLD_TEXT}${RED_TEXT}Deleting the script ($SCRIPT_NAME) for safety purposes...${RESET_FORMAT}${NO_COLOR}"
-    rm -- "$SCRIPT_NAME"
-fi
-
-echo
-
-echo
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-
-echo
-echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
-echo
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
