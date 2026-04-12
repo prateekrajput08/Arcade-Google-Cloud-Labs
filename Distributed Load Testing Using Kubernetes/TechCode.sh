@@ -31,107 +31,78 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 1: Configuration Setup${RESET_FORMAT}"
-read -p "Enter your preferred ZONE (e.g., us-central1-a): " ZONE
+# Ask the zone from user
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Please enter the Zone (e.g., us-central1-a):${RESET_FORMAT}"
+read -p "> " ZONE
 
-if [ -z "$ZONE" ]; then
-  echo "${RED_TEXT}Error: Zone cannot be empty${RESET_FORMAT}"
-  exit 1
-fi
-
-# Set Project and Region
-PROJECT=$(gcloud config get-value project)
+# Auto-fetch Region by removing the last hyphen and everything after it
 REGION="${ZONE%-*}"
-CLUSTER="gke-load-test"
-TARGET="${PROJECT}.appspot.com"
 
-echo "${GREEN_TEXT}✓ Configuration:${RESET_FORMAT}"
-echo "  Project: ${PROJECT}"
-echo "  Region: ${REGION}"
-echo "  Zone: ${ZONE}"
-echo
+# Auto-fetch Project ID
+PROJECT=$(gcloud config get-value project)
+CLUSTER=gke-load-test
+TARGET=${PROJECT}.appspot.com
 
-# Set GCP Configuration
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 2: Setting Up GCP Environment${RESET_FORMAT}"
+echo -e "${CYAN_TEXT}Setting up configuration for Project: ${PROJECT}, Region: ${REGION}, Zone: ${ZONE}${RESET_FORMAT}"
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $ZONE
-echo "${GREEN_TEXT}✓ GCP configuration updated${RESET_FORMAT}"
-echo
 
-# Download Resources
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 3: Downloading Required Resources${RESET_FORMAT}"
-if [ -d "distributed-load-testing-using-kubernetes" ]; then
-  echo "${YELLOW_TEXT}✓ Directory already exists, skipping download${RESET_FORMAT}"
-else
-  gsutil -m cp -r gs://spls/gsp182/distributed-load-testing-using-kubernetes .
-fi
-echo "${GREEN_TEXT}✓ Resources downloaded${RESET_FORMAT}"
-echo
+echo -e "${GREEN_TEXT}Fetching sample code from Cloud Storage...${RESET_FORMAT}"
+gsutil -m cp -r gs://spls/gsp182/distributed-load-testing-using-kubernetes .
 
-# Configure Web Application
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 4: Configuring Sample Web Application${RESET_FORMAT}"
+echo -e "${BLUE_TEXT}Navigating to directory and updating Python version...${RESET_FORMAT}"
 cd distributed-load-testing-using-kubernetes/sample-webapp/
 sed -i "s/python37/python312/g" app.yaml
 cd ..
-echo "${GREEN_TEXT}✓ Web application configured${RESET_FORMAT}"
-echo
 
-# Build Docker Image
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 5: Building Locust Docker Image${RESET_FORMAT}"
+echo -e "${MAGENTA_TEXT}Building Docker image and submitting to Container Registry...${RESET_FORMAT}"
 gcloud builds submit --tag gcr.io/$PROJECT/locust-tasks:latest docker-image/.
-echo "${GREEN_TEXT}✓ Docker image built and pushed${RESET_FORMAT}"
-echo
 
-# Deploy Web Application
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 6: Deploying Web Application${RESET_FORMAT}"
-gcloud app create --region=$REGION || echo "${YELLOW}App already exists, continuing...${RESET_FORMAT}"
+echo -e "${TEAL_TEXT}Initializing App Engine in region ${REGION}...${RESET_FORMAT}"
+gcloud app create --region=$REGION || echo "App Engine might already be created."
+
+gcloud projects add-iam-policy-binding qwiklabs-gcp-00-e744bd2c1012 \
+  --member="serviceAccount:qwiklabs-gcp-00-e744bd2c1012@appspot.gserviceaccount.com" \
+  --role="roles/storage.admin"
+
+echo -e "${PURPLE_TEXT}Deploying web application to App Engine...${RESET_FORMAT}"
 gcloud app deploy sample-webapp/app.yaml --quiet
-echo "${GREEN_TEXT}✓ Web application deployed${RESET_FORMAT}"
-echo
 
-# Create GKE Cluster
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 7: Creating GKE Cluster${RESET_FORMAT}"
+echo -e "${GOLD_TEXT}Deploying Kubernetes cluster (this may take a few minutes)...${RESET_FORMAT}"
 gcloud container clusters create $CLUSTER \
   --zone $ZONE \
-  --num-nodes=5 \
-  --machine-type=e2-standard-4
-echo "${GREEN_TEXT}✓ GKE cluster created${RESET_FORMAT}"
-echo
+  --num-nodes=5
 
-# Configure Locust Files
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 8: Configuring Load Testing Components${RESET_FORMAT}"
+echo -e "${LIME_TEXT}Fetching cluster credentials...${RESET_FORMAT}"
+gcloud container clusters get-credentials $CLUSTER --zone $ZONE
+
+echo -e "${MAROON_TEXT}Updating Kubernetes configuration files with TARGET_HOST and PROJECT_ID...${RESET_FORMAT}"
 sed -i -e "s/\[TARGET_HOST\]/$TARGET/g" kubernetes-config/locust-master-controller.yaml
 sed -i -e "s/\[TARGET_HOST\]/$TARGET/g" kubernetes-config/locust-worker-controller.yaml
 sed -i -e "s/\[PROJECT_ID\]/$PROJECT/g" kubernetes-config/locust-master-controller.yaml
 sed -i -e "s/\[PROJECT_ID\]/$PROJECT/g" kubernetes-config/locust-worker-controller.yaml
-echo "${GREEN_TEXT}✓ Configuration files updated${RESET_FORMAT}"
-echo
 
-# Deploy Locust Master
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 9: Deploying Locust Master${RESET_FORMAT}"
+echo -e "${NAVY_TEXT}Deploying Locust Master...${RESET_FORMAT}"
 kubectl apply -f kubernetes-config/locust-master-controller.yaml
+
+echo -e "${CYAN_TEXT}Deploying Locust Master Service...${RESET_FORMAT}"
 kubectl apply -f kubernetes-config/locust-master-service.yaml
-echo "${GREEN_TEXT}✓ Locust master deployed${RESET_FORMAT}"
-echo
 
-# Get Master Service Details
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 10: Locust Master Service Details${RESET_FORMAT}"
-kubectl get svc locust-master
-echo
-echo "${GREEN_TEXT}✓ You can access the Locust web interface at the EXTERNAL-IP above on port 8089${RESET_FORMAT}"
-echo
-
-# Deploy Locust Workers
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 11: Deploying Locust Workers${RESET_FORMAT}"
+echo -e "${BLUE_TEXT}Deploying Locust Workers...${RESET_FORMAT}"
 kubectl apply -f kubernetes-config/locust-worker-controller.yaml
-echo "${GREEN_TEXT}✓ Initial workers deployed${RESET_FORMAT}"
-echo
 
-# Scale Workers
-echo "${YELLOW_TEXT}${BOLD_TEXT}Step 12: Scaling Workers${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}Scaling Locust Workers to 20 replicas...${RESET_FORMAT}"
 kubectl scale deployment/locust-worker --replicas=20
-echo "${GREEN_TEXT}✓ Scaled to 20 workers${RESET_FORMAT}"
-echo
+
+echo -e "${YELLOW_TEXT}Waiting for external IP assignment (this might take a minute)...${RESET_FORMAT}"
+sleep 45
+
+echo -e "${MAGENTA_TEXT}Fetching Locust Master External IP...${RESET_FORMAT}"
+EXTERNAL_IP=$(kubectl get svc locust-master -o yaml | grep ip: | awk -F": " '{print $NF}')
+
+echo -e "${GREEN_TEXT}${BOLD_TEXT}Lab deployment complete!${RESET_FORMAT}"
+echo -e "${TEAL_TEXT}${BOLD_TEXT}Access your Locust Load Testing interface here:${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}http://$EXTERNAL_IP:8089${RESET_FORMAT}"
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
