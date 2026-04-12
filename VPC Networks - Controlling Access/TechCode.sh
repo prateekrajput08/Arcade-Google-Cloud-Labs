@@ -19,7 +19,6 @@ NAVY_TEXT=$'\033[0;94m'
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 BLINK_TEXT=$'\033[5m'
-NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
 REVERSE_TEXT=$'\033[7m'
 
@@ -31,107 +30,111 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# ------------------ ASK FOR ZONE ------------------
-echo "${YELLOW}${BOLD}Enter zone (e.g., us-central1-a):${RESET}"
+# 1. Ask for Zone and Autofetch Region
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Enter the ZONE (e.g., us-central1-a): ${RESET_FORMAT}"
 read ZONE
-export ZONE
+# Strip the last part of the zone (e.g., "-a") to get the region
+REGION=${ZONE%-*}
+echo -e "${GREEN_TEXT}${BOLD_TEXT}Auto-fetched Region: ${REGION}${RESET_FORMAT}"
 
-echo "${CYAN}${BOLD}Creating Blue & Green servers...${RESET}"
+# Get the current Project ID
+PROJECT_ID=$(gcloud config get-value project)
 
-# ------------------ CREATE BLUE SERVER (TAGGED) ------------------
+# --- NEW: Create startup script files locally to avoid metadata escaping errors ---
+cat << 'EOF' > blue-startup.sh
+#!/bin/bash
+apt-get update
+apt-get install nginx-light -y
+echo "<h1>Welcome to the blue server!</h1><p>If you see this page, the nginx web server is successfully installed and working. Further configuration is required.</p>" > /var/www/html/index.nginx-debian.html
+EOF
+
+cat << 'EOF' > green-startup.sh
+#!/bin/bash
+apt-get update
+apt-get install nginx-light -y
+echo "<h1>Welcome to the green server!</h1><p>If you see this page, the nginx web server is successfully installed and working. Further configuration is required.</p>" > /var/www/html/index.nginx-debian.html
+EOF
+# ---------------------------------------------------------------------------------
+
+# 2. Create the web servers (Task 1)
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Creating 'blue' server with Nginx and web-server tag...${RESET_FORMAT}"
 gcloud compute instances create blue \
-  --project=$DEVSHELL_PROJECT_ID \
-  --zone=$ZONE \
-  --machine-type=e2-micro \
-  --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
-  --metadata=enable-oslogin=true \
-  --tags=web-server \
-  --create-disk=auto-delete=yes,boot=yes,device-name=blue,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=pd-balanced \
-  --quiet
+    --zone=$ZONE \
+    --machine-type=e2-micro \
+    --tags=web-server \
+    --metadata-from-file=startup-script=blue-startup.sh
 
-# ------------------ CREATE GREEN SERVER (NO TAG) ------------------
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Creating 'green' server with Nginx (no tag)...${RESET_FORMAT}"
 gcloud compute instances create green \
-  --project=$DEVSHELL_PROJECT_ID \
-  --zone=$ZONE \
-  --machine-type=e2-micro \
-  --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
-  --metadata=enable-oslogin=true \
-  --create-disk=auto-delete=yes,boot=yes,device-name=green,image=projects/debian-cloud/global/images/debian-11-bullseye-v20230509,mode=rw,size=10,type=pd-balanced \
-  --quiet
+    --zone=$ZONE \
+    --machine-type=e2-micro \
+    --metadata-from-file=startup-script=green-startup.sh
 
-echo "${GREEN}${BOLD}VMs Created Successfully!${RESET}"
-
-# ------------------ CREATE FIREWALL RULE ------------------
-echo "${CYAN}${BOLD}Creating Firewall Rule...${RESET}"
-
+# 3. Create the firewall rule (Task 2)
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Creating tagged firewall rule 'allow-http-web-server'...${RESET_FORMAT}"
 gcloud compute firewall-rules create allow-http-web-server \
-  --project=$DEVSHELL_PROJECT_ID \
-  --direction=INGRESS \
-  --priority=1000 \
-  --network=default \
-  --allow=tcp:80,icmp \
-  --source-ranges=0.0.0.0/0 \
-  --target-tags=web-server \
-  --quiet
+    --network=default \
+    --action=allow \
+    --direction=ingress \
+    --rules=tcp:80,icmp \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=web-server
 
-echo "${GREEN}${BOLD}Firewall Rule Created Successfully!${RESET}"
-
-# ------------------ CREATE TEST VM ------------------
-echo "${CYAN}${BOLD}Creating test-vm...${RESET}"
-
+echo -e "${YELLOW_TEXT}Creating 'test-vm'...${RESET_FORMAT}"
 gcloud compute instances create test-vm \
-  --project=$DEVSHELL_PROJECT_ID \
-  --zone=$ZONE \
-  --machine-type=e2-micro \
-  --subnet=default \
-  --quiet
+    --zone=$ZONE \
+    --machine-type=e2-micro \
+    --subnet=default
 
-echo "${GREEN}${BOLD}test-vm Created Successfully!${RESET}"
+# 4. Explore Network and Security Admin roles (Task 3)
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Creating Service Account 'Network-admin'...${RESET_FORMAT}"
+gcloud iam service-accounts create Network-admin \
+    --display-name="Network-admin"
 
-# ------------------ CREATE SERVICE ACCOUNT ------------------
-echo "${CYAN}${BOLD}Creating Service Account & Keys...${RESET}"
+SA_EMAIL="Network-admin@${PROJECT_ID}.iam.gserviceaccount.com"
 
-gcloud iam service-accounts create network-admin \
-  --description="Service account for Network Admin role" \
-  --display-name="Network-admin" \
-  --quiet
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Assigning Compute Network Admin role to the Service Account...${RESET_FORMAT}"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role="roles/compute.networkAdmin" > /dev/null 2>&1
 
-gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID \
-  --member=serviceAccount:network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/compute.networkAdmin \
-  --quiet
-
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Generating JSON key 'credentials.json'...${RESET_FORMAT}"
 gcloud iam service-accounts keys create credentials.json \
-  --iam-account=network-admin@$DEVSHELL_PROJECT_ID.iam.gserviceaccount.com \
-  --quiet
+    --iam-account=${SA_EMAIL}
 
-echo "${GREEN}${BOLD}Service Account + Key Created Successfully!${RESET}"
+# Pause for checkpoints
+echo -e "\n${YELLOW_TEXT}${BOLD_TEXT}====================================================${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}WAIT! Please click 'Check my progress' in the lab manual for:${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Create the blue server${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Create the green server${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Install Nginx and customize the welcome page${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Create the tagged firewall rule${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Create a test-vm${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}- Create a Network-admin service account${RESET_FORMAT}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}====================================================${RESET_FORMAT}\n"
 
-# ------------------ BLUE SERVER NGINX SETUP ------------------
-echo "${CYAN}${BOLD}Configuring Blue Server...${RESET}"
+read -p "${MAGENTA_TEXT}${BOLD_TEXT}Press [ENTER] once you have collected those points to proceed with the final steps...${RESET_FORMAT}"
 
-cat > bluessh.sh <<'EOF_END'
-sudo apt-get update -y
-sudo apt-get install nginx-light -y
-sudo sed -i '14c\<h1>Welcome to the blue server!</h1>' /var/www/html/index.nginx-debian.html
-sudo systemctl restart nginx
-EOF_END
+# 5. Final Role Swap and Deletion
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Removing Compute Network Admin role...${RESET_FORMAT}"
+gcloud projects remove-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role="roles/compute.networkAdmin" > /dev/null 2>&1
 
-gcloud compute scp bluessh.sh blue:/tmp --zone=$ZONE --quiet
-gcloud compute ssh blue --zone=$ZONE --quiet --command="bash /tmp/bluessh.sh"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Adding Compute Security Admin role...${RESET_FORMAT}"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role="roles/compute.securityAdmin" > /dev/null 2>&1
 
-# ------------------ GREEN SERVER NGINX SETUP ------------------
-echo "${CYAN}${BOLD}Configuring Green Server...${RESET}"
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Waiting 15 seconds for IAM changes to propagate...${RESET_FORMAT}"
+sleep 15
 
-cat > greenssh.sh <<'EOF_END'
-sudo apt-get update -y
-sudo apt-get install nginx-light -y
-sudo sed -i '14c\<h1>Welcome to the green server!</h1>' /var/www/html/index-nginx-debian.html
-sudo systemctl restart nginx
-EOF_END
+echo -e "${YELLOW_TEXT}${BOLD_TEXT}Deleting firewall rule 'allow-http-web-server'...${RESET_FORMAT}"
+gcloud compute firewall-rules delete allow-http-web-server --quiet
 
-gcloud compute scp greenssh.sh green:/tmp --zone=$ZONE --quiet
-gcloud compute ssh green --zone=$ZONE --quiet --command="bash /tmp/greenssh.sh"
+# Clean up local temporary files
+rm blue-startup.sh green-startup.sh
+rm -f TechCode.sh
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
