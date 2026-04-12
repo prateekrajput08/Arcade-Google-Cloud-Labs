@@ -25,11 +25,13 @@ echo "${CYAN_TEXT}${BOLD_TEXT}            SUBSCRIBE TECH & CODE- INITIATING EXEC
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# User prompts
+# User inputs
 echo -e "${BOLD_TEXT}${YELLOW_TEXT}Please enter the connection profile details:${RESET_FORMAT}"
 
 read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the region: ${RESET_FORMAT}")" REGION
 read -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter the host or IP address: ${RESET_FORMAT}")" HOST_OR_IP
+read -s -p "$(echo -e "${BOLD_TEXT}${WHITE_TEXT}Enter MySQL Password: ${RESET_FORMAT}")" MYSQL_PASS
+echo
 
 # Enable APIs
 echo -e "${YELLOW_TEXT}Enabling Database Migration API...${RESET_FORMAT}"
@@ -43,7 +45,7 @@ sleep 5
 # ================= MYSQL FIX =================
 echo -e "${YELLOW_TEXT}Connecting to MySQL and updating DEFINER...${RESET_FORMAT}"
 
-mysql -h "$HOST_OR_IP" -u admin -pchangeme! <<EOF
+mysql -h "$HOST_OR_IP" -u admin -p"$MYSQL_PASS" <<EOF
 USE sales_data;
 
 DROP VIEW IF EXISTS invoices_storenum_3656;
@@ -73,7 +75,7 @@ if [ "$EXISTS" == "" ]; then
     --host="$HOST_OR_IP" \
     --port=3306 \
     --username="admin" \
-    --password="changeme!"
+    --password="$MYSQL_PASS"
 
   echo -e "${GREEN_TEXT}${BOLD_TEXT}Source connection profile created.${NO_COLOR}"
 else
