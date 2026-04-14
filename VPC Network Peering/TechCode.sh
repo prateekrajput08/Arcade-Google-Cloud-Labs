@@ -25,6 +25,11 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# Ask user for required inputs
+read -p "${BOLD_TEXT}${YELLOW_TEXT}Enter ZONE: ${RESET_FORMAT}" ZONE
+read -p "${BOLD_TEXT}${YELLOW_TEXT}Enter ZONE_2: ${RESET_FORMAT}" ZONE_2
+read -p "${BOLD_TEXT}${YELLOW_TEXT}Enter PROJECT_ID_2: ${RESET_FORMAT}" PROJECT_ID_2
+
 export PROJECT_ID=$DEVSHELL_PROJECT_ID
 export REGION_1="${ZONE%-*}"
 export REGION_2="${ZONE_2%-*}"
