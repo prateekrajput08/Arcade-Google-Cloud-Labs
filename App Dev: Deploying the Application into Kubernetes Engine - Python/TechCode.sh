@@ -25,6 +25,10 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+
+# Ask user for required inputs
+read -p "${BOLD_TEXT}${YELLOW_TEXT}Enter ZONE: ${RESET_FORMAT}" ZONE
+
 # Set region from zone
 export REGION="${ZONE%-*}"
 echo "${BLUE_TEXT}Zone: $ZONE${RESET_FORMAT}"
