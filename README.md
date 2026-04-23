@@ -45,4 +45,4 @@ Participants can also earn exciting swags by completing selected Google Cloud la
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-blue?logo=linkedin)](https://www.linkedin.com/in/prateekrajput08)
 [![GitHub](https://img.shields.io/badge/GitHub-Prateek%20Rajput-black?logo=github)](https://github.com/prateekrajput08)
 [![YouTube](https://img.shields.io/badge/YouTube-Tech%20&%20Code-red?logo=youtube)](https://www.youtube.com/@TechCode9/playlists)
-[![Live](https://img.shields.io/badge/Live-ArcadeCalci-success?logo=vercel)](https://arcadecalci.vercel.app)
+[![Live](https://img.shields.io/badge/Live-ArcadeCalci-success?logo=vercel)](https://arcadepointscalci.in)
