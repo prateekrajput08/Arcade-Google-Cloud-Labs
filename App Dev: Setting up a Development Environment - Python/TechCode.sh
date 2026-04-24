@@ -88,7 +88,7 @@ gcloud compute ssh dev-instance \
   --project="$DEVSHELL_PROJECT_ID" \
   --zone="$ZONE" \
   --quiet \
-  --command='bash /tmp/techcode.sh'
+  --command='bash /tmp/TechCode.sh'
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
