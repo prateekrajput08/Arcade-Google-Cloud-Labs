@@ -25,6 +25,18 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
+# Ask user for zone input in yellow
+echo -ne "${YELLOW_TEXT}Enter your zone: ${RESET}"
+read zone
+
+# Check if input is empty
+if [ -z "$zone" ]; then
+  echo -e "${YELLOW_TEXT}No zone entered. Please try again.${RESET}"
+  exit 1
+fi
+
+# Use the zone variable
+echo -e "${YELLOW_TEXT}You entered zone: $zone${RESET}"
 
 gcloud auth list
 
