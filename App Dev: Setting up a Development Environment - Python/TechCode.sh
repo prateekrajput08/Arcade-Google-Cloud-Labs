@@ -26,17 +26,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FOR
 echo
 
 # Ask user for zone input in yellow
-echo -ne "${YELLOW_TEXT}Enter your zone: ${RESET}"
+echo -ne "${YELLOW_TEXT}Enter your zone: ${RESET_FORMAT}"
 read zone
 
 # Check if input is empty
 if [ -z "$zone" ]; then
-  echo -e "${YELLOW_TEXT}No zone entered. Please try again.${RESET}"
+  echo -e "${YELLOW_TEXT}No zone entered. Please try again.${RESET_FORMAT}"
   exit 1
 fi
 
 # Use the zone variable
-echo -e "${YELLOW_TEXT}You entered zone: $zone${RESET}"
+echo -e "${YELLOW_TEXT}You entered zone: $zone${RESET_FORMAT}"
 
 gcloud auth list
 
