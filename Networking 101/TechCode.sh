@@ -25,6 +25,16 @@ echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
 echo
 
+# Ask user for regions
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION 1:${RESET_FORMAT}"
+read REGION_1
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION 2:${RESET_FORMAT}"
+read REGION_2
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION 3:${RESET_FORMAT}"
+read REGION_3
+
 gcloud compute networks create taw-custom-network --subnet-mode custom
 
 gcloud compute networks subnets create subnet-$REGION_1 \
