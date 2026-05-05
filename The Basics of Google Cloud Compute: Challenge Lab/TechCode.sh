@@ -20,13 +20,10 @@ REVERSE_TEXT=$'\033[7m'
 
 clear
 set -e
+
 pause_for_yes() {
-  echo
-  read -p "Press Y to continue: " choice
-  if [[ "$choice" != "Y" && "$choice" != "y" ]]; then
-    echo "${RED_TEXT}${BOLD_TEXT}❌ Script stopped by user.${RESET_FORMAT}"
-    exit 1
-  fi
+  echo "${GREEN_TEXT}✔ Auto-continue enabled${RESET_FORMAT}"
+  return 0
 }
 
 # ========================= WELCOME MESSAGE =========================
@@ -37,10 +34,12 @@ echo
 
 # ========================= PROJECT & ZONE =========================
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-ZONE=$(gcloud compute zones list --limit=1 --format="value(name)")
+ZONE="us-west1-a"
+REGION="us-west1"
 
-INSTANCE_NAME="techcode-vm"
-DISK_NAME="techcode-disk"
+INSTANCE_NAME="my-instance"
+DISK_NAME="mydisk"
+BUCKET_NAME="qwiklabs-gcp-03-690def5510a9-bucket"
 
 # ========================= VALIDATION =========================
 if [[ -z "$PROJECT_ID" || -z "$ZONE" || -z "$INSTANCE_NAME" || -z "$DISK_NAME" ]]; then
@@ -57,26 +56,52 @@ echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Enabling Compute Engine API...${RESET_FORMAT
 gcloud services enable compute.googleapis.com
 echo
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Create Instance Manually ...${RESET_FORMAT}"
-pause_for_yes
+# ========================= TASK 1 =========================
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Cloud Storage Bucket...${RESET_FORMAT}"
+gsutil mb -l US gs://$BUCKET_NAME
+echo
+
+# ========================= CREATE INSTANCE =========================
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Compute Engine Instance...${RESET_FORMAT}"
+gcloud compute instances create $INSTANCE_NAME \
+  --zone=$ZONE \
+  --machine-type=e2-medium \
+  --image-family=debian-12 \
+  --image-project=debian-cloud \
+  --boot-disk-size=10GB \
+  --boot-disk-type=pd-balanced \
+  --tags=http-server
+echo
 
 # ========================= CREATE DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Persistent Disk...${RESET_FORMAT}"
-gcloud compute disks create mydisk \
+gcloud compute disks create $DISK_NAME \
   --size=200GB \
-  --zone $ZONE
+  --zone=$ZONE
 echo
 
 # ========================= ATTACH DISK =========================
 echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Attaching Disk to VM...${RESET_FORMAT}"
-gcloud compute instances attach-disk my-instance \
-  --disk mydisk \
-  --zone "$ZONE"
+gcloud compute instances attach-disk $INSTANCE_NAME \
+  --disk=$DISK_NAME \
+  --zone=$ZONE
 echo
 
-# ========================= SSH TEST =========================
-echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Testing SSH connection...${RESET_FORMAT}"
-gcloud compute ssh "$INSTANCE_NAME" --zone="$ZONE" --command="echo SSH Connected Successfully"
+# ========================= SSH + NGINX =========================
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Installing NGINX...${RESET_FORMAT}"
+gcloud compute ssh "$INSTANCE_NAME" --zone="$ZONE" --command="
+sudo apt update &&
+sudo apt install -y nginx &&
+sudo systemctl enable nginx &&
+sudo systemctl start nginx
+"
+echo
+
+# ========================= FIREWALL =========================
+echo "${YELLOW_TEXT}${BOLD_TEXT}▶ Creating Firewall Rule...${RESET_FORMAT}"
+gcloud compute firewall-rules create allow-http \
+  --allow tcp:80 \
+  --target-tags=http-server
 echo
 
 # ========================= COMPLETION =========================
@@ -86,3 +111,4 @@ echo "${GREEN_TEXT}${BOLD_TEXT}=================================================
 echo
 echo "${CYAN_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${CYAN_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo
