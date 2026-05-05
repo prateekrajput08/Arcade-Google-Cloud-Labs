@@ -98,7 +98,8 @@ gcloud compute firewall-rules create $FWL_3 \
 
 #----------------------------------------------------VM helper--------------------------------------------------#
 
-MACHINE_TYPES=("e2-medium" "e2-micro" "e2-standard-2" "n1-standard-1")
+# All e2 machine types from smallest to largest for best availability
+MACHINE_TYPES=("e2-micro" "e2-small" "e2-medium" "e2-standard-2" "e2-standard-4" "n1-standard-1" "n2-standard-2")
 
 create_vm() {
     local VM_NAME=$1
@@ -106,7 +107,7 @@ create_vm() {
     local PRIMARY_ZONE=$3
     local REGION=${PRIMARY_ZONE%-*}
 
-    # Check if VM already exists
+    # Check if VM already exists anywhere
     echo "${YELLOW_TEXT}Checking if $VM_NAME already exists...${RESET_FORMAT}"
     EXISTING_ZONE=$(gcloud compute instances list \
         --filter="name=$VM_NAME" \
@@ -114,11 +115,13 @@ create_vm() {
 
     if [[ -n "$EXISTING_ZONE" ]]; then
         echo "${GREEN_TEXT}${BOLD_TEXT}$VM_NAME already exists in $EXISTING_ZONE. Skipping.${RESET_FORMAT}"
+        # Return just the zone as last line
         echo "$EXISTING_ZONE"
         return 0
     fi
 
-    # Build zone list: primary zone first, then others in region
+    # Build zone list: primary zone first, then all other UP zones in region
+    echo "${YELLOW_TEXT}Fetching available zones in $REGION...${RESET_FORMAT}"
     ZONE_LIST=("$PRIMARY_ZONE")
     while IFS= read -r z; do
         [[ "$z" != "$PRIMARY_ZONE" ]] && ZONE_LIST+=("$z")
@@ -126,61 +129,67 @@ create_vm() {
         --filter="region:$REGION AND status:UP" \
         --format="get(name)" 2>/dev/null)"
 
+    echo "${YELLOW_TEXT}Will try zones: ${ZONE_LIST[*]}${RESET_FORMAT}"
+
     for ZONE_TRY in "${ZONE_LIST[@]}"; do
         for MTYPE in "${MACHINE_TYPES[@]}"; do
             echo "${YELLOW_TEXT}Trying zone: $ZONE_TRY | machine-type: $MTYPE ...${RESET_FORMAT}"
-            ERR=$(gcloud compute instances create $VM_NAME \
-                --project=$DEVSHELL_PROJECT_ID \
-                --zone=$ZONE_TRY \
-                --machine-type=$MTYPE \
-                --subnet=$SUBNET 2>&1)
+            ERR=$(gcloud compute instances create "$VM_NAME" \
+                --project="$DEVSHELL_PROJECT_ID" \
+                --zone="$ZONE_TRY" \
+                --machine-type="$MTYPE" \
+                --subnet="$SUBNET" 2>&1)
             EXIT_CODE=$?
 
-            if echo "$ERR" | grep -q "ZONE_RESOURCE_POOL_EXHAUSTED"; then
-                echo "${RED_TEXT}Exhausted. Trying next...${RESET_FORMAT}"
+            if echo "$ERR" | grep -qE "ZONE_RESOURCE_POOL_EXHAUSTED|does not have enough resources"; then
+                echo "${RED_TEXT}  ✗ Zone/type exhausted. Trying next...${RESET_FORMAT}"
                 continue
+
             elif echo "$ERR" | grep -q "already exists"; then
-                echo "${GREEN_TEXT}${BOLD_TEXT}$VM_NAME already exists. Skipping.${RESET_FORMAT}"
+                echo "${GREEN_TEXT}${BOLD_TEXT}  ✓ $VM_NAME already exists. Skipping.${RESET_FORMAT}"
                 echo "$ZONE_TRY"
                 return 0
+
             elif [ $EXIT_CODE -eq 0 ]; then
-                echo "${GREEN_TEXT}${BOLD_TEXT}SUCCESS: $VM_NAME created in $ZONE_TRY with $MTYPE${RESET_FORMAT}"
+                echo "${GREEN_TEXT}${BOLD_TEXT}  ✓ SUCCESS: $VM_NAME created in $ZONE_TRY with $MTYPE${RESET_FORMAT}"
                 echo "$ZONE_TRY"
                 return 0
+
             else
-                echo "${RED_TEXT}Failed (non-exhaustion): $ERR${RESET_FORMAT}"
-                break
+                echo "${RED_TEXT}  ✗ Unexpected error in $ZONE_TRY/$MTYPE — skipping zone.${RESET_FORMAT}"
+                echo "${RED_TEXT}    $ERR${RESET_FORMAT}"
+                break  # skip remaining machine types for this zone, try next zone
             fi
         done
     done
 
-    echo "${RED_TEXT}${BOLD_TEXT}ERROR: Could not create $VM_NAME in any zone in $REGION.${RESET_FORMAT}"
+    echo "${RED_TEXT}${BOLD_TEXT}ERROR: Could not create $VM_NAME in any zone in region $REGION.${RESET_FORMAT}"
     return 1
 }
 
-#----------------------------------------------------VMs--------------------------------------------------#
+#----------------------------------------------------create VMs--------------------------------------------------#
 
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}>>> Creating VM 1 ($VM_1)...${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}>>> Creating VM 1 ($VM_1) in region $REGION_1...${RESET_FORMAT}"
 RESULT_1=$(create_vm "$VM_1" "$SUBNET_A" "$ZONE_1")
 if [ $? -ne 0 ]; then
     echo "${RED_TEXT}${BOLD_TEXT}Could not create $VM_1. Exiting.${RESET_FORMAT}"
     exit 1
 fi
 ZONE_1=$(echo "$RESULT_1" | tail -1)
-echo "${GREEN_TEXT}$VM_1 running in zone: $ZONE_1${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}$VM_1 is running in zone: $ZONE_1${RESET_FORMAT}"
 
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}>>> Creating VM 2 ($VM_2)...${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}>>> Creating VM 2 ($VM_2) in region $REGION_2...${RESET_FORMAT}"
 RESULT_2=$(create_vm "$VM_2" "$SUBNET_B" "$ZONE_2")
 if [ $? -ne 0 ]; then
     echo "${RED_TEXT}${BOLD_TEXT}Could not create $VM_2. Exiting.${RESET_FORMAT}"
     exit 1
 fi
 ZONE_2=$(echo "$RESULT_2" | tail -1)
-echo "${GREEN_TEXT}$VM_2 running in zone: $ZONE_2${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}$VM_2 is running in zone: $ZONE_2${RESET_FORMAT}"
 
-#----------------------------------------------------connectivity--------------------------------------------------#
+#----------------------------------------------------connectivity test--------------------------------------------------#
 
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}>>> Waiting 15 seconds for VMs to initialize...${RESET_FORMAT}"
