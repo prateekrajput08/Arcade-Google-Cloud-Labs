@@ -25,244 +25,79 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# ==========================================================
-# STEP 0 - DETECT PROJECT / REGION / ZONE
-# ==========================================================
+# --- 1. Environmental Setup ---
+echo "${BLUE_TEXT}Fetching Project ID, Region, and Zone...${RESET_FORMAT}"
+export PROJECT_ID=$(gcloud config get-value project)
+export REGION=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items.google-compute-default-region)")
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items.google-compute-default-zone)")
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}[0/8] Detecting Google Cloud environment...${RESET_FORMAT}"
+# Fallback if metadata is not set
+[[ -z "$REGION" ]] && REGION="us-east1"
+[[ -z "$ZONE" ]] && ZONE="us-east1-b"
 
-PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+gcloud config set compute/region "$REGION"
+gcloud config set compute/zone "$ZONE"
 
-REGION=$(gcloud config get-value compute/region 2>/dev/null)
-ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
-
-# Auto detect region if unset
-if [[ -z "$REGION" || "$REGION" == "(unset)" ]]; then
-    REGION=$(gcloud compute regions list --format="value(name)" --limit=1)
-    gcloud config set compute/region "$REGION" >/dev/null 2>&1
-fi
-
-# Auto detect zone if unset
-if [[ -z "$ZONE" || "$ZONE" == "(unset)" ]]; then
-    ZONE=$(gcloud compute zones list \
-        --filter="region:(${REGION})" \
-        --format="value(name)" \
-        --limit=1)
-    gcloud config set compute/zone "$ZONE" >/dev/null 2>&1
-fi
-
-echo "${GREEN_TEXT}✔ Project : ${WHITE_TEXT}${PROJECT_ID}${RESET_FORMAT}"
-echo "${GREEN_TEXT}✔ Region  : ${WHITE_TEXT}${REGION}${RESET_FORMAT}"
-echo "${GREEN_TEXT}✔ Zone    : ${WHITE_TEXT}${ZONE}${RESET_FORMAT}"
-echo ""
-
-# ==========================================================
-# STEP 1 - DOWNLOAD LAB FILES
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[1/8] Downloading lab files...${RESET_FORMAT}"
-
-if [[ -d "gke-network-policy-demo" ]]; then
-    echo "${BLUE_TEXT}→ Lab directory already exists. Skipping download.${RESET_FORMAT}"
-else
-    gsutil cp -r gs://spls/gsp480/gke-network-policy-demo . \
-        2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-fi
-
-cd gke-network-policy-demo || {
-    echo "${RED_TEXT}✘ Failed to enter lab directory.${RESET_FORMAT}"
-    exit 1
-}
-
+# --- 2. Clone and Prep ---
+echo "${BLUE_TEXT}Cloning lab resources...${RESET_FORMAT}"
+gsutil cp -r gs://spls/gsp480/gke-network-policy-demo .
+cd gke-network-policy-demo
 chmod -R 755 *
 
-echo "${GREEN_TEXT}✔ Lab files ready.${RESET_FORMAT}"
-echo ""
+echo "${YELLOW_TEXT}Enabling APIs and generating Terraform vars...${RESET_FORMAT}"
+# Using 'yes' to bypass the confirmation prompt in 'make setup-project'
+yes | make setup-project
 
-# ==========================================================
-# STEP 2 - SET REGION & ZONE
-# ==========================================================
+# --- 3. Provision Infrastructure ---
+echo "${MAGENTA_TEXT}Running Terraform Apply (this will take several minutes)...${RESET_FORMAT}"
+# Using -auto-approve for non-interactive execution
+cd terraform
+terraform init
+terraform apply -auto-approve
+cd ..
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}[2/8] Setting compute region and zone...${RESET_FORMAT}"
+# --- 4. Bastion Configuration ---
+# Since we are in Cloud Shell, we need to send commands TO the bastion via SSH
+echo "${GREEN_TEXT}Configuring GKE Auth Plugin on Bastion Host...${RESET_FORMAT}"
+gcloud compute ssh gke-demo-bastion --zone "$ZONE" --quiet --command "
+  sudo apt-get update && sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+  echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> ~/.bashrc
+  export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+  gcloud container clusters get-credentials gke-demo-cluster --zone $ZONE
+"
 
-gcloud config set compute/region "$REGION" >/dev/null
-gcloud config set compute/zone "$ZONE" >/dev/null
+# --- 5. Deploy Applications ---
+echo "${BLUE_TEXT}Deploying hello-app manifests...${RESET_FORMAT}"
+gcloud compute ssh gke-demo-bastion --zone "$ZONE" --quiet --command "
+  cd gke-network-policy-demo
+  kubectl apply -f ./manifests/hello-app/
+  echo 'Waiting for pods to be ready...'
+  kubectl wait --for=condition=ready pod -l app=hello --timeout=90s
+"
 
-echo "${GREEN_TEXT}✔ Region and zone configured.${RESET_FORMAT}"
-echo ""
+# --- 6. Apply Network Policy ---
+echo "${YELLOW_TEXT}Applying Restrictive Network Policy...${RESET_FORMAT}"
+gcloud compute ssh gke-demo-bastion --zone "$ZONE" --quiet --command "
+  cd gke-network-policy-demo
+  kubectl apply -f ./manifests/network-policy.yaml
+"
 
-# ==========================================================
-# STEP 3 - SETUP PROJECT
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[3/8] Running project setup...${RESET_FORMAT}"
-
-echo "y" | make setup-project \
-    2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-if [[ ${PIPESTATUS[1]} -ne 0 ]]; then
-    echo "${RED_TEXT}✘ setup-project failed.${RESET_FORMAT}"
-    exit 1
-fi
-
-echo "${GREEN_TEXT}✔ Project setup complete.${RESET_FORMAT}"
-echo ""
-
-echo "${CYAN_TEXT}terraform.tfvars:${RESET_FORMAT}"
-cat terraform/terraform.tfvars
-echo ""
-
-# ==========================================================
-# STEP 4 - TERRAFORM APPLY
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[4/8] Creating GKE infrastructure...${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}This may take several minutes...${RESET_FORMAT}"
-
-echo "yes" | make tf-apply \
-    2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-if [[ ${PIPESTATUS[1]} -ne 0 ]]; then
-    echo "${RED_TEXT}✘ Terraform apply failed.${RESET_FORMAT}"
-    exit 1
-fi
-
-echo "${GREEN_TEXT}✔ Infrastructure deployed successfully.${RESET_FORMAT}"
-echo ""
-
-# ==========================================================
-# STEP 5 - CONFIGURE BASTION + KUBECTL
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[5/8] Configuring bastion host and kubectl...${RESET_FORMAT}"
-
-gcloud compute ssh gke-demo-bastion \
-    --zone="$ZONE" \
-    --command="
-sudo apt-get update -y >/dev/null 2>&1
-
-sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin >/dev/null 2>&1
-
-echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> ~/.bashrc
-
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
-gcloud container clusters get-credentials gke-demo-cluster --zone ${ZONE}
-
-echo 'Bastion setup completed.'
-" 2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-    echo "${RED_TEXT}✘ Bastion setup failed.${RESET_FORMAT}"
-    exit 1
-fi
-
-echo "${GREEN_TEXT}✔ Bastion configured successfully.${RESET_FORMAT}"
-echo ""
-
-# ==========================================================
-# STEP 6 - DEPLOY HELLO APPLICATION
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[6/8] Deploying hello application...${RESET_FORMAT}"
-
-gcloud compute ssh gke-demo-bastion \
-    --zone="$ZONE" \
-    --command="
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
-cd ~/gke-network-policy-demo
-
-kubectl apply -f ./manifests/hello-app/
-
-echo ''
-echo 'Waiting for pods to become ready...'
-
-kubectl wait --for=condition=Ready pods --all --timeout=180s
-
-echo ''
-echo 'Current pods:'
-kubectl get pods
-" 2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-echo "${GREEN_TEXT}✔ hello-server and clients deployed.${RESET_FORMAT}"
-echo ""
-
-# ==========================================================
-# STEP 7 - APPLY NETWORK POLICIES
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[7/8] Applying Network Policies...${RESET_FORMAT}"
-
-gcloud compute ssh gke-demo-bastion \
-    --zone="$ZONE" \
-    --command="
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
-cd ~/gke-network-policy-demo
-
-echo 'Applying pod label network policy...'
-
-kubectl apply -f ./manifests/network-policy.yaml
-
-sleep 10
-
-echo ''
-echo 'Blocked client logs:'
-
-kubectl logs --tail=5 \$(kubectl get pods -oname -l app=not-hello)
-
-echo ''
-echo 'Replacing with namespace-based policy...'
-
-kubectl delete -f ./manifests/network-policy.yaml
-
-kubectl create -f ./manifests/network-policy-namespaced.yaml
-
-echo ''
-echo 'Deploying clients into hello-apps namespace...'
-
-kubectl -n hello-apps apply -f ./manifests/hello-app/hello-client.yaml
-
-echo ''
-echo 'Pods in hello-apps namespace:'
-
-kubectl get pods -n hello-apps
-" 2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-echo "${GREEN_TEXT}✔ Network Policies configured successfully.${RESET_FORMAT}"
-echo ""
-
-# ==========================================================
-# STEP 8 - VALIDATION
-# ==========================================================
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}[8/8] Validating final deployment...${RESET_FORMAT}"
-
-gcloud compute ssh gke-demo-bastion \
-    --zone="$ZONE" \
-    --command="
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
-echo ''
-echo '=== Network Policies ==='
-kubectl get networkpolicy --all-namespaces
-
-echo ''
-echo '=== Pods ==='
-kubectl get pods --all-namespaces
-" 2>&1 | sed "s/^/  ${BLACK_TEXT}/"
-
-echo "${GREEN_TEXT}✔ Validation completed.${RESET_FORMAT}"
-echo ""
-
+# --- 7. Namespace Testing ---
+echo "${MAGENTA_TEXT}Setting up Namespaced Network Policies...${RESET_FORMAT}"
+gcloud compute ssh gke-demo-bastion --zone "$ZONE" --quiet --command "
+  cd gke-network-policy-demo
+  kubectl delete -f ./manifests/network-policy.yaml
+  kubectl create -f ./manifests/network-policy-namespaced.yaml
+  kubectl -n hello-apps apply -f ./manifests/hello-app/hello-client.yaml
+"
 
 # Final message
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
+
