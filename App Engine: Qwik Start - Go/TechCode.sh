@@ -25,6 +25,11 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+echo -e "${YELLOW_TEXT}Enter REGION:${RESET_FORMAT}"
+read REGION
+
+echo -e "${GREEN_TEXT}Selected REGION:${RESET_FORMAT} $REGION"
+
 gcloud config set compute/region $REGION
 gcloud config set project $DEVSHELL_PROJECT_ID
 
