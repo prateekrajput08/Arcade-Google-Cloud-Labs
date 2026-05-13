@@ -96,9 +96,9 @@ echo "${GREEN_TEXT}${BOLD_TEXT}All Assets Created Successfully${RESET_FORMAT}"
 echo
 
 echo "${CYAN_TEXT}${BOLD_TEXT}Complete Task 2 Manually (Aspects)${RESET_FORMAT}"
-read -p "Press Enter when done: "
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Press Enter when done: ${RESET_FORMAT}"
 
-read -p "Enter User 2 email: " USER_2
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter User 2 email: ${RESET_FORMAT}" USER_2
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Applying IAM Policy Binding...${RESET_FORMAT}"
 gcloud dataplex assets add-iam-policy-binding customer-engagements \
