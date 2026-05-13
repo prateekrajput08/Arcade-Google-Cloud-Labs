@@ -1,39 +1,38 @@
-
 #!/bin/bash
+
 # Define color variables
+BLACK_TEXT=$'\033[0;90m'
+RED_TEXT=$'\033[0;91m'
+GREEN_TEXT=$'\033[0;92m'
+YELLOW_TEXT=$'\033[0;93m'
+BLUE_TEXT=$'\033[0;94m'
+MAGENTA_TEXT=$'\033[0;95m'
+CYAN_TEXT=$'\033[0;96m'
+WHITE_TEXT=$'\033[0;97m'
+TEAL=$'\033[38;5;50m'
 
-BLACK=`tput setaf 0`
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-BLUE=`tput setaf 4`
-MAGENTA=`tput setaf 5`
-CYAN=`tput setaf 6`
-WHITE=`tput setaf 7`
+# Define text formatting variables
+BOLD_TEXT=$'\033[1m'
+UNDERLINE_TEXT=$'\033[4m'
+BLINK_TEXT=$'\033[5m'
+NO_COLOR=$'\033[0m'
+RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
 
-BG_BLACK=`tput setab 0`
-BG_RED=`tput setab 1`
-BG_GREEN=`tput setab 2`
-BG_YELLOW=`tput setab 3`
-BG_BLUE=`tput setab 4`
-BG_MAGENTA=`tput setab 5`
-BG_CYAN=`tput setab 6`
-BG_WHITE=`tput setab 7`
-
-BOLD=`tput bold`
-RESET=`tput sgr0`
-clear # Clear the terminal screen
-
+clear
 
 # Welcome message
-echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...  ${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+# Ask user for required inputs
+read -p "${BOLD_TEXT}${YELLOW_TEXT}Enter REGION: ${RESET_FORMAT}" REGION
 
+echo "${BLUE_TEXT}Region: $REGION${RESET_FORMAT}"
 
-echo "${BG_MAGENTA}${BOLD}Starting Execution${RESET}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Starting Execution${RESET_FORMAT}"
 
 gcloud services enable dataplex.googleapis.com
 
@@ -54,16 +53,14 @@ gcloud dataplex assets create customer-online-sessions --location=$REGION \
             --resource-name=projects/$DEVSHELL_PROJECT_ID/buckets/$DEVSHELL_PROJECT_ID-bucket \
             --display-name="Customer Online Sessions"
 
-echo "${CYAN}${BOLD}Click here: "${RESET}""${BLUE}${BOLD}"https://console.cloud.google.com/dataplex/secure?resourceName=projects%2F$DEVSHELL_PROJECT_ID%2Flocations%2F$REGION%2Flakes%2Fcustomer-info-lake&project=$DEVSHELL_PROJECT_ID""${RESET}"
-
+echo "${GREEN_TEXT}${BOLD_TEXT}Click here: "${RESET_FORMAT}""${BLUE}${BOLD_TEXT}"https://console.cloud.google.com/dataplex/secure?resourceName=projects%2F$DEVSHELL_PROJECT_ID%2Flocations%2F$REGION%2Flakes%2Fcustomer-info-lake&project=$DEVSHELL_PROJECT_ID""${RESET_FORMAT}"
 
 # Final message
-
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
-echo "${GREEN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
 echo
