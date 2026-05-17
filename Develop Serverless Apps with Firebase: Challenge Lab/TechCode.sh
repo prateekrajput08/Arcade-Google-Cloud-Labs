@@ -14,9 +14,11 @@ BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 
 clear
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}         INITIATING EXECUTION...       ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================${RESET_FORMAT}"
+
+# Welcome message
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
 gcloud auth list
@@ -26,7 +28,8 @@ gcloud config set project $(gcloud projects list \
   --format='value(PROJECT_ID)' --filter='qwiklabs-gcp')
 
 export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
-export REGION="us-east4"   # Lab spec: "Add location us-east4"
+export REGION=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
 export DATASET_SERVICE=netflix-dataset-service
 export FRONTEND_STAGING_SERVICE=frontend-staging-service
