@@ -23,7 +23,7 @@ echo
 
 gcloud auth list
 
-# ── Project & fixed region (lab requires us-east4) ──────────────────────────
+# ── Project & fixed region ──────────────────────────
 gcloud config set project $(gcloud projects list \
   --format='value(PROJECT_ID)' --filter='qwiklabs-gcp')
 
@@ -50,9 +50,9 @@ gcloud services enable \
 
 # ── Task 1 : Create Firestore database ───────────────────────────────────────
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}[Task 1] Creating Firestore database in us-east4...${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}[Task 1] Creating Firestore database in ${REGION}...${RESET_FORMAT}"
 gcloud firestore databases create \
-  --location=us-east4 \
+  --location=$REGION \
   --project=$DEVSHELL_PROJECT_ID
 sleep 10
 
@@ -63,7 +63,7 @@ git clone https://github.com/rosera/pet-theory.git
 
 cd ~/pet-theory/lab06/firebase-import-csv/solution
 npm install
-node index.js netflix_titles_original.csv
+node index.js ../netflix_titles_original.csv
 
 # ── Create Artifact Registry repository ──────────────────────────────────────
 echo
