@@ -63,7 +63,7 @@ git clone https://github.com/rosera/pet-theory.git
 
 cd ~/pet-theory/lab06/firebase-import-csv/solution
 npm install
-node index.js ../netflix_titles_original.csv
+node index.js netflix_titles_original.csv
 
 # ── Create Artifact Registry repository ──────────────────────────────────────
 echo
