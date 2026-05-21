@@ -1,6 +1,12 @@
 #!/bin/bash
 
-# ---------- COLORS ----------
+# =========================================================
+# GOOGLE CLOUD GKE NETWORK POLICY LAB AUTOMATION
+# Tech & Code
+# =========================================================
+
+# ---------------- COLORS ----------------
+
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
@@ -22,73 +28,95 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE - INITIATING EXECUTION
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# =========================================================
-# AUTO FETCH PROJECT / REGION / ZONE
-# =========================================================
-
-echo "${BLUE_TEXT}Fetching Project Configuration...${RESET_FORMAT}"
-
-PROJECT_ID=$(gcloud config get-value project)
-
-REGION=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items.google-compute-default-region)")
-
-ZONE=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items.google-compute-default-zone)")
-
-# Fallbacks
-[[ -z "$REGION" ]] && REGION="us-east1"
-[[ -z "$ZONE" ]] && ZONE="us-east1-d"
-
-gcloud config set project "$PROJECT_ID"
-
-gcloud config set compute/region "$REGION"
-
-gcloud config set compute/zone "$ZONE"
-
+echo "${BLUE_TEXT}${BOLD_TEXT}Fetching Project Configuration...${RESET_FORMAT}"
 echo
+
+gcloud config set project $(gcloud projects list \
+  --format='value(PROJECT_ID)' --filter='qwiklabs-gcp')
+
+export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
+export REGION=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-region])")
+
+
+gcloud config set project "$PROJECT_ID" >/dev/null 2>&1
+gcloud config set compute/region "$REGION" >/dev/null 2>&1
+gcloud config set compute/zone "$ZONE" >/dev/null 2>&1
+
 echo "${GREEN_TEXT}Project ID : ${PROJECT_ID}${RESET_FORMAT}"
 echo "${GREEN_TEXT}Region     : ${REGION}${RESET_FORMAT}"
 echo "${GREEN_TEXT}Zone       : ${ZONE}${RESET_FORMAT}"
 echo
 
-echo "${BLUE_TEXT}Cloning Lab Resources...${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Downloading Lab Resources...${RESET_FORMAT}"
+echo
 
-gsutil cp -r gs://spls/gsp480/gke-network-policy-demo .
+rm -rf gke-network-policy-demo
 
-cd gke-network-policy-demo || exit
+gsutil cp -r gs://spls/gsp480/gke-network-policy-demo . || exit 1
+
+cd gke-network-policy-demo || exit 1
 
 chmod -R 755 *
 
 echo
-echo "${YELLOW_TEXT}Setting up Project APIs & Terraform Variables...${RESET_FORMAT}"
+echo "${GREEN_TEXT}Lab files downloaded successfully.${RESET_FORMAT}"
+echo
 
-echo "y" | make setup-project
+# =========================================================
+# PROJECT SETUP
+# =========================================================
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Setting Up Project APIs & Terraform Variables...${RESET_FORMAT}"
+echo
+
+yes | make setup-project
 
 echo
-echo "${MAGENTA_TEXT}Provisioning Infrastructure using Terraform...${RESET_FORMAT}"
-echo "${YELLOW_TEXT}This may take several minutes...${RESET_FORMAT}"
+echo "${GREEN_TEXT}Project setup completed.${RESET_FORMAT}"
+echo
 
-make tf-apply <<< "yes"
+# =========================================================
+# TERRAFORM APPLY
+# =========================================================
+
+echo "${MAGENTA_TEXT}${BOLD_TEXT}Provisioning Infrastructure using Terraform...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}This process may take several minutes...${RESET_FORMAT}"
+echo
+
+yes | make tf-apply
+
+if [ $? -ne 0 ]; then
+    echo
+    echo "${RED_TEXT}${BOLD_TEXT}Terraform deployment failed.${RESET_FORMAT}"
+    exit 1
+fi
 
 echo
-echo "${GREEN_TEXT}Infrastructure Provisioned Successfully.${RESET_FORMAT}"
-
+echo "${GREEN_TEXT}${BOLD_TEXT}Infrastructure Provisioned Successfully.${RESET_FORMAT}"
 echo
-echo "${YELLOW_TEXT}Waiting for Infrastructure Stabilization...${RESET_FORMAT}"
 
-sleep 30
+# =========================================================
+# WAIT FOR STABILIZATION
+# =========================================================
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for Infrastructure Stabilization...${RESET_FORMAT}"
 echo
-echo "${GREEN_TEXT}Configuring Bastion Host and Deploying Resources...${RESET_FORMAT}"
+
+sleep 60
+
+# =========================================================
+# SSH INTO BASTION
+# =========================================================
+
+echo "${CYAN_TEXT}${BOLD_TEXT}Connecting to Bastion Host...${RESET_FORMAT}"
+echo
 
 gcloud compute ssh gke-demo-bastion \
 --zone "$ZONE" \
 --quiet << EOF
 
-# ---------------------------------------------------------
-# INSTALL GKE AUTH PLUGIN
-# ---------------------------------------------------------
+echo "Installing GKE Auth Plugin..."
 
 sudo apt-get update -y
 
@@ -96,113 +124,68 @@ sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
 echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> ~/.bashrc
 
+source ~/.bashrc
+
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
-# ---------------------------------------------------------
-# CLONE LAB FILES INSIDE BASTION
-# ---------------------------------------------------------
+echo "Downloading Lab Files Inside Bastion..."
+
+rm -rf gke-network-policy-demo
 
 gsutil cp -r gs://spls/gsp480/gke-network-policy-demo .
 
-cd gke-network-policy-demo
+cd gke-network-policy-demo || exit 1
 
-# ---------------------------------------------------------
-# GET CLUSTER CREDENTIALS
-# ---------------------------------------------------------
+chmod -R 755 *
 
-gcloud container clusters get-credentials gke-demo-cluster --zone $ZONE
+echo "Fetching Cluster Credentials..."
 
-# ---------------------------------------------------------
-# DEPLOY HELLO APPLICATION
-# ---------------------------------------------------------
-
-echo
-echo "Deploying Hello Application..."
+gcloud container clusters get-credentials gke-demo-cluster --zone "$ZONE"
 
 kubectl apply -f ./manifests/hello-app/
 
 echo
 echo "Waiting for Pods to Become Ready..."
+echo
 
-sleep 60
+kubectl wait --for=condition=Ready pod --all --timeout=300s
+
+echo "Current Pods:"
 
 kubectl get pods
 
-# ---------------------------------------------------------
-# IMPORTANT WAIT FOR LAB GRADER
-# ---------------------------------------------------------
-
-echo
-echo "Waiting for Lab Validation..."
-
-sleep 90
-
-# ---------------------------------------------------------
-# APPLY NETWORK POLICY
-# ---------------------------------------------------------
-
-echo
-echo "Applying Network Policy..."
+sleep 180
 
 kubectl apply -f ./manifests/network-policy.yaml
 
-sleep 20
-
-# ---------------------------------------------------------
-# VALIDATE BLOCKED CLIENT
-# ---------------------------------------------------------
-
-echo
-echo "Blocked Client Logs:"
-echo "--------------------------------------------------"
+sleep 30
 
 kubectl logs --tail 10 \$(kubectl get pods -oname -l app=not-hello)
 
-echo "--------------------------------------------------"
-
-# ---------------------------------------------------------
-# REMOVE POLICY
-# ---------------------------------------------------------
-
-echo
-echo "Removing Existing Policy..."
-
 kubectl delete -f ./manifests/network-policy.yaml
-
-# ---------------------------------------------------------
-# APPLY NAMESPACE POLICY
-# ---------------------------------------------------------
-
-echo
-echo "Applying Namespace Policy..."
-
-kubectl create -f ./manifests/network-policy-namespaced.yaml
 
 sleep 15
 
-# ---------------------------------------------------------
-# DEPLOY CLIENTS IN NAMESPACE
-# ---------------------------------------------------------
+kubectl create -f ./manifests/network-policy-namespaced.yaml
 
-echo
-echo "Deploying Clients in Namespace..."
+sleep 20
+
+kubectl logs --tail 10 \$(kubectl get pods -oname -l app=hello)
 
 kubectl -n hello-apps apply \
 -f ./manifests/hello-app/hello-client.yaml
 
-sleep 30
-
-# ---------------------------------------------------------
-# FINAL VALIDATION
-# ---------------------------------------------------------
-
 echo
-echo "Cluster Resources:"
-echo "--------------------------------------------------"
+echo "Waiting for Namespace Pods..."
+echo
+
+kubectl wait --for=condition=Ready pod \
+--all -n hello-apps --timeout=300s
+
+kubectl logs --tail 10 -n hello-apps \
+\$(kubectl get pods -oname -l app=hello -n hello-apps)
 
 kubectl get pods -A
-
-echo "--------------------------------------------------"
 
 EOF
 
