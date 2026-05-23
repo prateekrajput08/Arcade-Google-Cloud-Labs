@@ -82,53 +82,6 @@ terraform apply -auto-approve
 
 cd ..
 
-
-echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for Infrastructure Stabilization...${RESET_FORMAT}"
-echo
-
-sleep 20
-
-echo "${CYAN_TEXT}${BOLD_TEXT}Connecting to Bastion Host...${RESET_FORMAT}"
-echo
-
-export ZONE=$(gcloud config get-value compute/zone)
-
-sudo apt-get update
-
-sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
-
-echo "export USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> ~/.bashrc
-
-source ~/.bashrc
-
-gcloud container clusters get-credentials gke-demo-cluster --zone "$ZONE"
-
-kubectl apply -f ./manifests/hello-app/
-
-kubectl get pods
-
-timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=hello)
-
-timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=not-hello)
-
-kubectl apply -f ./manifests/network-policy.yaml
-
-timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=not-hello)
-
-kubectl delete -f ./manifests/network-policy.yaml
-
-kubectl create -f ./manifests/network-policy-namespaced.yaml
-
-timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=hello)
-
-kubectl -n hello-apps apply -f ./manifests/hello-app/hello-client.yaml
-
-timeout 10 kubectl logs --tail 10 -f -n hello-apps $(kubectl get pods -oname -l app=hello -n hello-apps)
-
-exit
-
-make teardown
-
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
