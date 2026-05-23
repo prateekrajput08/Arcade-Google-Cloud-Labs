@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# =========================================================
-# GOOGLE CLOUD GKE NETWORK POLICY LAB AUTOMATION
-# Tech & Code
-# =========================================================
-
-# ---------------- COLORS ----------------
-
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
@@ -32,16 +25,19 @@ echo "${BLUE_TEXT}${BOLD_TEXT}Fetching Project Configuration...${RESET_FORMAT}"
 echo
 
 gcloud config set project $(gcloud projects list \
-  --format='value(PROJECT_ID)' --filter='qwiklabs-gcp')
+  --format='value(PROJECT_ID)' \
+  --filter='qwiklabs-gcp')
 
-export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
+export PROJECT_ID=$(gcloud config get-value project)
+
 export REGION=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items[google-compute-default-region])")
+  --format="value(commonInstanceMetadata.items[google-compute-default-region])")
 
+export ZONE=$(gcloud compute project-info describe \
+  --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
-gcloud config set project "$PROJECT_ID" >/dev/null 2>&1
-gcloud config set compute/region "$REGION" >/dev/null 2>&1
-gcloud config set compute/zone "$ZONE" >/dev/null 2>&1
+gcloud config set compute/region "$REGION"
+gcloud config set compute/zone "$ZONE"
 
 echo "${GREEN_TEXT}Project ID : ${PROJECT_ID}${RESET_FORMAT}"
 echo "${GREEN_TEXT}Region     : ${REGION}${RESET_FORMAT}"
@@ -51,11 +47,11 @@ echo
 echo "${BLUE_TEXT}${BOLD_TEXT}Downloading Lab Resources...${RESET_FORMAT}"
 echo
 
-rm -rf gke-network-policy-demo
+rm -rf ~/gke-network-policy-demo
 
-gsutil cp -r gs://spls/gsp480/gke-network-policy-demo . || exit 1
+gsutil cp -r gs://spls/gsp480/gke-network-policy-demo ~
 
-cd gke-network-policy-demo || exit 1
+cd ~/gke-network-policy-demo || exit 1
 
 chmod -R 755 *
 
@@ -63,131 +59,75 @@ echo
 echo "${GREEN_TEXT}Lab files downloaded successfully.${RESET_FORMAT}"
 echo
 
-# =========================================================
-# PROJECT SETUP
-# =========================================================
-
 echo "${YELLOW_TEXT}${BOLD_TEXT}Setting Up Project APIs & Terraform Variables...${RESET_FORMAT}"
 echo
 
-yes | make setup-project
+printf "y\n" | make setup-project
+
+sleep 15
 
 echo
 echo "${GREEN_TEXT}Project setup completed.${RESET_FORMAT}"
 echo
 
-# =========================================================
-# TERRAFORM APPLY
-# =========================================================
-
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Provisioning Infrastructure using Terraform...${RESET_FORMAT}"
 echo "${YELLOW_TEXT}This process may take several minutes...${RESET_FORMAT}"
 echo
 
-yes | make tf-apply
+cd terraform || exit 1
 
-if [ $? -ne 0 ]; then
-    echo
-    echo "${RED_TEXT}${BOLD_TEXT}Terraform deployment failed.${RESET_FORMAT}"
-    exit 1
-fi
+terraform init
 
-echo
-echo "${GREEN_TEXT}${BOLD_TEXT}Infrastructure Provisioned Successfully.${RESET_FORMAT}"
-echo
+terraform apply -auto-approve
 
-# =========================================================
-# WAIT FOR STABILIZATION
-# =========================================================
+cd ..
+
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting for Infrastructure Stabilization...${RESET_FORMAT}"
 echo
 
-sleep 60
-
-# =========================================================
-# SSH INTO BASTION
-# =========================================================
+sleep 20
 
 echo "${CYAN_TEXT}${BOLD_TEXT}Connecting to Bastion Host...${RESET_FORMAT}"
 echo
 
-gcloud compute ssh gke-demo-bastion \
---zone "$ZONE" \
---quiet << EOF
+export ZONE=$(gcloud config get-value compute/zone)
 
-echo "Installing GKE Auth Plugin..."
-
-sudo apt-get update -y
+sudo apt-get update
 
 sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
-echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> ~/.bashrc
+echo "export USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> ~/.bashrc
 
 source ~/.bashrc
-
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-
-echo "Downloading Lab Files Inside Bastion..."
-
-rm -rf gke-network-policy-demo
-
-gsutil cp -r gs://spls/gsp480/gke-network-policy-demo .
-
-cd gke-network-policy-demo || exit 1
-
-chmod -R 755 *
-
-echo "Fetching Cluster Credentials..."
 
 gcloud container clusters get-credentials gke-demo-cluster --zone "$ZONE"
 
 kubectl apply -f ./manifests/hello-app/
 
-echo
-echo "Waiting for Pods to Become Ready..."
-echo
-
-kubectl wait --for=condition=Ready pod --all --timeout=300s
-
-echo "Current Pods:"
-
 kubectl get pods
 
-sleep 180
+timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=hello)
+
+timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=not-hello)
 
 kubectl apply -f ./manifests/network-policy.yaml
 
-sleep 30
-
-kubectl logs --tail 10 \$(kubectl get pods -oname -l app=not-hello)
+timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=not-hello)
 
 kubectl delete -f ./manifests/network-policy.yaml
 
-sleep 15
-
 kubectl create -f ./manifests/network-policy-namespaced.yaml
 
-sleep 20
+timeout 10 kubectl logs --tail 10 -f $(kubectl get pods -oname -l app=hello)
 
-kubectl logs --tail 10 \$(kubectl get pods -oname -l app=hello)
+kubectl -n hello-apps apply -f ./manifests/hello-app/hello-client.yaml
 
-kubectl -n hello-apps apply \
--f ./manifests/hello-app/hello-client.yaml
+timeout 10 kubectl logs --tail 10 -f -n hello-apps $(kubectl get pods -oname -l app=hello -n hello-apps)
 
-echo
-echo "Waiting for Namespace Pods..."
-echo
+exit
 
-kubectl wait --for=condition=Ready pod \
---all -n hello-apps --timeout=300s
-
-kubectl logs --tail 10 -n hello-apps \
-\$(kubectl get pods -oname -l app=hello -n hello-apps)
-
-kubectl get pods -A
-
-EOF
+make teardown
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
@@ -198,5 +138,5 @@ echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 
 echo
-echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe ❤️${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe${RESET_FORMAT}"
 echo
