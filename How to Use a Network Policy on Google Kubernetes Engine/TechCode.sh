@@ -140,3 +140,4 @@ echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe${RESET_FORMAT}"
 echo
+rm -f TechCode.sh
