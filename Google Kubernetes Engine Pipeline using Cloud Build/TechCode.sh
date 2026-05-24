@@ -125,6 +125,19 @@ echo "  Service account : ${CYAN_TEXT}Compute Engine default${RESET_FORMAT}"
 echo ""
 read -p "${WHITE_TEXT}Press ENTER when CI trigger is created: ${RESET_FORMAT}"
 
+# ─── CD Trigger (Manual) ──────────────────────────────────────
+echo ""
+echo "${YELLOW_TEXT}Create CD Trigger in Console:${RESET_FORMAT}"
+echo "  Name            : ${CYAN_TEXT}hello-cloudbuild-deploy${RESET_FORMAT}"
+echo "  Region          : ${CYAN_TEXT}${REGION}${RESET_FORMAT}"
+echo "  Event           : ${CYAN_TEXT}Push to a branch${RESET_FORMAT}"
+echo "  Repo            : ${CYAN_TEXT}${GITHUB_USERNAME}/hello-cloudbuild-env${RESET_FORMAT}"
+echo "  Branch          : ${CYAN_TEXT}^candidate\$${RESET_FORMAT}  (type manually)"
+echo "  Config file     : ${CYAN_TEXT}cloudbuild.yaml${RESET_FORMAT}"
+echo "  Service account : ${CYAN_TEXT}Compute Engine default${RESET_FORMAT}"
+echo ""
+read -p "${WHITE_TEXT}Press ENTER when CD trigger is created: ${RESET_FORMAT}"
+
 cd ~/hello-cloudbuild-app
 git commit --allow-empty -m "Trigger CI pipeline"
 git push google master
@@ -267,19 +280,6 @@ git push google production
 git push google candidate
 echo "${GREEN_TEXT}✔ production and candidate branches pushed.${RESET_FORMAT}"
 
-# ─── CD Trigger (Manual) ──────────────────────────────────────
-echo ""
-echo "${YELLOW_TEXT}Create CD Trigger in Console:${RESET_FORMAT}"
-echo "  Name            : ${CYAN_TEXT}hello-cloudbuild-deploy${RESET_FORMAT}"
-echo "  Region          : ${CYAN_TEXT}${REGION}${RESET_FORMAT}"
-echo "  Event           : ${CYAN_TEXT}Push to a branch${RESET_FORMAT}"
-echo "  Repo            : ${CYAN_TEXT}${GITHUB_USERNAME}/hello-cloudbuild-env${RESET_FORMAT}"
-echo "  Branch          : ${CYAN_TEXT}^candidate\$${RESET_FORMAT}  (type manually)"
-echo "  Config file     : ${CYAN_TEXT}cloudbuild.yaml${RESET_FORMAT}"
-echo "  Service account : ${CYAN_TEXT}Compute Engine default${RESET_FORMAT}"
-echo ""
-read -p "${WHITE_TEXT}Press ENTER when CD trigger is created: ${RESET_FORMAT}"
-
 # Add known_hosts to app repo
 cd ~/hello-cloudbuild-app
 ssh-keyscan -t rsa github.com > known_hosts.github
@@ -413,43 +413,6 @@ git diff --cached --stat
 git commit -m "Hello Cloud Build"
 git push google master
 echo "${GREEN_TEXT}✔ Hello Cloud Build pushed — full pipeline triggered.${RESET_FORMAT}"
-
-# ─── TASK 9: Rollback (automated) ────────────────────────────
-echo ""
-echo "${MAGENTA_TEXT}${BOLD_TEXT}[ TASK 9 ] Rollback${RESET_FORMAT}"
-echo "${CYAN_TEXT}→ Waiting 3 min for Hello Cloud Build pipeline to finish...${RESET_FORMAT}"
-sleep 180
-
-echo "${CYAN_TEXT}→ Finding second most recent hello-cloudbuild-env build...${RESET_FORMAT}"
-
-# Get list of builds for env repo, pick second one
-BUILD_IDS=$(gcloud builds list \
-  --filter="source.repoSource.repoName=hello-cloudbuild-env OR substitutions.REPO_NAME=hello-cloudbuild-env OR source.gitSource.url~hello-cloudbuild-env" \
-  --format="value(id)" \
-  --sort-by="~createTime" \
-  --limit=10 2>/dev/null)
-
-# Alternative: list all builds sorted by time and filter by trigger
-BUILD_IDS=$(gcloud builds list \
-  --format="value(id,trigger_id,source)" \
-  --sort-by="~createTime" \
-  --limit=50 2>/dev/null | grep -i "cloudbuild-env\|deploy" | head -5 | awk '{print $1}')
-
-if [[ -z "$BUILD_IDS" ]]; then
-  echo "${YELLOW_TEXT}Auto-rollback lookup failed. Do it manually:${RESET_FORMAT}"
-  echo "  1. Cloud Build > Build History"
-  echo "  2. Filter: Trigger = hello-cloudbuild-deploy"
-  echo "  3. Click 2nd most recent build > Rebuild"
-else
-  SECOND_BUILD=$(echo "$BUILD_IDS" | sed -n '2p')
-  if [[ -z "$SECOND_BUILD" ]]; then
-    echo "${YELLOW_TEXT}Only one build found. Rollback manually via Console.${RESET_FORMAT}"
-  else
-    echo "${CYAN_TEXT}→ Rebuilding ${SECOND_BUILD} for rollback...${RESET_FORMAT}"
-    gcloud builds retry ${SECOND_BUILD}
-    echo "${GREEN_TEXT}✔ Rollback triggered.${RESET_FORMAT}"
-  fi
-fi
 
 
 # Final message
