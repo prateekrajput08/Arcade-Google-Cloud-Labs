@@ -31,7 +31,7 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 # Step 0: Assigning variables
-echo "${BOLD_TEXT}${BLUE}Assigning variables${RESET_FORMAT}"
+echo "${BOLD_TEXT}${BLUE_TEXT}Assigning variables${RESET_FORMAT}"
 export PROJECT_ID=$(gcloud config get-value project)
 export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
@@ -41,18 +41,18 @@ export CLUSTER=hello-cluster
 export REPO=my-repository
 
 # Step 1: Navigate to the sample-app directory
-echo "${BOLD_TEXT}${BLUE}Navigate to sample-app Directory${RESET_FORMAT}"
+echo "${BOLD_TEXT}${BLUE_TEXT}Navigate to sample-app Directory${RESET_FORMAT}"
 cd sample-app
 
 # Step 2: Build and push Docker image using Cloud Build
-echo "${BOLD_TEXT}${YELLOW}Build and Push Docker Image${RESET_FORMAT}"
+echo "${BOLD_TEXT}${YELLOW_TEXT}Build and Push Docker Image${RESET_FORMAT}"
 COMMIT_ID="$(git rev-parse --short=7 HEAD)"
 gcloud builds submit --tag="${REGION}-docker.pkg.dev/${PROJECT_ID}/$REPO/hello-cloudbuild:${COMMIT_ID}" .
 
 EXPORTED_IMAGE="$(gcloud builds submit --tag="${REGION}-docker.pkg.dev/${PROJECT_ID}/$REPO/hello-cloudbuild:${COMMIT_ID}" . | grep IMAGES | awk '{print $2}')"
 
 # Step 3: Switch to the 'dev' branch and update Cloud Build configuration
-echo "${BOLD_TEXT}${CYAN}Switch to 'dev' Branch and Update Configuration${RESET_FORMAT}"
+echo "${BOLD_TEXT}${CYAN_TEXT}Switch to 'dev' Branch and Update Configuration${RESET_FORMAT}"
 git checkout dev
 
 sed -i "9c\    args: ['build', '-t', '$REGION-docker.pkg.dev/$PROJECT_ID/my-repository/hello-cloudbuild-dev:v1.0', '.']" cloudbuild-dev.yaml
@@ -68,7 +68,7 @@ git push -u origin dev
 sleep 120
 
 # Step 4: Switch to the 'master' branch and expose development deployment
-echo "${BOLD_TEXT}${MAGENTA}Switch to 'master' Branch and Expose Development Deployment${RESET_FORMAT}"
+echo "${BOLD_TEXT}${MAGENTA_TEXT}Switch to 'master' Branch and Expose Development Deployment${RESET_FORMAT}"
 git checkout master
 
 kubectl expose deployment development-deployment -n dev --name=dev-deployment-service --type=LoadBalancer --port 8080 --target-port 8080
@@ -86,11 +86,11 @@ git push -u origin master
 sleep 80
 
 # Step 5: Expose the production deployment
-echo "${BOLD_TEXT}${BLUE}Expose Production Deployment${RESET_FORMAT}"
+echo "${BOLD_TEXT}${BLUE_TEXT}Expose Production Deployment${RESET_FORMAT}"
 kubectl expose deployment production-deployment -n prod --name=prod-deployment-service --type=LoadBalancer --port 8080 --target-port 8080
 
 # Step 6: Modify the dev branch for version 2.0 updates
-echo "${BOLD_TEXT}${YELLOW}Modify Dev Branch for v2.0${RESET_FORMAT}"
+echo "${BOLD_TEXT}${YELLOW_TEXT}Modify Dev Branch for v2.0${RESET_FORMAT}"
 git checkout dev
 
 sed -i '28a\	http.HandleFunc("/red", redHandler)' main.go
@@ -116,7 +116,7 @@ git push -u origin dev
 sleep 10
 
 # Step 7: Modify the master branch for version 2.0 updates
-echo "${BOLD_TEXT}${MAGENTA}Modify Master Branch for v2.0${RESET_FORMAT}"
+echo "${BOLD_TEXT}${MAGENTA_TEXT}Modify Master Branch for v2.0${RESET_FORMAT}"
 git checkout master
 
 sed -i '28a\	http.HandleFunc("/red", redHandler)' main.go
@@ -143,7 +143,7 @@ git push -u origin master
 sleep 70
 
 # Step 8: Rollback deployment and validate
-echo "${BOLD_TEXT}${GREEN}Rollback and Validate Deployment${RESET_FORMAT}"
+echo "${BOLD_TEXT}${GREEN_TEXT}Rollback and Validate Deployment${RESET_FORMAT}"
 kubectl -n prod rollout undo deployment/production-deployment
 
 kubectl -n prod get pods -o jsonpath --template='{range .items[*]}{.metadata.name}{"\t"}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
