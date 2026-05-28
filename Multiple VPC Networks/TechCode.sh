@@ -36,7 +36,7 @@ read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_2: ${RESET_FORMAT}" REGION_2
 
 REGION="${ZONE%-*}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Starting lab execution..."
+echo "${YELLOW_TEXT}${BOLD_TEXT}Starting lab execution...${RESET_FORMAT}"
 
 gcloud compute networks create managementnet --subnet-mode=custom
 
@@ -88,7 +88,7 @@ gcloud compute instances create vm-appliance \
 --machine-type=e2-standard-4 \
 --network-interface=subnet=privatesubnet-1 \
 --network-interface=subnet=managementsubnet-1 \
---network-interface=subnet=mynetwork-us
+--network-interface=subnet=mynetwork
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
