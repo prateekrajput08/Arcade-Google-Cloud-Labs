@@ -31,44 +31,64 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter ZONE: ${RESET_FORMAT}" ZONE
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_2: ${RESET_FORMAT}" REGION_2
 
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter the ZONE: ${RESET_FORMAT}" ZONE
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter the REGION_2: ${RESET_FORMAT}" REGION_2
+REGION="${ZONE%-*}"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Starting${RESET_FORMAT}" "${GREEN_TEXT}${BOLD_TEXT}Progress...${RESET_FORMAT}"
-
-export ZONE REGION_2
-
-export REGION="${ZONE%-*}"
-
-export PROJECT_ID=$(gcloud config get-value project)
+echo "${YELLOW_TEXT}${BOLD_TEXT}Starting lab execution..."
 
 gcloud compute networks create managementnet --subnet-mode=custom
 
-gcloud compute networks subnets create managementsubnet-1 --network=managementnet --region=$REGION --range=10.130.0.0/20
+gcloud compute networks subnets create managementsubnet-1 \
+--network=managementnet \
+--region=$REGION \
+--range=10.130.0.0/20
 
 gcloud compute networks create privatenet --subnet-mode=custom
 
-gcloud compute networks subnets create privatesubnet-1 --network=privatenet --region=$REGION --range=172.16.0.0/24
+gcloud compute networks subnets create privatesubnet-1 \
+--network=privatenet \
+--region=$REGION \
+--range=172.16.0.0/24
 
-gcloud compute networks subnets create privatesubnet-2 --network=privatenet --region=$REGION_2 --range=172.20.0.0/20
+gcloud compute networks subnets create privatesubnet-2 \
+--network=privatenet \
+--region=$REGION_2 \
+--range=172.20.0.0/20
 
-gcloud compute networks list
+gcloud compute firewall-rules create managementnet-allow-icmp-ssh-rdp \
+--direction=INGRESS \
+--priority=1000 \
+--network=managementnet \
+--action=ALLOW \
+--rules=icmp,tcp:22,tcp:3389 \
+--source-ranges=0.0.0.0/0
 
-gcloud compute networks subnets list --sort-by=NETWORK
+gcloud compute firewall-rules create privatenet-allow-icmp-ssh-rdp \
+--direction=INGRESS \
+--priority=1000 \
+--network=privatenet \
+--action=ALLOW \
+--rules=icmp,tcp:22,tcp:3389 \
+--source-ranges=0.0.0.0/0
 
-gcloud compute firewall-rules create managementnet-allow-icmp-ssh-rdp --direction=INGRESS --priority=1000 --network=managementnet --action=ALLOW --rules=icmp,tcp:22,tcp:3389 --source-ranges=0.0.0.0/0
+gcloud compute instances create managementnet-vm-1 \
+--zone=$ZONE \
+--machine-type=e2-micro \
+--subnet=managementsubnet-1
 
-gcloud compute firewall-rules create privatenet-allow-icmp-ssh-rdp --direction=INGRESS --priority=1000 --network=privatenet --action=ALLOW --rules=icmp,tcp:22,tcp:3389 --source-ranges=0.0.0.0/0
+gcloud compute instances create privatenet-vm-1 \
+--zone=$ZONE \
+--machine-type=e2-micro \
+--subnet=privatesubnet-1
 
-gcloud compute firewall-rules list --sort-by=NETWORK
-
-gcloud compute instances create managementnet-vm-1 --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-micro --subnet=managementsubnet-1
-
-gcloud compute instances create privatenet-vm-1 --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-micro --subnet=privatesubnet-1
-
-gcloud compute instances create vm-appliance --project=$DEVSHELL_PROJECT_ID --zone=$ZONE --machine-type=e2-standard-4 --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=privatesubnet-1 --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=managementsubnet-1 --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=mynetwork
-
+gcloud compute instances create vm-appliance \
+--zone=$ZONE \
+--machine-type=e2-standard-4 \
+--network-interface=subnet=privatesubnet-1 \
+--network-interface=subnet=managementsubnet-1 \
+--network-interface=subnet=mynetwork-us
 
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
