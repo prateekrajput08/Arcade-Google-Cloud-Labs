@@ -27,6 +27,8 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+export PROJECT_ID=$(gcloud config get-value project)
+
 echo "${YELLOW_TEXT}${BOLD_TEXT}Verifying your authenticated Google Cloud accounts...${RESET_FORMAT}"
 gcloud auth list
 
@@ -54,7 +56,11 @@ cd ~/monolith-to-microservices/monolith
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating a new Artifact Registry Docker repository named 'monolith-demo'...${RESET_FORMAT}"
 echo "${YELLOW_TEXT}${BOLD_TEXT}   This will be located in region: ${WHITE_TEXT}${REGION}${RESET_FORMAT}"
-gcloud artifacts repositories create monolith-demo --location=$REGION --repository-format=docker --description="Subscribe to techcps" 
+gcloud artifacts repositories describe monolith-demo --location=$REGION >/dev/null 2>&1 || \
+gcloud artifacts repositories create monolith-demo \
+--location=$REGION \
+--repository-format=docker \
+--description="Subscribe to techcode9"
 
 echo
 echo "${GREEN_TEXT}${BOLD_TEXT}Configuring Docker to authenticate with Artifact Registry in region: ${WHITE_TEXT}${REGION}${RESET_FORMAT}"
@@ -68,21 +74,21 @@ gcloud services enable artifactregistry.googleapis.com \
 
 echo
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Building the first version (1.0.0) of the monolith Docker image using Cloud Build...${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}   Image will be tagged as: ${WHITE_TEXT}$REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:1.0.0${RESET_FORMAT}"
-gcloud builds submit --tag $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:1.0.0
+echo "${MAGENTA_TEXT}${BOLD_TEXT}   Image will be tagged as: ${WHITE_TEXT}$REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:1.0.0${RESET_FORMAT}"
+gcloud builds submit --tag $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:1.0.0
 
 echo
 echo "${PINK_TEXT}${BOLD_TEXT}Deploying the monolith application (version 1.0.0) to Cloud Run...${RESET_FORMAT}"
 echo "${PINK_TEXT}${BOLD_TEXT}   Service name: monolith, Region: ${WHITE_TEXT}${REGION}${PINK_TEXT}, Allow unauthenticated access.${RESET_FORMAT}"
-gcloud run deploy monolith --image $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION
+gcloud run deploy monolith --image $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION
 
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}Updating the Cloud Run service 'monolith' to set concurrency to 1...${RESET_FORMAT}"
-gcloud run deploy monolith --image $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION --concurrency 1
+gcloud run deploy monolith --image $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION --concurrency 1
 
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}Updating the Cloud Run service 'monolith' to set concurrency to 80...${RESET_FORMAT}"
-gcloud run deploy monolith --image $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION --concurrency 80
+gcloud run deploy monolith --image $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:1.0.0 --allow-unauthenticated --region $REGION --concurrency 80
 
 echo
 echo "${BLUE_TEXT}${BOLD_TEXT}Navigating to the React app's 'Home' page source directory...${RESET_FORMAT}"
@@ -110,13 +116,13 @@ cd ~/monolith-to-microservices/monolith
 
 echo
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Building the second version (2.0.0) of the monolith Docker image with updated frontend...${RESET_FORMAT}"
-echo "${MAGENTA_TEXT}${BOLD_TEXT}   Image will be tagged as: ${WHITE_TEXT}$REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:2.0.0${RESET_FORMAT}"
-gcloud builds submit --tag $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:2.0.0
+echo "${MAGENTA_TEXT}${BOLD_TEXT}   Image will be tagged as: ${WHITE_TEXT}$REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:2.0.0${RESET_FORMAT}"
+gcloud builds submit --tag $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:2.0.0
 
 echo
 echo "${PINK_TEXT}${BOLD_TEXT}Deploying the updated monolith application (version 2.0.0) to Cloud Run...${RESET_FORMAT}"
 echo "${PINK_TEXT}${BOLD_TEXT}   Service name: monolith, Region: ${WHITE_TEXT}${REGION}${PINK_TEXT}, Allow unauthenticated access.${RESET_FORMAT}"
-gcloud run deploy monolith --image $REGION-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/monolith-demo/monolith:2.0.0 --allow-unauthenticated --region $REGION
+gcloud run deploy monolith --image $REGION-docker.pkg.dev/${PROJECT_ID}/monolith-demo/monolith:2.0.0 --allow-unauthenticated --region $REGION
 
 # Final message
 echo
