@@ -50,16 +50,13 @@ echo "${BLUE_TEXT}${BOLD_TEXT}Region     : ${WHITE_TEXT}${REGION}${RESET_FORMAT}
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Dataplex Lake...${RESET_FORMAT}"
-
 gcloud dataplex lakes create sales-lake \
   --location=$REGION \
   --display-name="Sales Lake"
-
 echo "${GREEN_TEXT}${BOLD_TEXT}Lake Created Successfully${RESET_FORMAT}"
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Raw Customer Zone...${RESET_FORMAT}"
-
 gcloud dataplex zones create raw-customer-zone \
   --lake=sales-lake \
   --location=$REGION \
@@ -68,7 +65,6 @@ gcloud dataplex zones create raw-customer-zone \
   --resource-location-type=SINGLE_REGION \
   --discovery-enabled \
   --discovery-schedule="0 * * * *"
-
 echo "${GREEN_TEXT}${BOLD_TEXT}Raw Zone Created${RESET_FORMAT}"
 echo
 
@@ -113,6 +109,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo "${CYAN_TEXT}${BOLD_TEXT}              COMPLETE TASK 2 MANUALLY                           ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
+
+echo "${YELLOW_TEXT}Open Knowledge Catlog:${RESET_FORMAT} https://console.cloud.google.com/dataplex?project=$(gcloud config get-value project)"
+echo
 echo "${YELLOW_TEXT}Aspect Type Name:${RESET_FORMAT} Protected Customer Data Aspect"
 echo
 echo "${YELLOW_TEXT}Field 1:${RESET_FORMAT} Raw Data Flag"
@@ -124,14 +123,14 @@ echo
 echo "${YELLOW_TEXT}Attach Aspect To:${RESET_FORMAT} Raw Customer Zone"
 echo
 echo "${YELLOW_TEXT}Set Values:${RESET_FORMAT}"
-echo "Raw Data Flag = Yes"
-echo "Protected Contact Information Flag = Yes"
+echo "${YELLOW_TEXT}Raw Data Flag =${RESET_FORMAT} Yes"
+echo "${YELLOW_TEXT}Protected Contact Information Flag${RESET_FORMAT} = Yes"
 echo
 
-read -p "Press Enter after completing Task 2..."
+read -p "${GREEN_TEXT}Press Enter after completing Task 2...${RESET_FORMAT}"
 
 echo
-read -p "Enter User 2 Email: " USER_2
+read -p "${YELLOW_TEXT}Enter User 2 Email:${RESET_FORMAT} " USER_2
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Applying IAM Policy Binding...${RESET_FORMAT}"
 
