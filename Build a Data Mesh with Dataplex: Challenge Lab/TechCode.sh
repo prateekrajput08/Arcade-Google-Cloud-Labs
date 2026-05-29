@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================
-# Color Variables (Unchanged)
+# Color Variables
 # ===============================
 BLACK_TEXT=$'\033[0;90m'
 RED_TEXT=$'\033[0;91m'
@@ -11,14 +11,10 @@ BLUE_TEXT=$'\033[0;94m'
 MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
 WHITE_TEXT=$'\033[0;97m'
-TEAL=$'\033[38;5;50m'
 
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
-BLINK_TEXT=$'\033[5m'
-NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
-REVERSE_TEXT=$'\033[7m'
 
 clear
 
@@ -27,28 +23,43 @@ echo "${CYAN_TEXT}${BOLD_TEXT}        SUBSCRIBE TECH & CODE - INITIATING EXECUTI
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Enabling Required GCP Services...${RESET_FORMAT}"
-gcloud services enable dataplex.googleapis.com datacatalog.googleapis.com dataproc.googleapis.com
-echo "${GREEN_TEXT}${BOLD_TEXT}Services Enabled Successfully${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enabling Required APIs...${RESET_FORMAT}"
+
+gcloud services enable \
+dataplex.googleapis.com \
+datacatalog.googleapis.com \
+dataproc.googleapis.com
+
+echo "${GREEN_TEXT}${BOLD_TEXT}APIs Enabled Successfully${RESET_FORMAT}"
 echo
 
 export PROJECT_ID=$(gcloud config get-value project)
-export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-export REGION=$(echo "$ZONE" | cut -d '-' -f 1-2)
 
-echo "${BLUE_TEXT}${BOLD_TEXT}Project ID: ${WHITE_TEXT}$PROJECT_ID${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}Zone: ${WHITE_TEXT}$ZONE${RESET_FORMAT}"
-echo "${BLUE_TEXT}${BOLD_TEXT}Region: ${WHITE_TEXT}$REGION${RESET_FORMAT}"
+ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
+
+if [[ -z "$ZONE" ]]; then
+  ZONE=$(gcloud compute project-info describe \
+  --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+fi
+
+REGION=$(echo "$ZONE" | cut -d'-' -f1-2)
+
+echo "${BLUE_TEXT}${BOLD_TEXT}Project ID : ${WHITE_TEXT}${PROJECT_ID}${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Zone       : ${WHITE_TEXT}${ZONE}${RESET_FORMAT}"
+echo "${BLUE_TEXT}${BOLD_TEXT}Region     : ${WHITE_TEXT}${REGION}${RESET_FORMAT}"
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Dataplex Lake...${RESET_FORMAT}"
+
 gcloud dataplex lakes create sales-lake \
   --location=$REGION \
   --display-name="Sales Lake"
-echo "${GREEN_TEXT}${BOLD_TEXT}Dataplex Lake Created${RESET_FORMAT}"
+
+echo "${GREEN_TEXT}${BOLD_TEXT}Lake Created Successfully${RESET_FORMAT}"
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Raw Customer Zone...${RESET_FORMAT}"
+
 gcloud dataplex zones create raw-customer-zone \
   --lake=sales-lake \
   --location=$REGION \
@@ -57,10 +68,12 @@ gcloud dataplex zones create raw-customer-zone \
   --resource-location-type=SINGLE_REGION \
   --discovery-enabled \
   --discovery-schedule="0 * * * *"
+
 echo "${GREEN_TEXT}${BOLD_TEXT}Raw Zone Created${RESET_FORMAT}"
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Curated Customer Zone...${RESET_FORMAT}"
+
 gcloud dataplex zones create curated-customer-zone \
   --lake=sales-lake \
   --location=$REGION \
@@ -69,6 +82,7 @@ gcloud dataplex zones create curated-customer-zone \
   --resource-location-type=SINGLE_REGION \
   --discovery-enabled \
   --discovery-schedule="0 * * * *"
+
 echo "${GREEN_TEXT}${BOLD_TEXT}Curated Zone Created${RESET_FORMAT}"
 echo
 
@@ -92,25 +106,47 @@ gcloud dataplex assets create customer-orders \
   --resource-name=projects/$PROJECT_ID/datasets/customer_orders \
   --discovery-enabled
 
-echo "${GREEN_TEXT}${BOLD_TEXT}All Assets Created Successfully${RESET_FORMAT}"
+echo "${GREEN_TEXT}${BOLD_TEXT}Assets Created Successfully${RESET_FORMAT}"
 echo
 
-echo "${CYAN_TEXT}${BOLD_TEXT}Complete Task 2 Manually (Aspects)${RESET_FORMAT}"
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Press Enter when done: ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}              COMPLETE TASK 2 MANUALLY                           ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo
+echo "${YELLOW_TEXT}Aspect Type Name:${RESET_FORMAT} Protected Customer Data Aspect"
+echo
+echo "${YELLOW_TEXT}Field 1:${RESET_FORMAT} Raw Data Flag"
+echo "${YELLOW_TEXT}Values:${RESET_FORMAT} Yes, No"
+echo
+echo "${YELLOW_TEXT}Field 2:${RESET_FORMAT} Protected Contact Information Flag"
+echo "${YELLOW_TEXT}Values:${RESET_FORMAT} Yes, No"
+echo
+echo "${YELLOW_TEXT}Attach Aspect To:${RESET_FORMAT} Raw Customer Zone"
+echo
+echo "${YELLOW_TEXT}Set Values:${RESET_FORMAT}"
+echo "Raw Data Flag = Yes"
+echo "Protected Contact Information Flag = Yes"
+echo
 
-read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter User 2 email: ${RESET_FORMAT}" USER_2
+read -p "Press Enter after completing Task 2..."
+
+echo
+read -p "Enter User 2 Email: " USER_2
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Applying IAM Policy Binding...${RESET_FORMAT}"
+
 gcloud dataplex assets add-iam-policy-binding customer-engagements \
   --lake=sales-lake \
   --zone=raw-customer-zone \
   --location=$REGION \
   --member=user:$USER_2 \
   --role=roles/dataplex.dataWriter
+
 echo "${GREEN_TEXT}${BOLD_TEXT}IAM Permission Applied${RESET_FORMAT}"
 echo
 
 echo "${BLUE_TEXT}${BOLD_TEXT}Creating Data Quality YAML File...${RESET_FORMAT}"
+
 cat > dq-customer-orders.yaml <<EOF
 rules:
 - nonNullExpectation: {}
@@ -129,21 +165,32 @@ postScanActions:
 EOF
 
 gsutil cp dq-customer-orders.yaml gs://$PROJECT_ID-dq-config/
-echo "${GREEN_TEXT}${BOLD_TEXT}YAML Uploaded to GCS${RESET_FORMAT}"
+
+echo "${GREEN_TEXT}${BOLD_TEXT}YAML Uploaded Successfully${RESET_FORMAT}"
 echo
 
 echo "${MAGENTA_TEXT}${BOLD_TEXT}Creating Data Quality Scan...${RESET_FORMAT}"
-gcloud dataplex datascans create data-quality customer-orders-data-quality-job \
-    --project=$PROJECT_ID \
-    --location=$REGION \
-    --data-source-resource="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items" \
-    --data-quality-spec-file="gs://$PROJECT_ID-dq-config/dq-customer-orders.yaml"
+
+gcloud dataplex datascans create data-quality \
+customer-orders-data-quality-job \
+--project=$PROJECT_ID \
+--location=$REGION \
+--data-source-resource="//bigquery.googleapis.com/projects/$PROJECT_ID/datasets/customer_orders/tables/ordered_items" \
+--data-quality-spec-file="gs://$PROJECT_ID-dq-config/dq-customer-orders.yaml"
+
+echo "${GREEN_TEXT}${BOLD_TEXT}Data Quality Scan Created${RESET_FORMAT}"
+echo
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Running Data Quality Scan...${RESET_FORMAT}"
+
+gcloud dataplex datascans run \
+customer-orders-data-quality-job \
+--location=$REGION
 
 echo
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}        ALL TASKS COMPLETED — LAB READY TO SUBMIT       ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}         ALL AUTOMATED TASKS COMPLETED SUCCESSFULLY              ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
-
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share & Subscribe!${RESET_FORMAT}"
