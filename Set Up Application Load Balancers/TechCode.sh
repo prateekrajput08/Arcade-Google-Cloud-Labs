@@ -27,16 +27,20 @@ echo
 
 gcloud auth list
 
-export ZONE=$(gcloud compute project-info describe \
-  --format="value(commonInstanceMetadata.items[google-compute-default-ZONE])")
-echo "Default ZONE: $ZONE"
-export REGION=$(echo $ZONE | sed 's/-[a-z]$//')
+export ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
 
-gcloud config set compute/ZONE $ZONE
-gcloud config set compute/REGION $REGION
+if [[ -z "$ZONE" ]]; then
+  echo "Zone not configured. Set it first."
+  exit 1
+fi
+
+export REGION=${ZONE%-*}
+
+gcloud config set compute/zone $ZONE
+gcloud config set compute/region $REGION
 
   gcloud compute instances create www1 \
-    --ZONE=$ZONE \
+    --zone=$ZONE \
     --tags=network-lb-tag \
     --machine-type=e2-small \
     --image-family=debian-11 \
@@ -49,7 +53,7 @@ gcloud config set compute/REGION $REGION
 <h3>Web Server: www1</h3>" | tee /var/www/html/index.html'
 
   gcloud compute instances create www2 \
-    --ZONE=$ZONE \
+    --zone=$ZONE \
     --tags=network-lb-tag \
     --machine-type=e2-small \
     --image-family=debian-11 \
@@ -62,7 +66,7 @@ gcloud config set compute/REGION $REGION
 <h3>Web Server: www2</h3>" | tee /var/www/html/index.html'
 
   gcloud compute instances create www3 \
-    --ZONE=$ZONE  \
+    --zone=$ZONE  \
     --tags=network-lb-tag \
     --machine-type=e2-small \
     --image-family=debian-11 \
@@ -80,7 +84,7 @@ gcloud compute firewall-rules create www-firewall-network-lb \
     gcloud compute instances list
 
     gcloud compute instance-templates create lb-backend-template \
-   --REGION=$REGION \
+   --region=$REGION \
    --network=default \
    --subnet=default \
    --tags=allow-health-check \
@@ -100,7 +104,10 @@ gcloud compute firewall-rules create www-firewall-network-lb \
 
 
      gcloud compute instance-groups managed create lb-backend-group \
-   --template=lb-backend-template --size=2 --ZONE=$ZONE
+   --template=lb-backend-template --size=2 --zone=$ZONE
+
+   echo "Waiting for managed instances to start..."
+sleep 60
 
    gcloud compute firewall-rules create fw-allow-health-check \
   --network=default \
@@ -131,7 +138,7 @@ gcloud compute firewall-rules create www-firewall-network-lb \
 
   gcloud compute backend-services add-backend web-backend-service \
   --instance-group=lb-backend-group \
-  --instance-group-ZONE=$ZONE \
+  --instance-group-zone=$ZONE \
   --global
 
   gcloud compute url-maps create web-map-http \
