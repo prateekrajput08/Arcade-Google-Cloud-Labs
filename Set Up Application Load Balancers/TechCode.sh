@@ -27,13 +27,7 @@ echo
 
 gcloud auth list
 
-export ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
-
-if [[ -z "$ZONE" ]]; then
-  echo "Zone not configured. Set it first."
-  exit 1
-fi
-
+read -p "Enter Zone: " ZONE
 export REGION=${ZONE%-*}
 
 gcloud config set compute/zone $ZONE
