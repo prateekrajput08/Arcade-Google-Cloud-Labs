@@ -15,32 +15,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-#!/bin/bash
-# ============================================================
-# Script  : TechCode9.sh
-# Channel : TechCode9 (https://youtube.com/@TechCode9)
-# Lab     : GSP636 — Regional Internal Proxy Network Load Balancer
-# Author  : TechCode9
-# Desc    : Automates full GSP636 lab setup on Google Cloud.
-#           Subscribe TechCode9 for more GCP lab solutions!
-# ============================================================
-
-BLACK_TEXT=$'\033[0;90m'
-RED_TEXT=$'\033[0;91m'
-GREEN_TEXT=$'\033[0;92m'
-YELLOW_TEXT=$'\033[0;93m'
-CYAN_TEXT=$'\033[0;96m'
-WHITE_TEXT=$'\033[0;97m'
-BOLD_TEXT=$'\033[1m'
-RESET_FORMAT=$'\033[0m'
-clear
-
-# Welcome message
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo
-
 # ─── AUTO-FETCH REGION ───────────────────────────────────────────────
 # TechCode9: auto-detect region so no manual input needed
 echo "${YELLOW_TEXT}${BOLD_TEXT}[INFO] Fetching project region... | TechCode9${RESET_FORMAT}"
@@ -218,6 +192,7 @@ gcloud compute addresses create int-tcp-ip-address \
 
 # Health check
 gcloud compute health-checks create tcp tcp-health-check \
+--region=$REGION \
     --port=80
 
 # Backend service
@@ -249,16 +224,22 @@ gcloud compute target-tcp-proxies create my-int-tcp-lb-proxy \
     --backend-service=my-int-tcp-lb \
     --backend-service-region=$REGION
 
-# Create forwarding rule
-gcloud compute forwarding-rules create int-tcp-forwarding-rule \
-    --load-balancing-scheme=INTERNAL_MANAGED \
-    --network=lb-network \
-    --subnet=backend-subnet \
-    --address=int-tcp-ip-address \
-    --region=$REGION \
-    --ports=110 \
-    --target-tcp-proxy=my-int-tcp-lb-proxy \
-    --target-tcp-proxy-region=$REGION
+echo ""
+echo "${YELLOW_TEXT}Frontend Configuration Required${RESET_FORMAT}"
+echo "================================"
+echo "Name           : int-tcp-forwarding-rule"
+echo "Subnetwork     : backend-subnet"
+echo "IP Address     : int-tcp-ip-address"
+echo "Port           : 110"
+echo "Proxy Protocol : Off"
+echo ""
+echo "Open Load Balancer:"
+echo "https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers?project=${PROJECT_ID}"
+echo ""
+echo "Open: my-int-tcp-lb"
+echo "Click: Add Frontend IP and port"
+read -p "${YELLOW_TEXT}Press Enter to continue...${RESET_FORMAT}"
+
 
 # ─── TASK 5: CLIENT VM ───────────────────────────────────────────────
 # TechCode9: client VM must be inside lb-network to reach internal LB VIP
@@ -296,22 +277,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}============================================${RESE
 echo "${GREEN_TEXT}${BOLD_TEXT}         LAB SETUP COMPLETE!               ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}============================================${RESET_FORMAT}"
 echo ""
-PROJECT_ID=$(gcloud config get-value project)
-
-echo ""
-echo "Frontend Configuration Required"
-echo "================================"
-echo "Name           : int-tcp-forwarding-rule"
-echo "Subnetwork     : backend-subnet"
-echo "IP Address     : int-tcp-ip-address"
-echo "Port           : 110"
-echo "Proxy Protocol : Off"
-echo ""
-echo "Open Load Balancer:"
-echo "https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers?project=${PROJECT_ID}"
-echo ""
-echo "Open: my-int-tcp-lb"
-echo "Click: Add Frontend IP and port"
 
 # ─── SELF CLEANUP ────────────────────────────────────────────────────
 # TechCode9: remove this script from terminal after execution
