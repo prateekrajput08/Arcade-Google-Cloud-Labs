@@ -36,9 +36,7 @@ fi
 echo -e "${GREEN_TEXT}Using ILB IP : ${YELLOW_TEXT}$ILB_IP${RESET_FORMAT}"
 echo
 
-ZONE=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-
+ZONE=$(gcloud compute project-info describe ...)
 REGION=$(echo "$ZONE" | sed 's/-[a-z]$//')
 
 ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
