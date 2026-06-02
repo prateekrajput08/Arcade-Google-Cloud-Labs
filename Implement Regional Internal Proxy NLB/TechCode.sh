@@ -210,93 +210,55 @@ echo "${GREEN_TEXT}  ✔ mig-c created (zone: ${ZONE_C})${RESET_FORMAT}"
 echo ""
 
 # ─── TASK 4: LOAD BALANCER ───────────────────────────────────────────
-# TechCode9: reserve internal VIP, build health check → backend service → proxy → forwarding rule
-echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 4] Reserving internal IP address... | TechCode9${RESET_FORMAT}"
-
-# TechCode9: SHARED_LOADBALANCER_VIP purpose required for internal proxy NLB
+# Reserve IP
 gcloud compute addresses create int-tcp-ip-address \
-  --region=${REGION} \
-  --subnet=backend-subnet \
-  --purpose=SHARED_LOADBALANCER_VIP \
-  --description="TechCode9 - internal VIP for GSP636 proxy NLB" \
-  --quiet
+    --region=$REGION \
+    --subnet=backend-subnet \
+    --purpose=SHARED_LOADBALANCER_VIP
 
-export LB_IP=$(gcloud compute addresses describe int-tcp-ip-address \
-  --region=${REGION} \
-  --format='value(address)')
-
-echo "${GREEN_TEXT}  ✔ Reserved IP: ${LB_IP}${RESET_FORMAT}"
-echo ""
-
-# TechCode9: TCP health check probes backends on port 80
-echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 4] Creating health check... | TechCode9${RESET_FORMAT}"
-
+# Health check
 gcloud compute health-checks create tcp tcp-health-check \
-  --region=${REGION} \
-  --port=80 \
-  --description="TechCode9 - TCP health check for GSP636 backends" \
-  --quiet
+    --port=80
 
-echo "${GREEN_TEXT}  ✔ tcp-health-check created${RESET_FORMAT}"
-
-# TechCode9: backend service uses named port tcp80 matching MIG port mapping
-echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 4] Creating backend service... | TechCode9${RESET_FORMAT}"
-
+# Backend service
 gcloud compute backend-services create my-int-tcp-lb \
-  --protocol=TCP \
-  --health-checks=tcp-health-check \
-  --health-checks-region=${REGION} \
-  --region=${REGION} \
-  --port-name=tcp80 \
-  --description="TechCode9 - GSP636 internal proxy NLB backend service" \
-  --quiet
+    --load-balancing-scheme=INTERNAL_MANAGED \
+    --protocol=TCP \
+    --region=$REGION \
+    --health-checks=tcp-health-check \
+    --health-checks-region=$REGION \
+    --port-name=tcp80
 
-# TechCode9: add mig-a backend
+# Add MIGs
 gcloud compute backend-services add-backend my-int-tcp-lb \
-  --instance-group=mig-a \
-  --instance-group-zone=${ZONE_A} \
-  --region=${REGION} \
-  --balancing-mode=CONNECTION \
-  --quiet
+    --region=$REGION \
+    --instance-group=mig-a \
+    --instance-group-zone=${REGION}-b \
+    --balancing-mode=UTILIZATION \
+    --max-utilization=0.8
 
-# TechCode9: add mig-c backend
 gcloud compute backend-services add-backend my-int-tcp-lb \
-  --instance-group=mig-c \
-  --instance-group-zone=${ZONE_C} \
-  --region=${REGION} \
-  --balancing-mode=CONNECTION \
-  --quiet
+    --region=$REGION \
+    --instance-group=mig-c \
+    --instance-group-zone=${REGION}-c \
+    --balancing-mode=UTILIZATION \
+    --max-utilization=0.8
 
-echo "${GREEN_TEXT}  ✔ Backend service created with mig-a + mig-c${RESET_FORMAT}"
-
-# TechCode9: target TCP proxy sits between forwarding rule and backend service
-echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 4] Creating target TCP proxy... | TechCode9${RESET_FORMAT}"
-
+# Create target TCP proxy
 gcloud compute target-tcp-proxies create my-int-tcp-lb-proxy \
-  --backend-service=my-int-tcp-lb \
-  --region=${REGION} \
-  --description="TechCode9 - target TCP proxy for GSP636 internal NLB" \
-  --quiet
+    --backend-service=my-int-tcp-lb \
+    --backend-service-region=$REGION
 
-echo "${GREEN_TEXT}  ✔ Target TCP proxy created${RESET_FORMAT}"
-
-# TechCode9: forwarding rule exposes LB on port 110 (client connects here)
-echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 4] Creating forwarding rule on port 110... | TechCode9${RESET_FORMAT}"
-
+# Create forwarding rule
 gcloud compute forwarding-rules create int-tcp-forwarding-rule \
-  --region=${REGION} \
-  --load-balancing-scheme=INTERNAL_MANAGED \
-  --network=lb-network \
-  --subnet=backend-subnet \
-  --address=int-tcp-ip-address \
-  --ports=110 \
-  --target-tcp-proxy=my-int-tcp-lb-proxy \
-  --target-tcp-proxy-region=${REGION} \
-  --description="TechCode9 - frontend forwarding rule port 110 for GSP636 NLB" \
-  --quiet
-
-echo "${GREEN_TEXT}  ✔ Forwarding rule created (port 110 → proxy → backends:80)${RESET_FORMAT}"
-echo ""
+    --load-balancing-scheme=INTERNAL_MANAGED \
+    --network=lb-network \
+    --subnet=backend-subnet \
+    --address=int-tcp-ip-address \
+    --region=$REGION \
+    --ports=110 \
+    --target-tcp-proxy=my-int-tcp-lb-proxy \
+    --target-tcp-proxy-region=$REGION
 
 # ─── TASK 5: CLIENT VM ───────────────────────────────────────────────
 # TechCode9: client VM must be inside lb-network to reach internal LB VIP
@@ -334,20 +296,22 @@ echo "${CYAN_TEXT}${BOLD_TEXT}============================================${RESE
 echo "${GREEN_TEXT}${BOLD_TEXT}         LAB SETUP COMPLETE!               ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}============================================${RESET_FORMAT}"
 echo ""
-echo "${WHITE_TEXT}  LB Internal IP : ${BOLD_TEXT}${LB_IP}${RESET_FORMAT}"
-echo "${WHITE_TEXT}  Frontend Port  : ${BOLD_TEXT}110${RESET_FORMAT}"
-echo "${WHITE_TEXT}  Client VM Zone : ${BOLD_TEXT}${ZONE_A}${RESET_FORMAT}"
+PROJECT_ID=$(gcloud config get-value project)
+
 echo ""
-echo "${YELLOW_TEXT}${BOLD_TEXT}[TEST] SSH to client-vm and run: | TechCode9${RESET_FORMAT}"
-echo "${CYAN_TEXT}  gcloud compute ssh client-vm --zone=${ZONE_A}${RESET_FORMAT}"
-echo "${CYAN_TEXT}  curl ${LB_IP}:110${RESET_FORMAT}"
-echo "${CYAN_TEXT}  # Run multiple times — hostname alternates between mig-a-XXXX / mig-c-XXXX${RESET_FORMAT}"
+echo "Frontend Configuration Required"
+echo "================================"
+echo "Name           : int-tcp-forwarding-rule"
+echo "Subnetwork     : backend-subnet"
+echo "IP Address     : int-tcp-ip-address"
+echo "Port           : 110"
+echo "Proxy Protocol : Off"
 echo ""
-echo "${CYAN_TEXT}${BOLD_TEXT}  If you found this helpful, Subscribe → TechCode9          ${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}  https://youtube.com/@TechCode9                             ${RESET_FORMAT}"
+echo "Open Load Balancer:"
+echo "https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers?project=${PROJECT_ID}"
 echo ""
-echo "${GREEN_TEXT}${BOLD_TEXT}Done. | TechCode9${RESET_FORMAT}"
-echo ""
+echo "Open: my-int-tcp-lb"
+echo "Click: Add Frontend IP and port"
 
 # ─── SELF CLEANUP ────────────────────────────────────────────────────
 # TechCode9: remove this script from terminal after execution
