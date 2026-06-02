@@ -33,7 +33,10 @@ Participants can also earn exciting swags by completing selected Google Cloud la
 ## ⚠️ Disclaimer
 
 > **Google Cloud** may update/remove badges, labs, or assessment paths anytime.  
-> **Respect the work, don’t copy-paste without giving credit — it takes hours of research.**
+> **Respect the work, don’t copy-paste without giving credit — it takes hours of research.**<br>
+> Copyright © 2025–2026 Prateek Rajput (Tech & Code)<br>
+> All Rights Reserved.<br>
+> No permission is granted to copy, redistribute, re-upload, modify, or use this code in YouTube videos, repositories, websites, courses, or other content without explicit written permission from the copyright owner.
 
 ## 💫 If you find this useful...
 
