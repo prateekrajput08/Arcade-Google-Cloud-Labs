@@ -25,11 +25,33 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-export REGION=$(gcloud config get-value compute/region)
-export ZONE=$(gcloud config get-value compute/zone)
+echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Internal Load Balancer IP: ${RESET_FORMAT}"
+read ILB_IP
 
-# Replace with the IP shown in the lab
-ILB_IP="REPLACE_WITH_LAB_IP"
+if [[ -z "$ILB_IP" ]]; then
+    echo -e "${RED_TEXT}ILB IP cannot be empty!${RESET_FORMAT}"
+    exit 1
+fi
+
+echo -e "${GREEN_TEXT}Using ILB IP : ${YELLOW_TEXT}$ILB_IP${RESET_FORMAT}"
+echo
+
+ZONE=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+
+REGION=$(echo "$ZONE" | sed 's/-[a-z]$//')
+
+ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
+REGION=$(gcloud config get-value compute/region 2>/dev/null)
+
+if [[ -z "$ZONE" || -z "$REGION" ]]; then
+    echo -e "${RED_TEXT}Region or Zone not configured!${RESET_FORMAT}"
+    exit 1
+fi
+
+echo "ILB_IP=$ILB_IP"
+echo "ZONE=$ZONE"
+echo "REGION=$REGION"
 
 msg() {
     echo "${GREEN_TEXT}${BOLD_TEXT}[+]${RESET_FORMAT} $1"
