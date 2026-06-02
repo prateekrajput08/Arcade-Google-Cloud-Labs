@@ -25,28 +25,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Internal Load Balancer IP: ${RESET_FORMAT}"
-read ILB_IP
-
-if [[ -z "$ILB_IP" ]]; then
-    echo -e "${RED_TEXT}ILB IP cannot be empty!${RESET_FORMAT}"
-    exit 1
-fi
-
-echo -e "${GREEN_TEXT}Using ILB IP : ${YELLOW_TEXT}$ILB_IP${RESET_FORMAT}"
-echo
-echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Zone (example: us-central1-b): ${RESET_FORMAT}"
+echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Zone: ${RESET_FORMAT}"
 read ZONE
-
-if [[ -z "$ZONE" ]]; then
-    echo -e "${RED_TEXT}Zone cannot be empty!${RESET_FORMAT}"
-    exit 1
-fi
 
 REGION=$(echo "$ZONE" | sed 's/-[a-z]$//')
 
 echo -e "${GREEN_TEXT}ZONE   : ${YELLOW_TEXT}$ZONE${RESET_FORMAT}"
 echo -e "${GREEN_TEXT}REGION : ${YELLOW_TEXT}$REGION${RESET_FORMAT}"
+
+
+echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Internal Load Balancer IP: ${RESET_FORMAT}"
+read ILB_IP
 
 echo "ILB_IP=$ILB_IP"
 echo "ZONE=$ZONE"
