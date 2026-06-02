@@ -35,17 +35,18 @@ fi
 
 echo -e "${GREEN_TEXT}Using ILB IP : ${YELLOW_TEXT}$ILB_IP${RESET_FORMAT}"
 echo
+echo -ne "${YELLOW_TEXT}${BOLD_TEXT}Enter Zone (example: us-central1-b): ${RESET_FORMAT}"
+read ZONE
 
-ZONE=$(gcloud compute project-info describe ...)
-REGION=$(echo "$ZONE" | sed 's/-[a-z]$//')
-
-ZONE=$(gcloud config get-value compute/zone 2>/dev/null)
-REGION=$(gcloud config get-value compute/region 2>/dev/null)
-
-if [[ -z "$ZONE" || -z "$REGION" ]]; then
-    echo -e "${RED_TEXT}Region or Zone not configured!${RESET_FORMAT}"
+if [[ -z "$ZONE" ]]; then
+    echo -e "${RED_TEXT}Zone cannot be empty!${RESET_FORMAT}"
     exit 1
 fi
+
+REGION=$(echo "$ZONE" | sed 's/-[a-z]$//')
+
+echo -e "${GREEN_TEXT}ZONE   : ${YELLOW_TEXT}$ZONE${RESET_FORMAT}"
+echo -e "${GREEN_TEXT}REGION : ${YELLOW_TEXT}$REGION${RESET_FORMAT}"
 
 echo "ILB_IP=$ILB_IP"
 echo "ZONE=$ZONE"
