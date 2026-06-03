@@ -101,7 +101,7 @@ gcloud compute backend-services create internal-proxy-backend \
 
 gcloud compute backend-services add-backend internal-proxy-backend \
     --instance-group=mig-proxy-internal \
-    --instance-group-zone=${REGION_B}-b \
+    --instance-group-region=$REGION_B \
     --region=$REGION_B
 ```
 Frontend:
