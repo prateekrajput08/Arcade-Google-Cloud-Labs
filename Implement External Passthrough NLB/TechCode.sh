@@ -83,10 +83,6 @@ echo "${GREEN_TEXT}✔ Health check basic-http-check created${RESET_FORMAT}"
 echo ""
 echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 2] Reserving Static External IP...${RESET_FORMAT}"
 
-gcloud compute addresses create network-lb-ip \
-  --region="$REGION" \
-  --project="$PROJECT_ID"
-
 LB_IP=$(gcloud compute addresses describe network-lb-ip \
   --region="$REGION" \
   --format="value(address)" \
@@ -98,13 +94,6 @@ echo "${GREEN_TEXT}✔ Static IP reserved: ${BOLD_TEXT}$LB_IP${RESET_FORMAT}"
 
 echo ""
 echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 2] Creating Backend Service...${RESET_FORMAT}"
-
-gcloud compute backend-services create network-lb-backend-service \
-  --protocol=TCP \
-  --region="$REGION" \
-  --health-checks=basic-http-check \
-  --health-checks-region="$REGION" \
-  --project="$PROJECT_ID"
 
 echo "${YELLOW_TEXT}Adding backends...${RESET_FORMAT}"
 
@@ -120,17 +109,25 @@ gcloud compute backend-services add-backend network-lb-backend-service \
   --region="$REGION" \
   --project="$PROJECT_ID"
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}MANUAL STEP REQUIRED${RESET_FORMAT}"
+echo ""
+echo "Name: network-lb-backend-service"
+echo "Health Check: basic-http-check"
+echo "Backends: web-server-1 and web-server-2"
+echo "Frontend IP: network-lb-ip"
+echo "Port: 80"
+echo ""
+echo "Open the following URL:"
+echo "https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers?project=$PROJECT_ID"
+echo ""
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Create the load balancer, then press ENTER to continue...${RESET_FORMAT}"
+
 echo "${GREEN_TEXT}✔ Backend service created with both instance groups${RESET_FORMAT}"
 
 # ─── TASK 2: Target Pool + Forwarding Rule ────────────────────────────────────
 
 echo ""
 echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 2] Creating Target Pool & Forwarding Rule...${RESET_FORMAT}"
-
-# For passthrough external TCP LB, need a target pool
-gcloud compute target-pools create network-lb-target-pool \
-  --region="$REGION" \
-  --project="$PROJECT_ID"
 
 gcloud compute target-pools add-instances network-lb-target-pool \
   --instances="$VM1","$VM2" \
@@ -140,14 +137,8 @@ gcloud compute target-pools add-instances network-lb-target-pool \
 
 echo "${YELLOW_TEXT}Creating forwarding rule...${RESET_FORMAT}"
 
-gcloud compute forwarding-rules create network-lb-forwarding-rule \
-  --region="$REGION" \
-  --ports=80 \
-  --address=network-lb-ip \
-  --target-pool=network-lb-target-pool \
-  --project="$PROJECT_ID"
-
 echo "${GREEN_TEXT}✔ Forwarding rule created${RESET_FORMAT}"
+
 
 # Final message
 echo
