@@ -27,6 +27,14 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_A: ${RESET_FORMAT}" REGION_A
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_B: ${RESET_FORMAT}" REGION_B
+
+echo "export REGION_A=$REGION_A" >> ~/.bashrc
+echo "export REGION_B=$REGION_B" >> ~/.bashrc
+
+source ~/.bashrc
+
 echo -e "${GREEN_TEXT}REGION_A=$REGION_A${RESET_FORMAT}"
 echo -e "${GREEN_TEXT}REGION_B=$REGION_B${RESET_FORMAT}"
 
