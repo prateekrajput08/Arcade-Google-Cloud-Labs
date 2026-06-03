@@ -138,6 +138,7 @@ ssh-keygen -t rsa -f ~/.ssh/google_compute_engine -N "" -q <<< y >/dev/null 2>&1
 
 LB_IP=$(gcloud compute addresses describe ip-alb-global \
   --global \
+   --quiet \
   --format="get(address)")
 
 INSTANCE=$(gcloud compute instances list \
@@ -160,10 +161,12 @@ ZONE=$(gcloud compute instances list \
   echo "===== Nginx stopped on $INSTANCE ====="
 ) &
 
+timeout 40 bash -c '
 while true; do
-  curl -k -s https://$LB_IP | grep "Hello from"
+  curl -k -s https://'"$LB_IP"' | grep "Hello from"
   sleep 0.5
 done
+'
 
 # Final message
 echo
