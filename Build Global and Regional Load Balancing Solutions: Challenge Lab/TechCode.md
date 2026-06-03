@@ -124,6 +124,14 @@ Create the Load Balancer.
 
 ### 7. Create Client VM
 ```
+read -p "Enter REGION_A: " REGION_A
+read -p "Enter REGION_B: " REGION_B
+
+echo "export REGION_A=$REGION_A" >> ~/.bashrc
+echo "export REGION_B=$REGION_B" >> ~/.bashrc
+
+source ~/.bashrc
+
 gcloud compute instances create vm-client-internal \
    --zone=${REGION_B}-b \
    --machine-type=e2-micro \
