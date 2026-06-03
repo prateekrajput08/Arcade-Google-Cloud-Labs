@@ -11,6 +11,7 @@
 ---
 
 <div style="padding: 15px; margin: 10px 0;">
+  
 ## Task 1: Secure Internal Transaction Processor
 
 ### 1. Create Regional MIG
