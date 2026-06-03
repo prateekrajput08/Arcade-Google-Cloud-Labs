@@ -50,10 +50,20 @@ gcloud compute instance-groups managed set-named-ports mig-alb-api-b \
     --named-ports=http80:80 \
     --region=$REGION_B
 
-sleep 60
+sleep 120
+
+echo -e "${BLUE_TEXT}Creating Firewall Rule...${RESET_FORMAT}"
+gcloud compute firewall-rules create fw-allow-health-check-and-proxy \
+    --network=lb-network \
+    --direction=INGRESS \
+    --action=ALLOW \
+    --rules=tcp:80 \
+    --source-ranges=130.211.0.0/22,35.191.0.0/16 \
+    --target-tags=tag-alb-api
 
 echo -e "${BLUE_TEXT}Creating Health Check...${RESET_FORMAT}"
 gcloud compute health-checks create http http-check-alb \
+    --global \
     --port=80
 
 echo -e "${BLUE_TEXT}Creating Backend Service...${RESET_FORMAT}"
@@ -77,6 +87,9 @@ gcloud compute backend-services add-backend service-alb-global \
     --instance-group-region=$REGION_B \
     --balancing-mode=RATE \
     --max-rate-per-instance=1
+    
+echo "Waiting for backend initialization..."
+sleep 60
 
 echo -e "${BLUE_TEXT}Generating SSL Certificate...${RESET_FORMAT}"
 openssl genrsa -out key.pem 2048
@@ -91,14 +104,6 @@ gcloud compute ssl-certificates create cert-self-signed \
     --certificate=cert.pem \
     --private-key=key.pem \
     --global
-
-echo -e "${BLUE_TEXT}Creating Firewall Rule...${RESET_FORMAT}"
-gcloud compute firewall-rules create fw-allow-health-check-and-proxy \
-    --network=lb-network \
-    --direction=INGRESS \
-    --action=ALLOW \
-    --rules=tcp:80 \
-    --source-ranges=130.211.0.0/22,35.191.0.0/16 
 
 echo -e "${BLUE_TEXT}Creating Global IP...${RESET_FORMAT}"
 gcloud compute addresses create ip-alb-global \
