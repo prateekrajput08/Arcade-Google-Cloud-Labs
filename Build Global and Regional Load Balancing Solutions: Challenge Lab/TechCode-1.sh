@@ -27,26 +27,27 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-read -p "Enter REGION_A: " REGION_A
-read -p "Enter REGION_B: " REGION_B
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_A: ${RESET_FORMAT}" REGION_A
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter REGION_B: ${RESET_FORMAT}" REGION_B
 
 echo "export REGION_A=$REGION_A" >> ~/.bashrc
 echo "export REGION_B=$REGION_B" >> ~/.bashrc
 
 source ~/.bashrc
 
-Create Regional MIG
-echo "Open:
+echo "${YELLOW_TEXT}${BOLD_TEXT}
+Open:
 https://console.cloud.google.com/compute/instanceGroups/add
 
-Create:
+Create Regional MIG
 
 Name: mig-proxy-internal
 Template: template-proxy-internal
 Region: Region B
-Add Named Port: tcp80 → 80
+Add Named Port: tcp80 -> 80
+${RESET_FORMAT}"
 
-read -p "Press Enter to continue..."
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Press Enter to continue...${RESET_FORMAT}"
 
 gcloud compute firewall-rules create fw-allow-hc-proxy-internal \
   --network=lb-network \
@@ -68,7 +69,7 @@ gcloud compute health-checks create tcp hc-internal-proxy \
     --region=$REGION_B \
     --port=80
 
-echo "Open:
+echo "${YELLOW_TEXT}${BOLD_TEXT}Open:
 https://console.cloud.google.com/networking/addresses/list
 
 Create:
@@ -77,9 +78,9 @@ Name: ip-internal-proxy
 Region: Region B
 Network: lb-network
 Subnet: lb-backend-subnet-region-b
-Purpose: Shared Load Balancer VIP"
+Purpose: Shared Load Balancer VIP${RESET_FORMAT}"
 
-read -p 'Press Enter to continue...'
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Press Enter to continue...${RESET_FORMAT}"
 
 gcloud compute backend-services create internal-proxy-backend \
     --load-balancing-scheme=INTERNAL_MANAGED \
@@ -93,15 +94,17 @@ gcloud compute backend-services add-backend internal-proxy-backend \
     --instance-group-zone=${REGION_B}-b \
     --region=$REGION_B
 
-echo "Frontend:
+echo "${YELLOW_TEXT}${BOLD_TEXT}Open:
+https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers
 
+echo Frontend:
 Name: rule-internal-proxy
 IP Address: ip-internal-proxy
 Protocol: TCP
 Port: 110
-Global Access: Disabled"
+Global Access: Disabled${RESET_FORMAT}"
 
-read -p 'Press Enter to continue...'
+read -p "${YELLOW_TEXT}${BOLD_TEXT}Press Enter to continue...${RESET_FORMAT}"
 
 gcloud compute instances create vm-client-internal \
    --zone=${REGION_B}-b \
