@@ -138,8 +138,9 @@ LB_IP=$(gcloud compute addresses describe ip-internal-proxy \
 
 echo $LB_IP
 ```
+Run in SSH
 ```
-    curl http://[LB_IP]:110
+curl http://[LB_IP]:110
 ```
 Then click:
 Check my progress → Create a regional internal proxy NLB
