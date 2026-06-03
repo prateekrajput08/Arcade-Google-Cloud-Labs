@@ -54,7 +54,7 @@ sleep 120
 
 echo -e "${BLUE_TEXT}Creating Firewall Rule...${RESET_FORMAT}"
 gcloud compute firewall-rules create fw-allow-health-check-and-proxy \
-    --network=lb-network \
+    --network=default \
     --direction=INGRESS \
     --action=ALLOW \
     --rules=tcp:80 \
@@ -132,9 +132,24 @@ sleep 120
 gcloud compute backend-services get-health service-alb-global --global
 
 echo -e "${MAGENTA_TEXT}Checking Port Name...${RESET_FORMAT}"
-gcloud compute backend-services describe service-alb-global \
+LB_IP=$(gcloud compute addresses describe ip-alb-global \
     --global \
-    --format="get(portName)"
+    --format="get(address)")
+
+timeout 10 bash -c '
+while true; do
+    curl -k -s https://'"$LB_IP"' | grep "Hello from"
+    sleep 0.5
+done
+'
+
+
+echo "Watching traffic for 10 seconds..."
+sleep 10
+
+gcloud compute ssh mig-alb-api-a-tp34 \
+    --zone=us-west1-b \
+    --command="sudo systemctl stop nginx"
 
 # Final message
 echo
