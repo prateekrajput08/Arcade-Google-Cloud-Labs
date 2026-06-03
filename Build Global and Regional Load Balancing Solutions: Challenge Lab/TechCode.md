@@ -1,4 +1,4 @@
-# 🌐 GSP539 - Build Global and Regional Load Balancing Solutions || GSP539 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/7225/labs/44716)
+# 🌐 Build Global and Regional Load Balancing Solutions || GSP539 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/7225/labs/44716)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -104,7 +104,14 @@ gcloud compute backend-services add-backend internal-proxy-backend \
     --instance-group-zone=${REGION_B}-b \
     --region=$REGION_B
 ```
+Frontend:
+- Name: rule-internal-proxy
+- IP Address: ip-internal-proxy
+- Protocol: TCP
+- Port: 110
+- Global Access: Disabled
 
+Create the Load Balancer.
 ---
 
 ### 6. Create Client VM
