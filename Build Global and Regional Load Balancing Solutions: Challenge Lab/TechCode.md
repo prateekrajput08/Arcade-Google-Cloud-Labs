@@ -1,538 +1,199 @@
-# GSP539 - Build Global and Regional Load Balancing Solutions (Challenge Lab)
+# 🌐 GSP539 - Build Global and Regional Load Balancing Solutions || GSP539 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/games/7225/labs/44716)
 
-## Overview
+## ⚠️ Disclaimer ⚠️
 
-This challenge lab requires implementing two different load balancing architectures within the same VPC network:
-
-1. **Regional Internal Proxy Network Load Balancer (Layer 4)**
-   - Private internal service
-   - Accessible only within the VPC
-   - Used for the Transaction Validation Service (TVS)
-
-2. **Global External Application Load Balancer (Layer 7)**
-   - Public HTTPS endpoint
-   - Multi-region backend deployment
-   - Used for the Market Data Feed service
+<blockquote style="background-color: #fffbea; border-left: 6px solid #f7c948; padding: 1em; font-size: 15px; line-height: 1.5;">
+  <strong>Educational Purpose Only:</strong> This script and guide are provided for the educational purposes to help you understand the lab services and boost your career. Before using the script, please open and review it to familiarize yourself with Google Cloud services.
+  <br><br>
+  <strong>Terms Compliance:</strong> Always ensure compliance with Qwiklabs' terms of service and YouTube's community guidelines. The aim is to enhance your learning experience — not to circumvent it.
+</blockquote>
 
 ---
 
-# Task 1: Secure Internal Transaction Processor (Regional Internal Proxy NLB)
+<div style="padding: 15px; margin: 10px 0;">
+## Task 1: Secure Internal Transaction Processor
 
-## Objective
+### 1. Create Regional MIG
 
-Create a secure internal load balancing solution that:
-
-- Uses a regional Managed Instance Group (MIG)
-- Is accessible only through an internal IP address
-- Uses a Regional Internal Proxy Network Load Balancer
-
----
-
-## Step 1: Create Regional Managed Instance Group
-
-Navigate to:
-
-```text
+Go to:
 Compute Engine → Instance Groups → Create Instance Group
-```
-
-Configure:
-
-| Property | Value |
-|----------|--------|
-| Name | mig-proxy-internal |
-| Template | template-proxy-internal |
-| Region | Region B |
-| Type | Managed |
-
-Create the instance group.
-
-### Configure Named Port
-
-Open the instance group and add:
-
-| Name | Port |
-|------|------|
-| tcp80 | 80 |
-
-Save changes.
-
----
-
-## Step 2: Create Firewall Rules
-
-### Health Check Firewall Rule
-
-Navigate to:
-
-```text
-VPC Network → Firewall → Create Firewall Rule
-```
-
-Configure:
-
-| Property | Value |
-|----------|--------|
-| Name | fw-health-check-proxy-internal |
-| Direction | Ingress |
-| Target Tags | tag-proxy-internal |
-| Source Ranges | 130.211.0.0/22,35.191.0.0/16 |
-| Protocol | TCP |
-| Port | 80 |
-
-Create the rule.
-
-### Proxy Subnet Firewall Rule
-
-Create another firewall rule:
-
-| Property | Value |
-|----------|--------|
-| Name | fw-proxy-subnet-internal |
-| Direction | Ingress |
-| Target Tags | tag-proxy-internal |
-| Source Range | 10.129.0.0/23 |
-| Protocol | TCP |
-| Port | 80 |
-
-Create.
-
----
-
-## Step 3: Create Proxy-Only Subnet
-
-Navigate to:
-
-```text
-VPC Network → VPC Networks → lb-network
-```
-
-Create subnet:
-
-| Property | Value |
-|----------|--------|
-| Name | proxy-only-subnet |
-| Region | Region B |
-| Purpose | Regional Managed Proxy |
-| CIDR | 10.129.0.0/23 |
-
-Create the subnet.
-
----
-
-## Step 4: Create Health Check
-
-Navigate to:
-
-```text
-Network Services → Health Checks
-```
 
 Create:
+- Name: mig-proxy-internal
+- Template: template-proxy-internal
+- Region: Region B
 
-| Property | Value |
-|----------|--------|
-| Name | hc-internal-proxy |
-| Protocol | TCP |
-| Port | 80 |
-
-Save.
+Add Named Port:
+- tcp80 → 80
 
 ---
 
-## Step 5: Create Internal Proxy Load Balancer
+### 2. Create Firewall Rules
 
-Navigate to:
-
-```text
-Network Services → Load Balancing
-```
-
-Create:
-
-```text
-Regional Internal Proxy Network Load Balancer
-```
-
-Backend configuration:
-
-| Property | Value |
-|----------|--------|
-| Backend | mig-proxy-internal |
-| Region | Region B |
-| Health Check | hc-internal-proxy |
-
----
-
-## Step 6: Reserve Internal Static IP
-
-Navigate to:
-
-```text
-VPC Network → IP Addresses
-```
-
-Reserve:
-
-| Property | Value |
-|----------|--------|
-| Name | ip-internal-proxy |
-| Type | Internal |
-| Region | Region B |
-| Purpose | Shared Load Balancer VIP |
-
----
-
-## Step 7: Create Forwarding Rule
-
-Frontend configuration:
-
-| Property | Value |
-|----------|--------|
-| Name | rule-internal-proxy |
-| Protocol | TCP |
-| Port | 110 |
-| IP Address | ip-internal-proxy |
-
-Finish load balancer creation.
-
----
-
-## Step 8: Create Client VM
-
-Navigate to:
-
-```text
-Compute Engine → VM Instances → Create VM
-```
-
-Configure:
-
-| Property | Value |
-|----------|--------|
-| Name | vm-client-internal |
-| Region | Region B |
-| Network Tag | allow-ssh |
-
-Create the VM.
-
----
-
-## Step 9: Validate Access
-
-SSH into the VM.
-
-Test connectivity:
-
-```bash
-nc -vz INTERNAL_LB_IP 110
-```
-
-or
-
-```bash
-curl http://INTERNAL_LB_IP:110
-```
-
-Successful responses confirm connectivity.
-
----
-
-# Task 2: Global External Market Data Feed (Global External ALB)
-
-## Objective
-
-Deploy a global HTTPS Application Load Balancer with:
-
-- Two regional backends
-- SSL termination
-- Cross-region traffic distribution
-
----
-
-## Step 1: Create Regional MIG in Region A
-
-Navigate to:
-
-```text
-Compute Engine → Instance Groups
-```
-
-Create:
-
-| Property | Value |
-|----------|--------|
-| Name | mig-alb-api-a |
-| Template | template-alb-api |
-| Region | Region A |
-
-Configure named port:
-
-| Name | Port |
-|------|------|
-| http80 | 80 |
-
-Save.
-
----
-
-## Step 2: Create Regional MIG in Region B
-
-Create another instance group:
-
-| Property | Value |
-|----------|--------|
-| Name | mig-alb-api-b |
-| Template | template-alb-api |
-| Region | Region B |
-
-Configure named port:
-
-| Name | Port |
-|------|------|
-| http80 | 80 |
-
-Save.
-
----
-
-## Step 3: Create HTTP Health Check
-
-Navigate to:
-
-```text
-Network Services → Health Checks
-```
-
-Create:
-
-| Property | Value |
-|----------|--------|
-| Name | http-check-alb |
-| Protocol | HTTP |
-| Port | 80 |
-
-Save.
-
----
-
-## Step 4: Create Global Backend Service
-
-Navigate to:
-
-```text
-Network Services → Load Balancing
-```
-
-Create:
-
-```text
-Global External Application Load Balancer
-```
-
-Backend service:
-
-| Property | Value |
-|----------|--------|
-| Name | service-alb-global |
-| Protocol | HTTP |
-
-Add:
-
-- mig-alb-api-a
-- mig-alb-api-b
-
-For each backend:
-
-| Property | Value |
-|----------|--------|
-| Balancing Mode | Rate |
-| Maximum RPS | 1 |
-
-Attach:
-
-```text
-http-check-alb
-```
-
----
-
-## Step 5: Create SSL Certificate
-
-Open Cloud Shell.
-
-Generate private key:
-
-```bash
-openssl genrsa -out key.pem 2048
-```
-
-Generate self-signed certificate:
-
-```bash
-openssl req -new -x509 \
--key key.pem \
--out cert.pem \
--days 1 \
--subj "/CN=example.com"
-```
-
-Create SSL certificate resource:
-
-```bash
-gcloud compute ssl-certificates create cert-self-signed \
-    --certificate=cert.pem \
-    --private-key=key.pem \
-    --global
-```
-
----
-
-## Step 6: Reserve Global External IP
-
-Navigate to:
-
-```text
-VPC Network → IP Addresses
-```
-
-Reserve:
-
-| Property | Value |
-|----------|--------|
-| Name | ip-alb-global |
-| Type | Global External |
-
----
-
-## Step 7: Configure HTTPS Frontend
-
-Frontend settings:
-
-| Property | Value |
-|----------|--------|
-| Protocol | HTTPS |
-| Port | 443 |
-| IP Address | ip-alb-global |
-| Certificate | cert-self-signed |
-
-Finish load balancer creation.
-
----
-
-## Step 8: Create Firewall Rule
-
-Navigate to:
-
-```text
+Go to:
 VPC Network → Firewall
-```
 
 Create:
 
-| Property | Value |
-|----------|--------|
-| Name | fw-allow-health-check-and-proxy |
-| Direction | Ingress |
-| Source Ranges | 130.211.0.0/22,35.191.0.0/16 |
-| Protocol | TCP |
-| Port | 80 |
+Rule 1:
+```
+gcloud compute firewall-rules create fw-allow-hc-proxy-internal \
+  --network=lb-network \
+  --action=ALLOW \
+  --direction=INGRESS \
+  --source-ranges=130.211.0.0/22,35.191.0.0/16 \
+  --target-tags=tag-proxy-internal \
+  --rules=tcp:80
+```
 
-Create.
+Rule 2:
+```
+gcloud compute firewall-rules create fw-allow-proxy-subnet-internal \
+  --network=lb-network \
+  --action=ALLOW \
+  --direction=INGRESS \
+  --source-ranges=10.129.0.0/23 \
+  --target-tags=tag-proxy-internal \
+  --rules=tcp:80
+```
+---
+
+### 3. Create Proxy-Only Subnet
+
+Go to:
+VPC Network → VPC Networks → lb-network
+
+Create Proxy-only Subnet:
+- Name: proxy-subnet-internal
+- Region: Region B
+- Purpose: Regional Managed Proxy
+- Role: Active
+- CIDR: 10.129.0.0/23
 
 ---
 
-# Task 3: Test Failover and Global Distribution
+### 4. Create Health Check
 
-## Step 1: Verify Traffic Distribution
+Go to:
+Network Services → Health Checks
 
-Obtain the ALB frontend IP address.
+Create:
+- Name: hc-internal-proxy
+- Protocol: TCP
+- Port: 80
 
-Run:
+---
+
+### 5. Reserve Internal Static IP
+
+Go to:
+VPC Network → IP Addresses → Reserve Internal
+
+Create:
+- Name: ip-internal-proxy
+- Region: Region B
+- Network: lb-network
+- Subnet: lb-backend-subnet-region-b
+- Purpose: Shared Load Balancer VIP
+
+---
+
+### 6. Create Regional Internal Proxy Network Load Balancer
+
+Go to:
+Network Services → Load Balancing
+
+Create:
+- Type: Regional Internal Proxy Network Load Balancer
+
+Backend:
+- Instance Group: mig-proxy-internal
+- Named Port: tcp80
+- Health Check: hc-internal-proxy
+
+Frontend:
+- Name: rule-internal-proxy
+- IP Address: ip-internal-proxy
+- Protocol: TCP
+- Port: 110
+- Global Access: Disabled
+
+Create the Load Balancer.
+
+---
+
+### 7. Create Client VM
+```
+gcloud compute instances create vm-client-internal \
+   --zone=${REGION_B}-b \
+   --machine-type=e2-micro \
+   --network=lb-network \
+   --subnet=lb-backend-subnet-region-b \
+   --tags=allow-ssh
+```
+---
+
+### 8. Validate Access
+
+SSH into vm-client-internal
+
+Test:
+```
+# Get Internal LB IP
+LB_IP=$(gcloud compute addresses describe ip-internal-proxy \
+    --region=$REGION_B \
+    --format="value(address)")
+
+echo $LB_IP
+
+gcloud compute ssh vm-client-internal \
+    --zone="${REGION_B}-b" \
+    --command="curl http://$LB_IP:110"
+```
+Then click:
+Check my progress → Create a regional internal proxy NLB
+
+## ☁️ Run in Cloud Shell:
 
 ```bash
-while true; do
-curl -k -s https://LOAD_BALANCER_IP | grep "Hello from"
-sleep 0.5
-done
+curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Import%20Data%20to%20a%20Firestore%20Database/TechCode.sh
+sudo chmod +x TechCode.sh 
+./TechCode.sh
 ```
 
-Expected output alternates between:
-
-```text
-Hello from Region A
-Hello from Region B
-```
-
-This occurs because both backends have Maximum RPS set to 1.
+</div>
 
 ---
 
-## Step 2: Simulate Backend Failure
+## 🎉 **Congratulations! Lab Completed Successfully!** 🏆  
 
-SSH into an instance in:
+<div style="text-align:center; padding: 10px 0; max-width: 640px; margin: 0 auto;">
+  <h3 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-bottom: 14px;">📱 Join the Tech & Code Community</h3>
 
-```text
-mig-alb-api-a
-```
+  <a href="https://www.youtube.com/@TechCode9?sub_confirmation=1" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Subscribe-Tech%20&%20Code-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube Channel">
+  </a>
 
-Stop nginx:
+  <a href="https://www.linkedin.com/in/prateekrajput08/" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/LinkedIn-Prateek%20Rajput-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+  </a>
 
-```bash
-sudo systemctl stop nginx
-```
+  <a href="https://t.me/techcode9" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Telegram-Tech%20Code-0088cc?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel">
+  </a>
 
-Wait for health checks to fail.
-
-Expected behavior:
-
-- Region A traffic drops to zero
-- Region B receives all requests
-
----
-
-## Step 3: Restore Backend
-
-Restart nginx:
-
-```bash
-sudo systemctl start nginx
-```
-
-Wait until the instance becomes healthy.
-
-Verify that requests again alternate between Region A and Region B.
+  <a href="https://www.instagram.com/techcodefacilitator" style="margin: 0 6px; display: inline-block;">
+    <img src="https://img.shields.io/badge/Instagram-Tech%20Code-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram Profile">
+  </a>
+</div>
 
 ---
 
-# Completion Checklist
-
-## Internal Proxy NLB
-
-- [ ] mig-proxy-internal created
-- [ ] tcp80 named port configured
-- [ ] Health check firewall rule created
-- [ ] Proxy subnet firewall rule created
-- [ ] Internal static IP reserved
-- [ ] rule-internal-proxy created
-- [ ] vm-client-internal created
-- [ ] Connectivity verified
-
-## Global External ALB
-
-- [ ] mig-alb-api-a created
-- [ ] mig-alb-api-b created
-- [ ] http-check-alb created
-- [ ] service-alb-global created
-- [ ] cert-self-signed created
-- [ ] ip-alb-global reserved
-- [ ] HTTPS frontend configured
-- [ ] fw-allow-health-check-and-proxy created
-
-## Failover Testing
-
-- [ ] Traffic alternates between regions
-- [ ] nginx stopped in Region A
-- [ ] Failover verified
-- [ ] nginx restarted
-- [ ] Health restored
+<div align="center">
+  <p style="font-size: 12px; color: #586069;">
+    <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
+  </p>
+  <p style="font-size: 12px; color: #586069;">
+    <em>Last updated: June 2026</em>
+  </p>
+</div>
