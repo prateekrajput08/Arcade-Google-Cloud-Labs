@@ -70,7 +70,7 @@ echo "export REGION_B=$REGION_B" >> ~/.bashrc
 source ~/.bashrc
 
 gcloud compute health-checks create tcp hc-internal-proxy \
-    --region=$REGION \
+    --region=$REGION_B \
     --port=80
 ```
 ---
