@@ -9,6 +9,16 @@ BOLD_TEXT=$'\033[1m'
 RESET_FORMAT=$'\033[0m'
 clear
 
+check_status() {
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "❌ FAILED: $1"
+        exit 1
+    else
+        echo "✔ $1"
+    fi
+}
+
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
@@ -16,48 +26,40 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 # ─── AUTO-FETCH PROJECT & REGIONS ───────────────────────────────────────────
-echo "${YELLOW_TEXT}${BOLD_TEXT}[*] Fetching project and region info...${RESET_FORMAT}"
-
 export PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-export PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
 
-# Region A = first region from quota list (usually us-central1)
-# Region B = second distinct region
-# Lab uses specific regions — fetch from existing templates to detect
-REGION_A=$(gcloud compute instance-templates list --format="value(region)" 2>/dev/null | grep -v "^$" | sort -u | head -1 | sed 's|.*/||')
-REGION_B=$(gcloud compute instance-templates list --format="value(region)" 2>/dev/null | grep -v "^$" | sort -u | sed -n '2p' | sed 's|.*/||')
+echo ""
+read -p "Region A: " REGION_A
+read -p "Region B: " REGION_B
+SUBNET_INTERNAL=$(gcloud compute networks subnets list \
+    --filter="network=lb-network AND region=$REGION_B" \
+    --format="value(name)" | grep -v proxy | head -1)
 
-# Fallback detection via template names
+echo "Internal subnet: $SUBNET_INTERNAL"
+
 if [[ -z "$REGION_A" || -z "$REGION_B" ]]; then
-  ALL_REGIONS=$(gcloud compute instance-templates list --format="value(selfLink)" 2>/dev/null | grep -oP 'regions/\K[^/]+' | sort -u)
-  REGION_A=$(echo "$ALL_REGIONS" | head -1)
-  REGION_B=$(echo "$ALL_REGIONS" | tail -1)
+    echo "Region A and Region B are required."
+    exit 1
 fi
-
-# If still empty, use defaults
-REGION_A=${REGION_A:-us-central1}
-REGION_B=${REGION_B:-us-east1}
 
 export REGION_A REGION_B
 
-echo "${GREEN_TEXT}  Project ID : ${WHITE_TEXT}$PROJECT_ID${RESET_FORMAT}"
-echo "${GREEN_TEXT}  Region A   : ${WHITE_TEXT}$REGION_A${RESET_FORMAT}"
-echo "${GREEN_TEXT}  Region B   : ${WHITE_TEXT}$REGION_B${RESET_FORMAT}"
+echo "${GREEN_TEXT}  Project ID        : ${WHITE_TEXT}$PROJECT_ID${RESET_FORMAT}"
+echo "${GREEN_TEXT}  Region A          : ${WHITE_TEXT}$REGION_A${RESET_FORMAT}"
+echo "${GREEN_TEXT}  Region B          : ${WHITE_TEXT}$REGION_B${RESET_FORMAT}"
+echo "${GREEN_TEXT}  Internal subnet   : ${WHITE_TEXT}$SUBNET_INTERNAL${RESET_FORMAT}"
 echo ""
 
 # ─── TASK 1: REGIONAL INTERNAL PROXY NLB ────────────────────────────────────
-echo "${CYAN_TEXT}${BOLD_TEXT}══════════════════════════════════════════${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT} TASK 1: Secure Internal Transaction Processor${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}══════════════════════════════════════════${RESET_FORMAT}"
-echo ""
-
 # 1a. Create regional MIG in Region B
 echo "${YELLOW_TEXT}[1/14] Creating MIG: mig-proxy-internal in $REGION_B ...${RESET_FORMAT}"
 gcloud compute instance-groups managed create mig-proxy-internal \
   --template=template-proxy-internal \
   --size=2 \
   --region=$REGION_B \
-  --quiet 2>&1
+  --quiet
+
+check_status "mig-proxy-internal created"
 
 gcloud compute instance-groups managed set-named-ports mig-proxy-internal \
   --named-ports=tcp80:80 \
@@ -97,9 +99,12 @@ echo ""
 
 # 1d. Reserve internal static IP
 echo "${YELLOW_TEXT}[4/14] Reserving internal static IP: ip-internal-proxy in $REGION_B ...${RESET_FORMAT}"
-SUBNET_INTERNAL=$(gcloud compute networks subnets list \
-  --filter="region:($REGION_B) network:lb-network" \
-  --format="value(name)" | grep -v proxy | head -1)
+echo ""
+echo "Available subnets:"
+gcloud compute networks subnets list \
+    --filter="network:lb-network"
+
+read -p "Enter internal subnet name: " SUBNET_INTERNAL
 
 gcloud compute addresses create ip-internal-proxy \
   --region=$REGION_B \
@@ -131,7 +136,9 @@ gcloud compute backend-services create service-internal-proxy \
   --protocol=TCP \
   --health-checks=hc-tcp-internal-proxy \
   --health-checks-region=$REGION_B \
-  --quiet 2>&1
+  --quiet
+
+check_status "service-internal-proxy created"
 
 gcloud compute backend-services add-backend service-internal-proxy \
   --region=$REGION_B \
@@ -164,14 +171,20 @@ gcloud compute forwarding-rules create rule-internal-proxy \
   --target-tcp-proxy=proxy-internal-proxy \
   --target-tcp-proxy-region=$REGION_B \
   --ports=110 \
-  --quiet 2>&1
+  --quiet
+
+check_status "rule-internal-proxy created"
 
 echo "${GREEN_TEXT}  ✔ Forwarding rule rule-internal-proxy created on port 110${RESET_FORMAT}"
 echo ""
 
 # 1i. Client VM for validation
 echo "${YELLOW_TEXT}[9/14] Creating client VM: vm-client-internal in $REGION_B ...${RESET_FORMAT}"
-ZONE_B=$(gcloud compute zones list --filter="region:$REGION_B" --format="value(name)" | head -1)
+echo ""
+echo "Available zones in $REGION_B:"
+gcloud compute zones list --filter="region:$REGION_B"
+
+read -p "Enter zone for client VM: " ZONE_B
 
 gcloud compute instances create vm-client-internal \
   --zone=$ZONE_B \
@@ -193,7 +206,9 @@ gcloud compute instance-groups managed create mig-alb-api-a \
   --template=template-alb-api \
   --size=2 \
   --region=$REGION_A \
-  --quiet 2>&1
+  --quiet
+
+check_status "mig-alb-api-a created"
 
 gcloud compute instance-groups managed set-named-ports mig-alb-api-a \
   --named-ports=http80:80 \
@@ -209,7 +224,9 @@ gcloud compute instance-groups managed create mig-alb-api-b \
   --template=template-alb-api \
   --size=2 \
   --region=$REGION_B \
-  --quiet 2>&1
+  --quiet
+
+check_status "mig-alb-api-b created"
 
 gcloud compute instance-groups managed set-named-ports mig-alb-api-b \
   --named-ports=http80:80 \
@@ -237,7 +254,9 @@ gcloud compute backend-services create service-alb-global \
   --protocol=HTTP \
   --health-checks=http-check-alb \
   --global-health-checks \
-  --quiet 2>&1
+  --quiet
+
+check_status "service-alb-global created"
 
 # Add Region A backend — Rate mode, max-rate-per-instance RPS=1
 gcloud compute backend-services add-backend service-alb-global \
@@ -307,7 +326,9 @@ gcloud compute forwarding-rules create rule-alb-global \
   --address=ip-alb-global \
   --target-https-proxy=proxy-alb-global \
   --ports=443 \
-  --quiet 2>&1
+  --quiet
+
+check_status "rule-alb-global created"
 
 echo "${GREEN_TEXT}  ✔ HTTPS frontend configured on port 443${RESET_FORMAT}"
 echo ""
