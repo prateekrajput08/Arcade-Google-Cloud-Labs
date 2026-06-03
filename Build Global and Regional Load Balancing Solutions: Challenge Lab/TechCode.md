@@ -59,33 +59,23 @@ gcloud compute firewall-rules create fw-allow-proxy-subnet-internal \
 ```
 ---
 
-### 3. Create Proxy-Only Subnet
+### 3. Create Health Check
+```
+read -p "Enter REGION_A: " REGION_A
+read -p "Enter REGION_B: " REGION_B
 
-Go to:
-VPC Network → VPC Networks → lb-network
+echo "export REGION_A=$REGION_A" >> ~/.bashrc
+echo "export REGION_B=$REGION_B" >> ~/.bashrc
 
-Create Proxy-only Subnet:
-- Name: proxy-subnet-internal
-- Region: Region B
-- Purpose: Regional Managed Proxy
-- Role: Active
-- CIDR: 10.129.0.0/23
+source ~/.bashrc
 
+gcloud compute health-checks create tcp hc-internal-proxy \
+    --region=$REGION \
+    --port=80
+```
 ---
 
-### 4. Create Health Check
-
-Go to:
-Network Services → Health Checks
-
-Create:
-- Name: hc-internal-proxy
-- Protocol: TCP
-- Port: 80
-
----
-
-### 5. Reserve Internal Static IP
+### 4. Reserve Internal Static IP
 
 Go to:
 VPC Network → IP Addresses → Reserve Internal
@@ -99,7 +89,7 @@ Create:
 
 ---
 
-### 6. Create Regional Internal Proxy Network Load Balancer
+### 5. Create Regional Internal Proxy Network Load Balancer
 
 Go to:
 Network Services → Load Balancing
@@ -123,16 +113,8 @@ Create the Load Balancer.
 
 ---
 
-### 7. Create Client VM
+### 6. Create Client VM
 ```
-read -p "Enter REGION_A: " REGION_A
-read -p "Enter REGION_B: " REGION_B
-
-echo "export REGION_A=$REGION_A" >> ~/.bashrc
-echo "export REGION_B=$REGION_B" >> ~/.bashrc
-
-source ~/.bashrc
-
 gcloud compute instances create vm-client-internal \
    --zone=${REGION_B}-b \
    --machine-type=e2-micro \
@@ -142,7 +124,7 @@ gcloud compute instances create vm-client-internal \
 ```
 ---
 
-### 8. Validate Access
+### 7. Validate Access
 
 SSH into vm-client-internal
 
