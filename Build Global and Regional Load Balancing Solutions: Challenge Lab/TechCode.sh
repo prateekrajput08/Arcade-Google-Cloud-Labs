@@ -27,13 +27,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo -e "${YELLOW_TEXT}Enter Lab Regions${RESET_FORMAT}"
-read -p "Enter Region A: " REGION_A
-read -p "Enter Region B: " REGION_B
-
-export REGION_A
-export REGION_B
-
 echo -e "${GREEN_TEXT}REGION_A=$REGION_A${RESET_FORMAT}"
 echo -e "${GREEN_TEXT}REGION_B=$REGION_B${RESET_FORMAT}"
 
