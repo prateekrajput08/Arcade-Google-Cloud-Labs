@@ -97,7 +97,8 @@ gcloud compute backend-services add-backend internal-proxy-backend \
 echo "${YELLOW_TEXT}${BOLD_TEXT}Open:
 https://console.cloud.google.com/net-services/loadbalancing/list/loadBalancers
 
-echo Frontend:
+Frontend:
+
 Name: rule-internal-proxy
 IP Address: ip-internal-proxy
 Protocol: TCP
