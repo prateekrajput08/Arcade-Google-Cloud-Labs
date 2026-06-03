@@ -57,6 +57,8 @@ gcloud compute instance-groups managed set-named-ports mig-alb-api-b \
     --named-ports=http80:80 \
     --region=$REGION_B
 
+sleep 60
+
 echo -e "${BLUE_TEXT}Creating Health Check...${RESET_FORMAT}"
 gcloud compute health-checks create http http-check-alb \
     --port=80
@@ -103,8 +105,7 @@ gcloud compute firewall-rules create fw-allow-health-check-and-proxy \
     --direction=INGRESS \
     --action=ALLOW \
     --rules=tcp:80 \
-    --source-ranges=130.211.0.0/22,35.191.0.0/16 \
-    --target-tags=tag-alb-api
+    --source-ranges=130.211.0.0/22,35.191.0.0/16 
 
 echo -e "${BLUE_TEXT}Creating Global IP...${RESET_FORMAT}"
 gcloud compute addresses create ip-alb-global \
@@ -127,8 +128,10 @@ gcloud compute forwarding-rules create https-forwarding-rule \
     --address=ip-alb-global
 
 echo -e "${MAGENTA_TEXT}Checking Backend Health...${RESET_FORMAT}"
-gcloud compute backend-services get-health service-alb-global \
-    --global
+echo "Waiting 120 seconds for health checks..."
+sleep 120
+
+gcloud compute backend-services get-health service-alb-global --global
 
 echo -e "${MAGENTA_TEXT}Checking Port Name...${RESET_FORMAT}"
 gcloud compute backend-services describe service-alb-global \
