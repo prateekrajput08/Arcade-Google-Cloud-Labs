@@ -5,14 +5,18 @@
 <blockquote style="background-color: #fffbea; border-left: 6px solid #f7c948; padding: 1em; font-size: 15px; line-height: 1.5;">
   <strong>Educational Purpose Only:</strong> This script and guide are provided for the educational purposes to help you understand the lab services and boost your career. Before using the script, please open and review it to familiarize yourself with Google Cloud services.
   <br><br>
-  <strong>Terms Compliance:</strong> Always ensure compliance with Qwiklabs' terms of service and YouTube's community guidelines. The aim is to enhance your learning experience — not to circumvent it.
+  <strong>Terms Compliance:</strong> Always ensure compliance with Qwiklabs' terms of service and YouTube's community guidelines. The aim is to enhance your learning experience — not to circumvent it.  
 </blockquote>
 
 ---
 
+Copyright © 2025–2026 Prateek Rajput (Tech & Code)<br.
+All Rights Reserved.<br>
+No permission is granted to copy, redistribute, re-upload, modify, or use this code in YouTube videos, repositories, websites, courses, or other content without explicit written permission from the copyright owner.
+
 <div style="padding: 15px; margin: 10px 0;">
   
-## Task 1: Secure Internal Transaction Processor
+## Haa bhai aa gye copy karne, thodi mehnat bhi kr liya kro 
 
 ### 1. Create Regional MIG
 
