@@ -132,24 +132,38 @@ sleep 120
 gcloud compute backend-services get-health service-alb-global --global
 
 echo -e "${MAGENTA_TEXT}Checking Port Name...${RESET_FORMAT}"
+# Create SSH key automatically if needed
+mkdir -p ~/.ssh
+ssh-keygen -t rsa -f ~/.ssh/google_compute_engine -N "" -q <<< y >/dev/null 2>&1 || true
+
 LB_IP=$(gcloud compute addresses describe ip-alb-global \
-    --global \
-    --format="get(address)")
+  --global \
+  --format="get(address)")
 
-timeout 10 bash -c '
-while true; do
-    curl -k -s https://'"$LB_IP"' | grep "Hello from"
-    sleep 0.5
-done
-'
+INSTANCE=$(gcloud compute instances list \
+  --filter="name~'^mig-alb-api-a'" \
+  --format="value(name)" | head -1)
 
+ZONE=$(gcloud compute instances list \
+  --filter="name=$INSTANCE" \
+  --format="value(zone.basename())")
 
-echo "Watching traffic for 10 seconds..."
-sleep 10
+(
+  sleep 10
 
-gcloud compute ssh mig-alb-api-a-tp34 \
-    --zone=us-west1-b \
+  gcloud compute ssh "$INSTANCE" \
+    --zone="$ZONE" \
+    --quiet \
     --command="sudo systemctl stop nginx"
+
+  echo ""
+  echo "===== Nginx stopped on $INSTANCE ====="
+) &
+
+while true; do
+  curl -k -s https://$LB_IP | grep "Hello from"
+  sleep 0.5
+done
 
 # Final message
 echo
