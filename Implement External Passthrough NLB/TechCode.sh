@@ -78,6 +78,22 @@ gcloud compute health-checks create tcp basic-http-check \
 
 echo "${GREEN_TEXT}✔ Health check basic-http-check created${RESET_FORMAT}"
 
+# ─── TASK 2: Static IP ────────────────────────────────────────────────────────
+
+echo ""
+echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 2] Reserving Static External IP...${RESET_FORMAT}"
+
+gcloud compute addresses create network-lb-ip \
+  --region="$REGION" \
+  --project="$PROJECT_ID"
+
+LB_IP=$(gcloud compute addresses describe network-lb-ip \
+  --region="$REGION" \
+  --format="value(address)" \
+  --project="$PROJECT_ID")
+
+echo "${GREEN_TEXT}✔ Static IP reserved: ${BOLD_TEXT}$LB_IP${RESET_FORMAT}"
+
 # ─── TASK 2: Backend Service ──────────────────────────────────────────────────
 
 echo ""
@@ -85,10 +101,9 @@ echo "${CYAN_TEXT}${BOLD_TEXT}[TASK 2] Creating Backend Service...${RESET_FORMAT
 
 gcloud compute backend-services create network-lb-backend-service \
   --protocol=TCP \
-  --load-balancing-scheme=EXTERNAL_MANAGED \
+  --region="$REGION" \
   --health-checks=basic-http-check \
   --health-checks-region="$REGION" \
-  --region="$REGION" \
   --project="$PROJECT_ID"
 
 echo "${YELLOW_TEXT}Adding backends...${RESET_FORMAT}"
