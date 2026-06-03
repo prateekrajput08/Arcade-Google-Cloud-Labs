@@ -91,25 +91,19 @@ Create:
 
 ### 5. Create Regional Internal Proxy Network Load Balancer
 
-Go to:
-Network Services → Load Balancing
+```
+gcloud compute backend-services create internal-proxy-backend \
+    --load-balancing-scheme=INTERNAL_MANAGED \
+    --protocol=TCP \
+    --region=$REGION_B \
+    --health-checks=hc-internal-proxy \
+    --health-checks-region=$REGION_B
 
-Create:
-- Type: Regional Internal Proxy Network Load Balancer
-
-Backend:
-- Instance Group: mig-proxy-internal
-- Named Port: tcp80
-- Health Check: hc-internal-proxy
-
-Frontend:
-- Name: rule-internal-proxy
-- IP Address: ip-internal-proxy
-- Protocol: TCP
-- Port: 110
-- Global Access: Disabled
-
-Create the Load Balancer.
+gcloud compute backend-services add-backend internal-proxy-backend \
+    --instance-group=mig-proxy-internal \
+    --instance-group-zone=${REGION_B}-b \
+    --region=$REGION_B
+```
 
 ---
 
