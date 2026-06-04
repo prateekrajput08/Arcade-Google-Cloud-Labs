@@ -42,6 +42,8 @@ echo "${YELLOW_TEXT}Project ID : ${PROJECT_ID}${RESET_FORMAT}"
 echo "${YELLOW_TEXT}Bucket     : ${BUCKET_NAME}${RESET_FORMAT}"
 echo "${YELLOW_TEXT}Region     : ${REGION}${RESET_FORMAT}"
 
+gcloud config set compute/region $REGION
+
 run_step "Cloning synthtool repository..." \
 "git clone https://github.com/googleapis/synthtool"
 
