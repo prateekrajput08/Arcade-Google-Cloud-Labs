@@ -17,6 +17,7 @@ No permission is granted to copy, redistribute, re-upload, modify, or use this c
 <div style="padding: 15px; margin: 10px 0;">
   
 ## Haa bhai aa gye copy karne, thodi mehnat bhi kr liya kro 
+## Kitne gire hue log jote h, khud copy karne ke baad bolte h, ye to vhi baat ho gai ulta chor kotwal ko daante
 
 ### 1. Create Regional MIG
 
