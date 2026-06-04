@@ -19,6 +19,7 @@ echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Enable the Cloud Dataproc API...${RESET_FORMAT}"
 gcloud services enable dataproc.googleapis.com
+sleep 60
 
 PROJECT_ID=$(gcloud config get-value project)
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
@@ -37,16 +38,10 @@ REGION=${ZONE%-*}
 echo "Zone: $ZONE"
 echo "Region: $REGION"
 
-REGION=${ZONE%-*}
-
-echo "Zone: $ZONE"
-echo "Region: $REGION"
-
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating Cluster...${RESET_FORMAT}"
 gcloud dataproc clusters create example-cluster \
     --project="$PROJECT_ID" \
     --region="$REGION" \
-    --zone="$ZONE" \
     --master-machine-type=e2-standard-2 \
     --master-boot-disk-type=pd-standard \
     --master-boot-disk-size=30GB \
