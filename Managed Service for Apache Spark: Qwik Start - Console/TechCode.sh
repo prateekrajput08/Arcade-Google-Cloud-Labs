@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 RED_TEXT=$'\033[0;91m'
@@ -19,7 +20,7 @@ echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Enable the Cloud Dataproc API...${RESET_FORMAT}"
 gcloud services enable dataproc.googleapis.com
-sleep 60
+sleep 20
 
 PROJECT_ID=$(gcloud config get-value project)
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
@@ -38,6 +39,15 @@ REGION=${ZONE%-*}
 echo "Zone: $ZONE"
 echo "Region: $REGION"
 
+# Delete cluster if already exists
+if gcloud dataproc clusters describe example-cluster --region="$REGION" --project="$PROJECT_ID" &>/dev/null; then
+  echo "${YELLOW_TEXT}${BOLD_TEXT}Deleting existing cluster...${RESET_FORMAT}"
+  gcloud dataproc clusters delete example-cluster \
+    --region="$REGION" \
+    --project="$PROJECT_ID" \
+    --quiet
+fi
+
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating Cluster...${RESET_FORMAT}"
 gcloud dataproc clusters create example-cluster \
     --project="$PROJECT_ID" \
@@ -50,23 +60,15 @@ gcloud dataproc clusters create example-cluster \
     --worker-boot-disk-size=30GB \
     --num-workers=2
 
-gcloud dataproc jobs submit spark \
+JOB_ID=$(gcloud dataproc jobs submit spark \
   --cluster=example-cluster \
   --region=$REGION \
   --class=org.apache.spark.examples.SparkPi \
   --jars=file:///usr/lib/spark/examples/jars/spark-examples.jar \
-  -- 1000
-
-gcloud dataproc jobs list --region=$REGION
-
-JOB_ID=$(gcloud dataproc jobs list \
-  --region=$REGION \
-  --sort-by=~status.stateStartTime \
-  --limit=1 \
-  --format="value(reference.jobId)")
-
-gcloud dataproc jobs wait $JOB_ID \
-  --region=$REGION
+  --format="value(reference.jobId)" \
+  -- 1000)
+echo "Job ID: $JOB_ID"
+gcloud dataproc jobs wait "$JOB_ID" --region=$REGION
 
 gcloud dataproc clusters update example-cluster \
   --region=$REGION \
