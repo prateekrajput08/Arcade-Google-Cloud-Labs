@@ -29,7 +29,15 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Getting Lab Credentials...${RESET_FORMAT}"
 
-ZONE=$(gcloud config get-value compute/zone)
+ZONE=$(gcloud compute instances list --limit=1 --format="value(zone.basename())")
+
+if [ -z "$ZONE" ]; then
+  ZONE=$(gcloud compute zones list \
+    --filter="status=UP" \
+    --limit=1 \
+    --format="value(name)")
+fi
+
 REGION=${ZONE%-*}
 
 echo "Zone: $ZONE"
