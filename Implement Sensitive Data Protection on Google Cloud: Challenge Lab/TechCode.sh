@@ -8,6 +8,7 @@ BLUE_TEXT=$'\033[0;94m'
 
 BOLD_TEXT=$'\033[1m'
 RESET_FORMAT=$'\033[0m'
+UNDERLINE_TEXT=$'\033[4m'
 
 clear
 
@@ -22,45 +23,94 @@ export TOKEN=$(gcloud auth print-access-token)
 export BUCKET_NAME="$(gcloud config get-value project)-redact"
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Redact sensitive data from text content${RESET_FORMAT}"
-cat > redact-request.json <<'EOF'
+cat > redact-request.json <<EOF_END
 {
-  "item": {
-    "value": "Please update my records with the following information:\n Email address: foo@example.com,\nNational Provider Identifier: 1245319599"
-  },
-  "deidentifyConfig": {
-    "infoTypeTransformations": {
-      "transformations": [{
-        "primitiveTransformation": {
-          "replaceWithInfoTypeConfig": {}
-        }
-      }]
-    }
-  },
-  "inspectConfig": {
-    "infoTypes": [
-      {
-        "name": "EMAIL_ADDRESS"
-      },
-      {
-        "name": "US_HEALTHCARE_NPI"
+	"item": {
+		"value": "Please update my records with the following information:\n Email address: foo@example.com,\nNational Provider Identifier: 1245319599"
+	},
+	"deidentifyConfig": {
+		"infoTypeTransformations": {
+			"transformations": [{
+				"primitiveTransformation": {
+					"replaceWithInfoTypeConfig": {}
+				}
+			}]
+		}
+	},
+	"inspectConfig": {
+		"infoTypes": [{
+				"name": "EMAIL_ADDRESS"
+			},
+			{
+				"name": "US_HEALTHCARE_NPI"
+			}
+		]
+	}
+}
+EOF_END
+
+curl -s \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  https://dlp.googleapis.com/v2/projects/$PROJECT_ID/content:deidentify \
+  -d @redact-request.json -o redact-response.txt
+
+gsutil mb -l us gs://$BUCKET_NAME 2>/dev/null || true
+gsutil cp redact-response.txt gs://$BUCKET_NAME
+
+echo "${YELLOW_TEXT}${BOLD_TET}Creating structured data deidentify template${RESET_FORMAT}"
+cat <<EOF > template.json
+{
+  "deidentifyTemplate": {
+    "deidentifyConfig": {
+      "recordTransformations": {
+        "fieldTransformations": [
+          {
+            "fields": [
+              { "name": "bank name" },
+              { "name": "zip code" }
+            ],
+            "primitiveTransformation": {
+              "characterMaskConfig": {
+                "maskingCharacter": "#"
+              }
+            }
+          },
+          {
+            "fields": [
+              { "name": "message" }
+            ],
+            "infoTypeTransformations": {
+              "transformations": [
+                {
+                  "primitiveTransformation": {
+                    "replaceWithInfoTypeConfig": {}
+                  }
+                }
+              ]
+            }
+          }
+        ]
       }
-    ]
-  }
+    },
+    "displayName": "structured_data_template"
+  },
+  "locationId": "us",
+  "templateId": "structured_data_template"
 }
 EOF
 
-curl -s -H "Authorization: Bearer $TOKEN" \
+curl -X POST -s \
+-H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
-https://dlp.googleapis.com/v2/projects/$PROJECT_ID/content:deidentify \
--d @redact-request.json > redact-response.txt
-
-gsutil cp redact-response.txt gs://$BUCKET_NAME/
+-d @template.json \
+"https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/deidentifyTemplates"
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating DLP inspection templates...${RESET_FORMAT}"
-cat > unstructured_data_template.json <<'EOF'
+
+cat > template.json <<'EOF_END'
 {
   "deidentifyTemplate": {
-    "displayName": "unstructured_data_template",
     "deidentifyConfig": {
       "infoTypeTransformations": {
         "transformations": [
@@ -75,19 +125,21 @@ cat > unstructured_data_template.json <<'EOF'
           }
         ]
       }
-    }
+    },
+    "displayName": "unstructured_data_template"
   },
   "templateId": "unstructured_data_template"
 }
-EOF
+EOF_END
 
-curl -X POST \
--H "Authorization: Bearer $(gcloud auth print-access-token)" \
+curl -X POST -s \
+-H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
--d @unstructured_data_template.json \
-"https://dlp.googleapis.com/v2/projects/${PROJECT_ID}/locations/us/deidentifyTemplates"
+-d @template.json \
+"https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/deidentifyTemplates"
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Configuring a job trigger to run DLP inspection...${RESET_FORMAT}"
+
 cat > job-configuration.json << EOM
 {
   "triggerId": "dlp_job",
@@ -382,7 +434,7 @@ cat > job-configuration.json << EOM
           ],
           "fileSet": {
             "regexFileSet": {
-              "bucketName": "$PROJECT_ID-input",
+              "bucketName": "$BUCKET_NAME",
               "includeRegex": [],
               "excludeRegex": []
             }
@@ -395,21 +447,20 @@ cat > job-configuration.json << EOM
 }
 EOM
 
-# Step 9: Send job configuration to DLP API
-echo "${YELLOW_TEXT}${BOLD_TEXT}Sending job configuration to DLP API...${RESET_FORMAT}"
 curl -s \
 -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
 https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/jobTriggers \
 -d @job-configuration.json
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Activating DLP job trigger...${RESET_FORMAT}"
 curl --request POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  -H "X-Goog-User-Project: $DEVSHELL_PROJECT_ID" \
-  "https://dlp.googleapis.com/v2/projects/$DEVSHELL_PROJECT_ID/locations/us/jobTriggers/dlp_job:activate"
+  -H "X-Goog-User-Project: $PROJECT_ID" \
+  "https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/jobTriggers/dlp_job:activate"
+
+echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Open Below Link and Follow Video...${RESET_FORMAT}"
 echo "https://console.cloud.google.com/security/dlp/landing?project=$PROJECT_ID"
