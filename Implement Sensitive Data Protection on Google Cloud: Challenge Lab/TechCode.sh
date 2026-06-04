@@ -22,7 +22,7 @@ export PROJECT_ID=$(gcloud config get-value project)
 export TOKEN=$(gcloud auth print-access-token)
 export BUCKET_NAME="$(gcloud config get-value project)-redact"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Redact sensitive data from text content${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating redact-request.json file${RESET_FORMAT}"
 cat > redact-request.json <<EOF_END
 {
 	"item": {
@@ -49,16 +49,17 @@ cat > redact-request.json <<EOF_END
 }
 EOF_END
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Calling DLP API to deidentify content${RESET_FORMAT}"
 curl -s \
-  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   https://dlp.googleapis.com/v2/projects/$PROJECT_ID/content:deidentify \
   -d @redact-request.json -o redact-response.txt
 
-gsutil mb -l us gs://$BUCKET_NAME 2>/dev/null || true
+echo "${YELLOW_TEXT}${BOLD_TEXT}Uploading deidentified content to GCS${RESET_FORMAT}"
 gsutil cp redact-response.txt gs://$BUCKET_NAME
 
-echo "${YELLOW_TEXT}${BOLD_TET}Creating structured data deidentify template${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating structured data deidentify template${RESET_FORMAT}"
 cat <<EOF > template.json
 {
   "deidentifyTemplate": {
@@ -100,14 +101,14 @@ cat <<EOF > template.json
 }
 EOF
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Uploading structured template to DLP API${RESET_FORMAT}"
 curl -X POST -s \
 -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
 -d @template.json \
 "https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/deidentifyTemplates"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating DLP inspection templates...${RESET_FORMAT}"
-
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating unstructured data template${RESET_FORMAT}"
 cat > template.json <<'EOF_END'
 {
   "deidentifyTemplate": {
@@ -132,14 +133,14 @@ cat > template.json <<'EOF_END'
 }
 EOF_END
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Uploading unstructured template to DLP API${RESET_FORMAT}"
 curl -X POST -s \
 -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
 -d @template.json \
 "https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/deidentifyTemplates"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Configuring a job trigger to run DLP inspection...${RESET_FORMAT}"
-
+echo "${YELLOW_TEXT}${BOLD_TEXT}Creating job-configuration.json for scheduled DLP job${RESET_FORMAT}"
 cat > job-configuration.json << EOM
 {
   "triggerId": "dlp_job",
@@ -434,7 +435,7 @@ cat > job-configuration.json << EOM
           ],
           "fileSet": {
             "regexFileSet": {
-              "bucketName": "$BUCKET_NAME",
+              "bucketName": "$PROJECT_ID-input",
               "includeRegex": [],
               "excludeRegex": []
             }
@@ -447,19 +448,29 @@ cat > job-configuration.json << EOM
 }
 EOM
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Sending job configuration to DLP API...${RESET_FORMAT}"
 curl -s \
 -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
 -H "Content-Type: application/json" \
 https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/jobTriggers \
 -d @job-configuration.json
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Waiting 60 seconds to ensure job trigger is ready${RESET_FORMAT}"
+echo
+for ((i=60; i>=0; i--)); do
+  echo -ne "\r${BOLD}${BOLD_TEXT}Time remaining${RESET} $i ${BOLD}${BOLD_TEXT}seconds${RESET_FORMAT}"
+  sleep 1
+done
+echo -e "\n${GREEN_TEXT}${BOLD_TEXT}Done!${RESET}"
+echo
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Activating DLP job trigger...${RESET}"
 curl --request POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
-  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "X-Goog-User-Project: $PROJECT_ID" \
   "https://dlp.googleapis.com/v2/projects/$PROJECT_ID/locations/us/jobTriggers/dlp_job:activate"
-
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Open Below Link and Follow Video...${RESET_FORMAT}"
