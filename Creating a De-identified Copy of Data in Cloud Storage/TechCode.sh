@@ -104,7 +104,7 @@ curl -X POST \
 "https://dlp.googleapis.com/v2/projects/${PROJECT_ID}/locations/global/deidentifyTemplates"
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Open Below Link and Follow Video...${RESET_FORMAT}"
-echo "https://console.cloud.google.com/<PATH>?project=${PROJECT_ID}"
+echo "https://console.cloud.google.com/security/dlp/"
 
 # Final message
 echo
