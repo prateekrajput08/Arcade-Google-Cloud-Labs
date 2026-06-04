@@ -17,12 +17,11 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating Bucket...${RESET_FORMAT}"
-
+PROJECT_ID="$(gcloud config get-value project)"
 BUCKET_NAME="$(gcloud config get-value project)-bucket"
 
 gcloud storage buckets create gs://$BUCKET_NAME \
     --location=US \
-    --public-access-prevention=unspecified
 
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}Initializing Dataprep...${RESET_FORMAT}"
@@ -32,7 +31,7 @@ gcloud beta services identity create \
 
 echo
 echo "${YELLOW_TEXT}${BOLD_TEXT}Open the following link and complete the setup:${RESET_FORMAT}"
-echo "https://console.cloud.google.com/marketplace/product/trifacta/trifacta-enterprise"
+echo "https://console.cloud.google.com/terms/service/dataprep?project=${PROJECT_ID}&next=%2Fdataprep"
 
 # Final message
 echo
