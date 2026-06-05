@@ -40,7 +40,8 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
   --role="roles/storage.admin"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Creating Cluster...${RESET_FORMAT}"
+echo "${YELLOW_TEXT}${BOLD_TEXT}Open Below Link And Follow Video...${RESET_FORMAT}"
+echo "https://console.cloud.google.com/dataproc/clusters?project=$PROJECT_ID"
 
 read -p "Press Enter to continue..."
 
