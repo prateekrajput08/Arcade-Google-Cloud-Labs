@@ -22,43 +22,64 @@ echo "${YELLOW_TEXT}${BOLD_TEXT}Enable the Cloud Dataproc API...${RESET_FORMAT}"
 gcloud services enable dataproc.googleapis.com
 sleep 20
 
+
+echo "${YELLOW_TEXT}${BOLD_TEXT}Getting Lab Credentials...${RESET_FORMAT}"
+
 PROJECT_ID=$(gcloud config get-value project)
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+ZONE=$(gcloud compute project-info describe \
+  --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+REGION=${ZONE%-*}
+
+echo "Zone: $ZONE"
+echo "Region: $REGION"
+echo "Project id: $PROJECT_ID"
+echo "Project Number: $PROJECT_NUMBER"
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
   --role="roles/storage.admin"
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Getting Lab Credentials...${RESET_FORMAT}"
-
-ZONE=$(gcloud compute project-info describe \
-  --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-
-REGION=${ZONE%-*}
-
-echo "Zone: $ZONE"
-echo "Region: $REGION"
-
-# Delete cluster if already exists
-if gcloud dataproc clusters describe example-cluster --region="$REGION" --project="$PROJECT_ID" &>/dev/null; then
-  echo "${YELLOW_TEXT}${BOLD_TEXT}Deleting existing cluster...${RESET_FORMAT}"
-  gcloud dataproc clusters delete example-cluster \
-    --region="$REGION" \
-    --project="$PROJECT_ID" \
-    --quiet
-fi
-
 echo "${YELLOW_TEXT}${BOLD_TEXT}Creating Cluster...${RESET_FORMAT}"
-gcloud dataproc clusters create example-cluster \
-    --project="$PROJECT_ID" \
-    --region="$REGION" \
-    --master-machine-type=e2-standard-2 \
-    --master-boot-disk-type=pd-standard \
-    --master-boot-disk-size=30GB \
-    --worker-machine-type=e2-standard-2 \
-    --worker-boot-disk-type=pd-standard \
-    --worker-boot-disk-size=30GB \
-    --num-workers=2
+
+MAX_RETRIES=3
+ATTEMPT=1
+
+while [ $ATTEMPT -le $MAX_RETRIES ]; do
+    echo "Cluster creation attempt $ATTEMPT of $MAX_RETRIES..."
+
+    gcloud dataproc clusters create example-cluster \
+        --project="$PROJECT_ID" \
+        --region="$REGION" \
+        --master-machine-type=e2-standard-2 \
+        --master-boot-disk-type=pd-standard \
+        --master-boot-disk-size=30GB \
+        --worker-machine-type=e2-standard-2 \
+        --worker-boot-disk-type=pd-standard \
+        --worker-boot-disk-size=30GB \
+        --num-workers=2
+
+    if [ $? -eq 0 ]; then
+        echo "${GREEN_TEXT}${BOLD_TEXT}Cluster created successfully!${RESET_FORMAT}"
+        break
+    fi
+
+    echo "${RED_TEXT}${BOLD_TEXT}Cluster creation failed.${RESET_FORMAT}"
+    echo "${YELLOW_TEXT}${BOLD_TEXT}Deleting any existing/partial cluster...${RESET_FORMAT}"
+
+    gcloud dataproc clusters delete example-cluster \
+        --region="$REGION" \
+        --project="$PROJECT_ID" \
+        --quiet 2>/dev/null || true
+
+    ATTEMPT=$((ATTEMPT + 1))
+    sleep 10
+done
+
+if [ $ATTEMPT -gt $MAX_RETRIES ]; then
+    echo "${RED_TEXT}${BOLD_TEXT}Failed to create cluster after $MAX_RETRIES attempts.${RESET_FORMAT}"
+    exit 1
+fi
 
 JOB_ID=$(gcloud dataproc jobs submit spark \
   --cluster=example-cluster \
