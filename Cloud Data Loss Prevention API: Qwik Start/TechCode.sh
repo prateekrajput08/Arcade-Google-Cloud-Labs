@@ -30,7 +30,8 @@ echo
 
 gcloud auth list
 
-export PROJECT_ID=$DEVSHELL_PROJECT_ID
+PROJECT_ID=$(gcloud config get-value project)
+echo "${GREEN_TEXT}${BOLD_TEXT}Project: $PROJECT_ID${RESET_FORMAT}"
 
 cat > inspect-request.json <<EOF_CP
 {
