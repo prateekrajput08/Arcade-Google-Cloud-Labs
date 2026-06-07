@@ -25,29 +25,7 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-
-BLACK=`tput setaf 0`
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-YELLOW=`tput setaf 3`
-BLUE=`tput setaf 4`
-MAGENTA=`tput setaf 5`
-CYAN=`tput setaf 6`
-WHITE=`tput setaf 7`
-
-BG_BLACK=`tput setab 0`
-BG_RED=`tput setab 1`
-BG_GREEN=`tput setab 2`
-BG_YELLOW=`tput setab 3`
-BG_BLUE=`tput setab 4`
-BG_MAGENTA=`tput setab 5`
-BG_CYAN=`tput setab 6`
-BG_WHITE=`tput setab 7`
-
-BOLD=`tput bold`
-RESET=`tput sgr0`
-
-
+echo "${YELLOW_TEXT}${BOLD_TEXT}Getting Lab Credentials...${RESET_FORMAT}"
  export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 
@@ -55,7 +33,7 @@ cat > prepare_disk.sh <<'EOF_END'
 
 gcloud auth login --quiet
 
-export PROJECT_ID=$(gcloud config get-value project)
+export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
 
 export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
@@ -68,9 +46,9 @@ gcloud iam service-accounts list  --filter "displayName=devops"
 
 SA=$(gcloud iam service-accounts list --format="value(email)" --filter "displayName=devops")
 
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SA --role=roles/iam.serviceAccountUser
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member serviceAccount:$SA --role=roles/iam.serviceAccountUser
 
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SA --role=roles/compute.instanceAdmin
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member serviceAccount:$SA --role=roles/compute.instanceAdmin
 
 gcloud compute instances create vm-2 --machine-type e2-micro --service-account $SA --zone $ZONE --scopes "https://www.googleapis.com/auth/compute"
 
@@ -83,16 +61,16 @@ includedPermissions:
 - cloudsql.instances.get
 EOF
 
-gcloud iam roles create editor --project $PROJECT_ID \
+gcloud iam roles create editor --project $DEVSHELL_PROJECT_ID \
 --file role-definition.yaml
 
 gcloud iam service-accounts create bigquery-qwiklab --display-name bigquery-qwiklab
 
 SA=$(gcloud iam service-accounts list --format="value(email)" --filter "displayName=bigquery-qwiklab")
 
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.dataViewer
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.dataViewer
 
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.user
+gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.user
 
 gcloud compute instances create bigquery-instance --service-account=$SA --scopes=https://www.googleapis.com/auth/bigquery --zone=$ZONE
 EOF_END
