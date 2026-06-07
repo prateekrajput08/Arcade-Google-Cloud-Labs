@@ -97,6 +97,9 @@ source myvenv/bin/activate
 pip install --upgrade pip
 pip install google-cloud-bigquery pandas pyarrow db-dtypes google-auth
 
+
+export ZONE=$(gcloud compute project-info describe \
+--format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 export PROJECT_ID=$(gcloud config get-value project)
 export SA_EMAIL=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" -H "Metadata-Flavor: Google")
 
