@@ -67,7 +67,8 @@ gcloud iam roles create editor --project $DEVSHELL_PROJECT_ID \
 --file role-definition.yaml
 
 gcloud iam service-accounts create bigquery-qwiklab --display-name bigquery-qwiklab
-
+sleep 15
+echo "${YELLOW_TEXT}${BOLD_TEXT}SA: $SA_EMAIL${RESET_FORMAT}"
 SA=$(gcloud iam service-accounts list --format="value(email)" --filter "displayName=bigquery-qwiklab")
 
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.dataViewer
@@ -101,7 +102,8 @@ pip install google-cloud-bigquery pandas pyarrow db-dtypes google-auth
 export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
 export PROJECT_ID=$(gcloud config get-value project)
-export SA_EMAIL=$(curl -s "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" -H "Metadata-Flavor: Google")
+export SA_EMAIL=$(gcloud config get-value account 2>/dev/null || curl -s "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" -H "Metadata-Flavor: Google")
+echo "SA: $SA_EMAIL"
 
 cat > query.py <<EOF
 from google.auth import compute_engine
