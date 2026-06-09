@@ -17,9 +17,6 @@ echo "${CYAN_TEXT}${BOLD_TEXT}          SUBSCRIBE TECH & CODE - INITIATING EXECU
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-echo "${YELLOW_TEXT}${BOLD_TEXT}Connecting to VM Instance...${RESET_FORMAT}"
-gcloud compute ssh lab-vm
-
 echo "${YELLOW_TEXT}${BOLD_TEXT}Enter the Following Details...${RESET_FORMAT}"
 read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter API_KEY: ${RESET_FORMAT}" API_KEY
 read -p "${YELLOW_TEXT}${BOLD_TEXT}Enter task_2_file_name: ${RESET_FORMAT}" FILE_NAME
