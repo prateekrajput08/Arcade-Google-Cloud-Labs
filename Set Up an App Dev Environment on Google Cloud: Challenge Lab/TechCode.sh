@@ -1,34 +1,23 @@
 #!/bin/bash
-BLACK_TEXT=$'\033[0;90m'
+
 RED_TEXT=$'\033[0;91m'
 GREEN_TEXT=$'\033[0;92m'
 YELLOW_TEXT=$'\033[0;93m'
-BLUE_TEXT=$'\033[0;94m'
-MAGENTA_TEXT=$'\033[0;95m'
 CYAN_TEXT=$'\033[0;96m'
-WHITE_TEXT=$'\033[0;97m'
-TEAL_TEXT=$'\033[38;5;50m'
-PURPLE_TEXT=$'\033[0;35m'
-GOLD_TEXT=$'\033[0;33m'
-LIME_TEXT=$'\033[0;92m'
-MAROON_TEXT=$'\033[0;91m'
-NAVY_TEXT=$'\033[0;94m'
+BLUE_TEXT=$'\033[0;94m'
 
 BOLD_TEXT=$'\033[1m'
-UNDERLINE_TEXT=$'\033[4m'
-BLINK_TEXT=$'\033[5m'
-NO_COLOR=$'\033[0m'
 RESET_FORMAT=$'\033[0m'
-REVERSE_TEXT=$'\033[7m'
+UNDERLINE_TEXT=$'\033[4m'
 
 clear
-# Welcome message
+
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION...  ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}          SUBSCRIBE TECH & CODE - INITIATING EXECUTION...         ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-# ✅ Added user input section (no existing line changed)
+
 echo "${YELLOW_TEXT}${BOLD_TEXT}Enter required details:${RESET_FORMAT}"
 read -p "Enter USER_2 (email): " USER_2
 read -p "Enter ZONE (e.g. us-central1-a): " ZONE
@@ -84,70 +73,66 @@ cd lol
 
 cat > index.js <<'EOF_END'
 const functions = require('@google-cloud/functions-framework');
-const crc32 = require("fast-crc32c");
 const { Storage } = require('@google-cloud/storage');
-const gcs = new Storage();
 const { PubSub } = require('@google-cloud/pubsub');
-const imagemagick = require("imagemagick-stream");
+const sharp = require('sharp');
 
-functions.cloudEvent('$FUNCTION_NAME', cloudEvent => {
+functions.cloudEvent('memories-thumbnail-generator', async cloudEvent => {
   const event = cloudEvent.data;
 
-  console.log(`Event: ${event}`);
+  console.log(`Event: ${JSON.stringify(event)}`);
   console.log(`Hello ${event.bucket}`);
 
   const fileName = event.name;
   const bucketName = event.bucket;
-  const size = "64x64"
-  const bucket = gcs.bucket(bucketName);
-  const topicName = "$TOPIC_NAME";
+  const size = "64x64";
+  const bucket = new Storage().bucket(bucketName);
+  const topicName = "topic-memories-522";
   const pubsub = new PubSub();
-  if ( fileName.search("64x64_thumbnail") == -1 ){
+
+  if (fileName.search("64x64_thumbnail") === -1) {
     // doesn't have a thumbnail, get the filename extension
-    var filename_split = fileName.split('.');
-    var filename_ext = filename_split[filename_split.length - 1];
-    var filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length );
-    if (filename_ext.toLowerCase() == 'png' || filename_ext.toLowerCase() == 'jpg'){
+    const filename_split = fileName.split('.');
+    const filename_ext = filename_split[filename_split.length - 1].toLowerCase();
+    const filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length - 1); // fix sub string to remove the dot
+
+    if (filename_ext === 'png' || filename_ext === 'jpg' || filename_ext === 'jpeg') {
       // only support png and jpg at this point
       console.log(`Processing Original: gs://${bucketName}/${fileName}`);
       const gcsObject = bucket.file(fileName);
-      let newFilename = filename_without_ext + size + '_thumbnail.' + filename_ext;
-      let gcsNewObject = bucket.file(newFilename);
-      let srcStream = gcsObject.createReadStream();
-      let dstStream = gcsNewObject.createWriteStream();
-      let resize = imagemagick().resize(size).quality(90);
-      srcStream.pipe(resize).pipe(dstStream);
-      return new Promise((resolve, reject) => {
-        dstStream
-          .on("error", (err) => {
-            console.log(`Error: ${err}`);
-            reject(err);
+      const newFilename = `${filename_without_ext}_64x64_thumbnail.${filename_ext}`;
+      const gcsNewObject = bucket.file(newFilename);
+
+      try {
+        const [buffer] = await gcsObject.download();
+        const resizedBuffer = await sharp(buffer)
+          .resize(64, 64, {
+            fit: 'inside',
+            withoutEnlargement: true,
           })
-          .on("finish", () => {
-            console.log(`Success: ${fileName} → ${newFilename}`);
-              // set the content-type
-              gcsNewObject.setMetadata(
-              {
-                contentType: 'image/'+ filename_ext.toLowerCase()
-              }, function(err, apiResponse) {});
-              pubsub
-                .topic(topicName)
-                .publisher()
-                .publish(Buffer.from(newFilename))
-                .then(messageId => {
-                  console.log(`Message ${messageId} published.`);
-                })
-                .catch(err => {
-                  console.error('ERROR:', err);
-                });
-          });
-      });
-    }
-    else {
+          .toFormat(filename_ext)
+          .toBuffer();
+
+        await gcsNewObject.save(resizedBuffer, {
+          metadata: {
+            contentType: `image/${filename_ext}`,
+          },
+        });
+
+        console.log(`Success: ${fileName} → ${newFilename}`);
+
+        await pubsub
+          .topic(topicName)
+          .publishMessage({ data: Buffer.from(newFilename) });
+
+        console.log(`Message published to ${topicName}`);
+      } catch (err) {
+        console.error(`Error: ${err}`);
+      }
+    } else {
       console.log(`gs://${bucketName}/${fileName} is not an image I can handle`);
     }
-  }
-  else {
+  } else {
     console.log(`gs://${bucketName}/${fileName} already has a thumbnail`);
   }
 });
@@ -159,24 +144,23 @@ sed -i "18c\  const topicName = '$TOPIC';" index.js
 
 cat > package.json <<EOF_END
 {
-    "name": "thumbnails",
-    "version": "1.0.0",
-    "description": "Create Thumbnail of uploaded image",
-    "scripts": {
-      "start": "node index.js"
-    },
-    "dependencies": {
-      "@google-cloud/functions-framework": "^3.0.0",
-      "@google-cloud/pubsub": "^2.0.0",
-      "@google-cloud/storage": "^5.0.0",
-      "fast-crc32c": "1.0.4",
-      "imagemagick-stream": "4.1.1"
-    },
-    "devDependencies": {},
-    "engines": {
-      "node": ">=4.3.2"
-    }
-  }
+ "name": "thumbnails",
+ "version": "1.0.0",
+ "description": "Create Thumbnail of uploaded image",
+ "scripts": {
+   "start": "node index.js"
+ },
+ "dependencies": {
+   "@google-cloud/functions-framework": "^3.0.0",
+   "@google-cloud/pubsub": "^2.0.0",
+   "@google-cloud/storage": "^6.11.0",
+   "sharp": "^0.32.1"
+ },
+ "devDependencies": {},
+ "engines": {
+   "node": ">=4.3.2"
+ }
+}
 EOF_END
 
 PROJECT_ID=$(gcloud config get-value project)
@@ -190,7 +174,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 deploy_function() {
     gcloud functions deploy $FUNCTION \
     --gen2 \
-    --runtime nodejs20 \
+    --runtime nodejs22 \
     --trigger-resource $DEVSHELL_PROJECT_ID-bucket \
     --trigger-event google.storage.object.finalize \
     --entry-point $FUNCTION \
@@ -225,6 +209,7 @@ gcloud projects remove-iam-policy-binding $DEVSHELL_PROJECT_ID \
 --member=user:$USER_2 \
 --role=roles/viewer
 
+# Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}              LAB COMPLETED SUCCESSFULLY!              ${RESET_FORMAT}"
@@ -232,3 +217,4 @@ echo "${CYAN_TEXT}${BOLD_TEXT}==================================================
 echo
 echo "${RED_TEXT}${BOLD_TEXT}${UNDERLINE_TEXT}https://www.youtube.com/@TechCode9${RESET_FORMAT}"
 echo "${GREEN_TEXT}${BOLD_TEXT}Don't forget to Like, Share and Subscribe for more Videos${RESET_FORMAT}"
+echo
