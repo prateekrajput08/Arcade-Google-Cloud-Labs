@@ -8,6 +8,7 @@ BLUE_TEXT=$'\033[0;94m'
 
 BOLD_TEXT=$'\033[1m'
 RESET_FORMAT=$'\033[0m'
+UNDERLINE_TEXT=$'\033[4m'
 
 clear
 
