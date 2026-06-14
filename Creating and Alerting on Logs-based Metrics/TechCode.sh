@@ -213,10 +213,6 @@ timeout 120 bash -c -- 'while true; do curl $(kubectl get services -n gmp-test -
 
 echo
 
-# Display completion message
-echo "${BOLD_TEXT}${YELLOW_TEXT}Lab execution completed successfully!${RESET_FORMAT}"
-echo "${BOLD_TEXT}${YELLOW_TEXT}Thank you for using Dr. Abhishek Cloud Tutorials${RESET_FORMAT}"
-
 remove_files() {
     # Loop through all files in the current directory
     for file in *; do
