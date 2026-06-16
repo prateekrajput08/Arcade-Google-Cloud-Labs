@@ -81,10 +81,18 @@ gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAcco
 
 gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=serviceAccount:$SA --role=roles/bigquery.user
 
+SA=$(gcloud iam service-accounts list \
+  --format="value(email)" \
+  --filter="displayName=bigquery-qwiklab")
+
 gcloud compute instances create bigquery-instance \
---service-account=$SA \
---scopes=https://www.googleapis.com/auth/cloud-platform \
---zone=$ZONE
+  --zone=$ZONE \
+  --machine-type=e2-standard-2 \
+  --service-account="$SA" \
+  --scopes=https://www.googleapis.com/auth/cloud-platform
+
+curl -H "Metadata-Flavor: Google" \
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/scopes
 
 EOF_END
 
