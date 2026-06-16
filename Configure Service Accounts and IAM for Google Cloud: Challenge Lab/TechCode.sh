@@ -23,6 +23,12 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
+echo "${YELLOW_TEXT}${BOLD_TEXT}Enabling APIs...${RESET_FORMAT}"
+gcloud services enable monitoring.googleapis.com \
+    networkmanagement.googleapis.com
+
+sleep 30
+
 echo "${YELLOW_TEXT}${BOLD_TEXT}Getting Lab Credentials...${RESET_FORMAT}"
  export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
