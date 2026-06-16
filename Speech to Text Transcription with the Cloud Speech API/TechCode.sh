@@ -29,9 +29,11 @@ echo
 
 cat > prepare_disk.sh <<'EOF_END'
 
-gcloud services enable apikeys.googleapis.com
+gcloud services enable speech.googleapis.com apikeys.googleapis.com
 
-gcloud alpha services api-keys create --display-name="awesome" 
+gcloud alpha services api-keys create \
+    --display-name="awesome" \
+    --api-target=service=speech.googleapis.com
 
 KEY_NAME=$(gcloud alpha services api-keys list --format="value(name)" --filter "displayName=awesome")
 
