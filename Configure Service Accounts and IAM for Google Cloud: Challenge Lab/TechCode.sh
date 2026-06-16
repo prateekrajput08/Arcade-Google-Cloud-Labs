@@ -107,7 +107,7 @@ pip install google-cloud-bigquery pandas pyarrow db-dtypes google-auth
 
 export ZONE=$(gcloud compute project-info describe \
 --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-export PROJECT_ID=$(gcloud config get-value project)
+export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
 export SA_EMAIL=$(gcloud config get-value account 2>/dev/null || curl -s "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" -H "Metadata-Flavor: Google")
 echo "SA: $SA_EMAIL"
 
@@ -127,7 +127,7 @@ LIMIT 20
 '''
 
 client = bigquery.Client(
-    project='$PROJECT_ID',
+    project='$DEVSHELL_PROJECT_ID',
     credentials=credentials
 )
 
