@@ -105,9 +105,12 @@ pip install --upgrade pip
 pip install google-cloud-bigquery pandas pyarrow db-dtypes google-auth
 
 
-export ZONE=$(gcloud compute project-info describe \
---format="value(commonInstanceMetadata.items[google-compute-default-zone])")
-export DEVSHELL_PROJECT_ID=$(gcloud config get-value project)
+export ZONE=$(curl -s \
+  -H "Metadata-Flavor: Google" \
+  http://metadata.google.internal/computeMetadata/v1/instance/zone | awk -F/ '{print $NF}')
+export DEVSHELL_PROJECT_ID=$(curl -s \
+  -H "Metadata-Flavor: Google" \
+  http://metadata.google.internal/computeMetadata/v1/project/project-id)
 export SA_EMAIL=$(gcloud config get-value account 2>/dev/null || curl -s "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email" -H "Metadata-Flavor: Google")
 echo "SA: $SA_EMAIL"
 
