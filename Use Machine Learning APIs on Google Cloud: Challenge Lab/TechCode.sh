@@ -10,11 +10,13 @@ CYAN_TEXT=$'\033[0;96m'
 BOLD_TEXT=$'\033[1m'
 UNDERLINE_TEXT=$'\033[4m'
 RESET_FORMAT=$'\033[0m'
+REVERSE_TEXT=$'\033[7m'
+
 clear
 
 # Welcome message
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
-echo "${CYAN_TEXT}${BOLD_TEXT}            SUBSCRIBE TECH & CODE- INITIATING EXECUTION...        ${RESET_FORMAT}"
+echo "${CYAN_TEXT}${BOLD_TEXT}           SUBSCRIBE TECH & CODE- INITIATING EXECUTION...         ${RESET_FORMAT}"
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
@@ -87,26 +89,6 @@ if [ ! -f "${SCRIPT_NAME}" ]; then
 else
   echo -e "${YELLOW_TEXT}${BOLD_TEXT}✓ Script already exists: ${SCRIPT_NAME}${RESET_FORMAT}"
 fi
-
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}→ Downloading image analysis script...${RESET_FORMAT}"
-wget https://raw.githubusercontent.com/guys-in-the-cloud/cloud-skill-boosts/main/Challenge-labs/Integrate%20with%20Machine%20Learning%20APIs%3A%20Challenge%20Lab/analyze-images-v2.py
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}✓ Script downloaded successfully${RESET_FORMAT}"
-echo ""
-
-echo -e ${YELLOW_TEXT}${BOLD_TEXT}→ Updating script locale to $"${YELLOW_TEXT}${BOLD_TEXT}...${RESET_FORMAT}"
-sed -i "s/'en'/'${LOCAL}'/g" analyze-images-v2.py
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}✓ Locale updated successfully${RESET_FORMAT}"
-echo ""
-
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}→ Running image analysis...${RESET_FORMAT}"
-python3 analyze-images-v2.py
-python3 analyze-images-v2.py $DEVSHELL_PROJECT_ID $DEVSHELL_PROJECT_ID
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}✓ Image analysis completed${RESET_FORMAT}"
-echo ""
-
-echo -e "${YELLOW_TEXT}${BOLD_TEXT}→ Querying locale distribution from BigQuery...${RESET_FORMAT}"
-bq query --use_legacy_sql=false "SELECT locale,COUNT(locale) as lcount FROM image_classification_dataset.image_text_detail GROUP BY locale ORDER BY lcount DESC"
-echo ""
 
 echo -e "${YELLOW_TEXT}→ Verification Summary${RESET_FORMAT}"
 echo -e "${YELLOW_TEXT}Project:${RESET_FORMAT} ${DEVSHELL_PROJECT_ID}"
