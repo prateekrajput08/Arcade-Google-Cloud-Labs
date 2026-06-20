@@ -105,7 +105,9 @@ gcloud services enable apikeys.googleapis.com
 gcloud services enable speech.googleapis.com
 
 # Create API key
-gcloud alpha services api-keys create --display-name="ml-api-key"
+gcloud alpha services api-keys create \
+  --display-name="ml-api-key" \
+  --api-target=service=speech.googleapis.com
 
 echo -e "${CYAN_TEXT}Waiting for API Key propagation...${RESET_FORMAT}"
 sleep 30
@@ -113,7 +115,6 @@ sleep 30
 # Get only ONE API key (fix for multiple keys issue)
 KEY_NAME=$(gcloud alpha services api-keys list \
 --format="value(name)" \
---filter="displayName=ml-api-key" \
 --limit=1)
 
 API_KEY=$(gcloud alpha services api-keys get-key-string "$KEY_NAME" \
