@@ -21,7 +21,7 @@ AgentTool(agent=search_agent, skip_summarization=False),
 ```bash
 adk deploy agent_engine paint_agent \
   --display_name "Paint Agent" \
-  --staging_bucket 
+  --staging_bucket gs://$DEVSHELL_PROJECT_ID-bucket \
 ```
 
 </div>
