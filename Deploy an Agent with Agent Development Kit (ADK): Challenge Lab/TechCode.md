@@ -19,9 +19,15 @@ AgentTool(agent=search_agent, skip_summarization=False),
 ```
 ## Task 5. `Deploy to Agent Engine`
 ```bash
+cat > ~/adk_challenge_lab/paint_agent/requirements.txt << EOF
+google-adk[a2a]
+google-cloud-aiplatform[agent_engines,adk]>=1.112
+EOF
+```
+```bash
 adk deploy agent_engine paint_agent \
-  --display_name "Paint Agent" \
-  --staging_bucket gs://$DEVSHELL_PROJECT_ID-bucket \
+  --display_name="Paint Agent" \
+  --staging_bucket="gs://$DEVSHELL_PROJECT_ID-bucket" \
 ```
 
 </div>
