@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-rm gsp524-challenge.ipynb
+rm gsp524-challenge-v1.0.0.ipynb
 
 curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Analyze%20and%20Reason%20on%20Multimodal%20Data%20with%20Gemini%3A%20Challenge%20Lab/gsp524-challenge-v1.0.0.ipynb
 ```
