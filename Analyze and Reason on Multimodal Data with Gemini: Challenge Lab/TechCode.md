@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-rm gsp524-challenge-v1.0.0.ipynb
+rm gsp524-challenge.ipynb
 
 curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Analyze%20and%20Reason%20on%20Multimodal%20Data%20with%20Gemini%3A%20Challenge%20Lab/gsp524-challenge-v1.0.0.ipynb
 ```
@@ -53,6 +53,6 @@ curl -LO https://raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-L
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: October 2025</em>
+    <em>Last updated: June 2026</em>
   </p>
 </div>
