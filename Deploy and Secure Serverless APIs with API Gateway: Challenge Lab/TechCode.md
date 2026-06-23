@@ -1,4 +1,4 @@
-# 🌐 Getting Started with API Gateway: Challenge Lab || ARC109 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/course_templates/662/labs/592577)
+# 🌐 Deploy and Secure Serverless APIs with API Gateway: Challenge Lab || ARC109 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/course_templates/662/labs/592577)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Getting%20Started%20with%20API%20Gateway%3A%20Challenge%20Lab/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Deploy%20and%20Secure%20Serverless%20APIs%20with%20API%20Gateway%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
@@ -53,6 +53,6 @@ sudo chmod +x TechCode.sh
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: November 2025</em>
+    <em>Last updated: June 2026</em>
   </p>
 </div>
