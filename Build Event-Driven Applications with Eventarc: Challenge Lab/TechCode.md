@@ -1,4 +1,4 @@
-# 🌐 Get Started with Eventarc: Challenge Lab || ARC118 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/course_templates/727/labs/587168)
+# 🌐 Build Event-Driven Applications with Eventarc: Challenge Lab|| ARC118 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/course_templates/727/labs/587168)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -53,6 +53,6 @@ sudo chmod +x TechCode.sh
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: October 2025</em>
+    <em>Last updated: June 2026</em>
   </p>
 </div>
