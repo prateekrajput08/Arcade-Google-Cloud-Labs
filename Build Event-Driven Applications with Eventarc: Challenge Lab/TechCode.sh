@@ -60,11 +60,12 @@ echo
 # Eventarc Trigger Setup
 echo "${YELLOW_TEXT}Creating Eventarc trigger for Pub/Sub messages...${RESET_FORMAT}"
 gcloud eventarc triggers create pubsub-events-trigger \
-  --location="$LOCATION" \
+  --location=$LOCATION \
   --destination-run-service=pubsub-events \
-  --destination-run-region="$LOCATION" \
-  --transport-topic="$DEVSHELL_PROJECT_ID-topic" \
-  --event-filters="type=google.cloud.pubsub.topic.v1.messagePublished"
+  --destination-run-region=$LOCATION \
+  --transport-topic=${DEVSHELL_PROJECT_ID}-topic \
+  --event-filters="type=google.cloud.pubsub.topic.v1.messagePublished" \
+  --verbosity=debug
 echo "${GREEN_TEXT}Eventarc trigger created successfully!${RESET_FORMAT}"
 echo
 
