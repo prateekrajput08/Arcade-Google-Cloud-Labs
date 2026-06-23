@@ -1,4 +1,4 @@
-# 🌐 Get Started with Cloud Storage: Challenge Lab || ARC111 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/focuses/62706?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=60867493)
+# 🌐 Implement Cloud Storage and Data Protection Solutions: Challenge Lab || ARC111 🚀 [![Open Lab](https://img.shields.io/badge/Open-Lab-blue?style=flat)](https://www.skills.google/focuses/62706?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=60867493)
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -15,7 +15,7 @@
 ## ☁️ Run in Cloud Shell:
 
 ```bash
-curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Get%20Started%20with%20Cloud%20Storage%3A%20Challenge%20Lab/TechCode.sh
+curl -LO raw.githubusercontent.com/prateekrajput08/Arcade-Google-Cloud-Labs/refs/heads/main/Implement%20Cloud%20Storage%20and%20Data%20Protection%20Solutions%3A%20Challenge%20Lab/TechCode.sh
 sudo chmod +x TechCode.sh 
 ./TechCode.sh
 ```
@@ -53,6 +53,6 @@ sudo chmod +x TechCode.sh
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: November 2025</em>
+    <em>Last updated: June 2026</em>
   </p>
 </div>
