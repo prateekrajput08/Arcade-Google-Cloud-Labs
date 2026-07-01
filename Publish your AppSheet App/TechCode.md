@@ -12,6 +12,7 @@
 
 <div style="padding: 15px; margin: 10px 0;">
 
+## Open 👉 [Here](https://docs.google.com/spreadsheets/)
 ## Download 👉[Here](https://docs.google.com/spreadsheets/d/18IhS645aPSwVHaNs7mbYC1adm8M05WWZ/export?format=xlsx)
 
 </div>
@@ -47,6 +48,6 @@
     <em>This guide is provided for educational purposes. Always follow Qwiklabs terms of service and YouTube's community guidelines.</em>
   </p>
   <p style="font-size: 12px; color: #586069;">
-    <em>Last updated: December 2025</em>
+    <em>Last updated: July 2026</em>
   </p>
 </div>
