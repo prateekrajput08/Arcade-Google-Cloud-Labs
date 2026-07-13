@@ -53,12 +53,12 @@ cat > main.tf <<EOF
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
+      version = "3.5.0"
     }
   }
 }
 provider "google" {
-  version = "3.5.0"
   project = "$PROJECT_ID"
   region  = "$REGION"
   zone    = "$ZONE"
@@ -67,6 +67,17 @@ resource "google_compute_network" "vpc_network" {
   name = "terraform-network"
 }
 EOF
+
+cat <<'EOF' > ~/.customize_environment
+# Set up HashiCorp repository and install Terraform
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install -y terraform
+EOF
+
+bash ~/.customize_environment
+
+terraform --version
 
 terraform init
 terraform apply -auto-approve
@@ -77,12 +88,12 @@ cat > main.tf <<EOF
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
+      version = "3.5.0"
     }
   }
 }
 provider "google" {
-  version = "3.5.0"
   project = "$PROJECT_ID"
   region  = "$REGION"
   zone    = "$ZONE"
@@ -106,6 +117,8 @@ resource "google_compute_instance" "vm_instance" {
 EOF
 
 terraform apply -auto-approve
+
+gcloud services enable cloudaicompanion.googleapis.com
 
 # ========================= PHASE 3 =========================
 echo -e "${YELLOW_TEXT}Phase 3: Adding Tags to VM${NO_COLOR}"
