@@ -29,12 +29,11 @@ sudo chmod +x TechCode.sh
 echo -n "Enter PROJECTID2: "
 read PROJECTID2
 if [[ -z "$PROJECTID2" ]]; then
-echo "ERROR: PROJECTID2 cannot be empty"
-exit 1
+  echo "ERROR: PROJECTID2 cannot be empty"
+  exit 1
 fi
 gcloud config set project $PROJECTID2
-gcloud iam service-accounts create instance-admin-sa 
---display-name "Instance Admin SA" || true
+gcloud iam service-accounts create instance-admin-sa --display-name "Instance Admin SA" || true
 export SA=instance-admin-sa@$PROJECTID2.iam.gserviceaccount.com
 ```
 
