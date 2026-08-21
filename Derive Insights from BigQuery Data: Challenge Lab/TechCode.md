@@ -37,7 +37,7 @@ FROM (
     date
 )
 WHERE
-  total_deaths > 10000
+  total_deaths > 14000
 ORDER BY
   date ASC
 LIMIT 1;
