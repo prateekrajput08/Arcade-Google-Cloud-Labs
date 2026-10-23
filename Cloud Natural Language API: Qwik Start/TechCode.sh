@@ -25,16 +25,17 @@ echo "${CYAN_TEXT}${BOLD_TEXT}      SUBSCRIBE TECH & CODE- INITIATING EXECUTION.
 echo "${CYAN_TEXT}${BOLD_TEXT}==================================================================${RESET_FORMAT}"
 echo
 
-
 gcloud config list project
 export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value core/project)
+
 gcloud iam service-accounts create my-natlang-sa \
   --display-name "my natural language service account"
 gcloud iam service-accounts keys create ~/key.json \
   --iam-account my-natlang-sa@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
-export GOOGLE_APPLICATION_CREDENTIALS="/home/USER/key.json"
+export GOOGLE_APPLICATION_CREDENTIALS="${HOME}/key.json"
 
-
+# Copy result.json to Cloud Storage bucket secara dinamis
+gcloud storage cp result.json gs://${GOOGLE_CLOUD_PROJECT}-nlp/
 
 # Final message
 echo
