@@ -194,7 +194,7 @@ EOF_END
 deploy_function() {
     gcloud functions deploy $FUNCTION \
     --gen2 \
-    --runtime nodejs20 \
+    --runtime nodejs22 \
     --trigger-resource $BUCKET \
     --trigger-event google.storage.object.finalize \
     --entry-point thumbnail \
