@@ -99,6 +99,17 @@ jq -r '
 
 cat result.json
 
+echo ""
+echo "${YELLOW_TEXT}${BOLD_TEXT}[STEP 5] Uploading result.json to Cloud Storage Bucket...${RESET_FORMAT}"
+
+export GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-$(gcloud config get-value core/project 2>/dev/null)}
+
+# Upload result.json gs://${GOOGLE_CLOUD_PROJECT}-nlp/
+gcloud storage cp result.json gs://${GOOGLE_CLOUD_PROJECT}-nlp/
+
+echo "${GREEN_TEXT}[SUCCESS] result.json uploaded to gs://${GOOGLE_CLOUD_PROJECT}-nlp/${RESET_FORMAT}"
+sleep 1
+
 # Final message
 echo
 echo "${CYAN_TEXT}${BOLD_TEXT}=======================================================${RESET_FORMAT}"
